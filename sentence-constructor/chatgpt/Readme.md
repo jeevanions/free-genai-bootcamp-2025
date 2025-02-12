@@ -1,4 +1,8 @@
-## ChatGPT powered Assistant
+# Observations
+
+* I tried the same prompt (prompt2.md) that I used for claude here and did have some improvements.
+
+# ChatGPT powered Assistant
 
 ## Model selected
 

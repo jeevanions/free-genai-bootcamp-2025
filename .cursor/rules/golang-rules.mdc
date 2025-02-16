@@ -1,0 +1,218 @@
+---
+description: rules for AI to follow when generating code for golang based backend api.. It should have a list of best practices with example and should follow for everytime go code is generated. 
+globs: 
+---
+
+# Go API Coding Standards
+
+## 1. Project Structure
+```language:.cursor/rules/golang-rules.mdc
+// Follow strict project layout:
+// cmd/server/main.go          → Entry point
+// internal/api/handlers/      → HTTP handlers
+// internal/api/middleware/    → Gin middleware
+// internal/db/repository/     → Database operations
+// internal/domain/models/     → Business objects
+```
+
+## 2. Error Handling
+```go
+// Use custom error types with proper HTTP status codes
+type APIError struct {
+    Code    int    `json:"code"`
+    Message string `json:"message"`
+}
+
+// Handler example:
+func GetWord(c *gin.Context) {
+    id := c.Param("id")
+    word, err := repository.GetWord(c.Request.Context(), id)
+    if err != nil {
+        c.JSON(http.StatusNotFound, APIError{
+            Code:    http.StatusNotFound,
+            Message: "Word not found",
+        })
+        return
+    }
+    c.JSON(http.StatusOK, word)
+}
+```
+
+## 3. Logging
+```go
+// Use zerolog with context fields
+func LoggerMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        start := time.Now()
+        
+        // Process request
+        c.Next()
+
+        logger := zerolog.Ctx(c.Request.Context())
+        logger.Info().
+            Str("method", c.Request.Method).
+            Str("path", c.Request.URL.Path).
+            Int("status", c.Writer.Status()).
+            Dur("duration", time.Since(start)).
+            Msg("request completed")
+    }
+}
+```
+
+## 4. SQL Handling
+```go
+// Use sqlc generated code with proper context
+func (r *WordRepository) GetWord(ctx context.Context, id string) (models.Word, error) {
+    return r.queries.GetWord(ctx, id)
+}
+
+// Always use context from request
+func (h *WordHandler) GetWord(c *gin.Context) {
+    ctx := c.Request.Context()
+    // ... use ctx in DB calls
+}
+```
+
+## 5. Testing
+```go
+// Table-driven tests with testify
+func TestGetWordHandler(t *testing.T) {
+    tt := []struct{
+        name string
+        id string
+        expectedStatus int
+    }{
+        {"valid id", "1", http.StatusOK},
+        {"invalid id", "abc", http.StatusBadRequest},
+    }
+
+    for _, tc := range tt {
+        t.Run(tc.name, func(t *testing.T) {
+            // Setup test
+            w := httptest.NewRecorder()
+            c, _ := gin.CreateTestContext(w)
+            c.Params = gin.Params{{Key: "id", Value: tc.id}}
+
+            // Execute handler
+            h.GetWord(c)
+
+            // Assertions
+            assert.Equal(t, tc.expectedStatus, w.Code)
+        })
+    }
+}
+```
+
+## 6. Security Practices
+```go
+// Add security headers middleware
+func SecurityHeaders() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        c.Header("X-Content-Type-Options", "nosniff")
+        c.Header("X-Frame-Options", "DENY")
+        c.Header("Content-Security-Policy", "default-src 'self'")
+        c.Next()
+    }
+}
+
+// Validation example with ozzo-validation
+type CreateWordRequest struct {
+    Italian string `json:"italian"`
+    English string `json:"english"`
+}
+
+func (r CreateWordRequest) Validate() error {
+    return validation.ValidateStruct(&r,
+        validation.Field(&r.Italian, validation.Required, validation.Length(1, 100)),
+        validation.Field(&r.English, validation.Required, validation.Length(1, 100)),
+    )
+}
+```
+
+## 7. Performance
+```go
+// Use connection pooling
+var dbPool *sql.DB
+
+func InitDB() error {
+    var err error
+    dbPool, err = sql.Open("sqlite3", "./words.db")
+    if err != nil {
+        return err
+    }
+    dbPool.SetMaxOpenConns(25)
+    dbPool.SetMaxIdleConns(25)
+    dbPool.SetConnMaxLifetime(5*time.Minute)
+    return nil
+}
+
+// Use sync.Pool for heavy allocations
+var bufPool = sync.Pool{
+    New: func() interface{} {
+        return bytes.NewBuffer(make([]byte, 0, 1024))
+    },
+}
+```
+
+## 8. Documentation
+```go
+// Handler with Swagger annotations
+// @Summary Get a word
+// @Description Get word by ID
+// @Tags words
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Word ID"
+// @Success 200 {object} models.Word
+// @Failure 404 {object} APIError
+// @Router /words/{id} [get]
+func (h *WordHandler) GetWord(c *gin.Context) {
+    // ... handler code
+}
+```
+
+## 9. Concurrency
+```go
+// Use errgroup for parallel operations
+func ProcessBatch(ctx context.Context, ids []string) error {
+    g, ctx := errgroup.WithContext(ctx)
+    
+    for _, id := range ids {
+        id := id // create new var for goroutine
+        g.Go(func() error {
+            return processItem(ctx, id)
+        })
+    }
+    
+    return g.Wait()
+}
+```
+
+## 10. Dependency Management
+```go
+// Use interface-based dependencies
+type WordService interface {
+    GetWord(ctx context.Context, id string) (models.Word, error)
+    CreateWord(ctx context.Context, word models.Word) error
+}
+
+type wordService struct {
+    repo db.WordRepository
+}
+
+func NewWordService(repo db.WordRepository) WordService {
+    return &wordService{repo: repo}
+}
+```
+
+**All generated code must:**
+1. Follow Go's Effective Go guidelines
+2. Use context propagation for all I/O operations
+3. Include proper error wrapping with `fmt.Errorf("%w", err)`
+4. Avoid global variables except for configuration
+5. Use structured logging with zerolog
+6. Include at least 70% test coverage
+7. Use SQL migrations for schema changes
+8. Validate all user input
+9. Use proper Content-Type headers
+10. Include API documentation annotations

@@ -23,6 +23,7 @@ The platform will have the following core capabilities:
 | Task Runner     | Mage v1.15.0     | Go-native build tool with declarative task definitions                   |
 | ORM             | sqlc v1.24.0     | Type-safe SQL to Go code generation                                      |
 | Migrations      | goose v3.19.0    | Robust database migration management                                     |
+| API Docs        | swaggo/swag      | OpenAPI/Swagger documentation generation                                 |
 
 API Format: RESTful JSON endpoints
 
@@ -46,7 +47,8 @@ Auth: None (single-user system)
 | modernc.org/sqlite  | v1.29.0 | Pure-Go SQLite implementation        |
 | github.com/stretchr/testify | v1.9.0 | Testing framework                    |
 | github.com/rs/zerolog | v1.32.0 | Structured logging                   |
-| github.com/prometheus/client_golang | v1.19.0 | Metrics collection                  |
+| github.com/swaggo/swag | v1.16.3 | Swagger documentation generation     |
+| github.com/swaggo/gin-swagger | v1.6.0 | Swagger UI for Gin                   |
 
 ### 2.4 Backend project structure
 

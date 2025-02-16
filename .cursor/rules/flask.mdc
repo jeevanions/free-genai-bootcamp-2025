@@ -1,0 +1,118 @@
+---
+description: 
+globs: 
+---
+
+from flask import Flask, g
+import sqlite3
+from typing import Any, Optional, List
+from contextlib import contextmanager
+from functools import wraps
+
+app = Flask(__name__)
+
+# Rule 1: Always use cursor context managers
+@contextmanager
+def get_cursor(commit: bool = False):
+    """
+    Context manager for database cursors that handles connections and errors properly.
+    
+    Args:
+        commit (bool): Whether to commit the transaction after execution
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        yield cursor
+        if commit:
+            conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+
+# Rule 2: Implement proper connection handling
+def get_db() -> sqlite3.Connection:
+    """
+    Get database connection for the current context.
+    Creates new connection if none exists.
+    """
+    if 'db' not in g:
+        g.db = sqlite3.connect('database.db')
+        # Enable foreign key support
+        g.db.execute('PRAGMA foreign_keys = ON')
+        # Return rows as dictionaries
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+# Rule 3: Always close connections when the request ends
+@app.teardown_appcontext
+def close_db(error: Optional[Exception]) -> None:
+    """
+    Close the database connection at the end of each request.
+    """
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+# Example usage in routes
+@app.route('/users/<int:user_id>')
+def get_user(user_id: int) -> dict:
+    with get_cursor() as cursor:
+        cursor.execute(
+            'SELECT * FROM users WHERE id = ?',
+            (user_id,)
+        )
+        user = cursor.fetchone()
+    return dict(user) if user else {'error': 'User not found'}
+
+@app.route('/users/create', methods=['POST'])
+def create_user(name: str, email: str) -> dict:
+    with get_cursor(commit=True) as cursor:
+        try:
+            cursor.execute(
+                'INSERT INTO users (name, email) VALUES (?, ?)',
+                (name, email)
+            )
+            return {'success': True, 'id': cursor.lastrowid}
+        except sqlite3.IntegrityError:
+            return {'error': 'User already exists'}
+
+# Example of a database operation class following the rules
+class DatabaseOperations:
+    @staticmethod
+    def bulk_insert(items: List[dict]) -> bool:
+        """
+        Example of handling multiple operations in a single transaction.
+        """
+        with get_cursor(commit=True) as cursor:
+            try:
+                cursor.executemany(
+                    'INSERT INTO items (name, value) VALUES (?, ?)',
+                    [(item['name'], item['value']) for item in items]
+                )
+                return True
+            except sqlite3.Error:
+                return False
+
+    @staticmethod
+    def get_items(limit: int = 10) -> List[dict]:
+        """
+        Example of a read operation.
+        """
+        with get_cursor() as cursor:
+            cursor.execute('SELECT * FROM items LIMIT ?', (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+if __name__ == '__main__':
+    # Create tables on startup
+    with get_cursor(commit=True) as cursor:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL
+            )
+        ''')
+    app.run(debug=True)

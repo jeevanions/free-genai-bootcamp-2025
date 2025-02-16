@@ -520,3 +520,123 @@ All errors will be logged using zerolog with contextual information including:
 - User IP
 - Endpoint
 - Error stack trace 
+
+## 8. Testing Strategy
+
+### 8.1 Testing Framework Stack
+
+| Component          | Technology                | Purpose                                          |
+|-------------------|---------------------------|--------------------------------------------------|
+| Testing Framework | testify v1.9.0           | Assertions and test suite organization           |
+| HTTP Testing      | httptest (stdlib)        | HTTP handler testing                             |
+| Mock Generation   | mockery v2.40.1          | Interface mocking for unit tests                 |
+| Coverage Tool     | go test -cover           | Code coverage reporting                          |
+| Performance Tests | k6 v0.49.0               | Load and performance testing                     |
+
+### 8.2 Test Categories
+
+1. **Unit Tests**
+   - Location: Next to the source files (`*_test.go`)
+   - Naming: `TestXxx` for test functions
+   - Coverage target: 80% minimum
+   - Mock external dependencies
+   - Focus on single component behavior
+
+2. **Integration Tests**
+   - Location: `test/integration/`
+   - Test component interactions
+   - Use test containers for dependencies
+   - Focus on API contract validation
+   - Include database interactions
+
+3. **End-to-End Tests**
+   - Location: `test/e2e/`
+   - Test complete user workflows
+   - Use staging environment
+   - Include API sequence testing
+   - Validate business requirements
+
+4. **Performance Tests**
+   - Location: `test/performance/`
+   - Load testing scripts
+   - Benchmark critical paths
+   - Resource utilization tests
+   - Concurrency testing
+
+### 8.3 Testing Standards
+
+1. **Test Structure (AAA Pattern)**
+   ```go
+   func TestSomething(t *testing.T) {
+       // Arrange
+       expected := "expected result"
+       sut := NewSystemUnderTest()
+
+       // Act
+       result, err := sut.DoSomething()
+
+       // Assert
+       assert.NoError(t, err)
+       assert.Equal(t, expected, result)
+   }
+   ```
+
+2. **Table-Driven Tests**
+   ```go
+   func TestOperation(t *testing.T) {
+       tests := []struct {
+           name     string
+           input    string
+           expected string
+           wantErr  bool
+       }{
+           {
+               name:     "valid input",
+               input:    "test",
+               expected: "result",
+               wantErr:  false,
+           },
+           // More test cases...
+       }
+
+       for _, tt := range tests {
+           t.Run(tt.name, func(t *testing.T) {
+               // Test implementation
+           })
+       }
+   }
+   ```
+
+3. **Mock Generation**
+   ```go
+   //go:generate mockery --name=Repository --output=mocks --outpkg=mocks --case=snake
+   type Repository interface {
+       FindByID(id string) (*Entity, error)
+   }
+   ```
+
+### 8.4 Test Execution
+
+```bash
+# Run all tests
+go test ./...
+
+# Run with coverage
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
+# Run specific test
+go test -run TestSpecificFunction
+
+# Run performance tests
+k6 run test/performance/scenario.js
+```
+
+### 8.5 CI Integration
+
+- Run unit tests on every commit
+- Run integration tests on PR
+- Run E2E tests before deployment
+- Generate and archive coverage reports
+- Fail builds if coverage drops below threshold
+- Performance test results comparison with baseline 

@@ -1,5 +1,13 @@
-# Binaries and compiled files
+# Generated files
+/docs/
 /bin/
+/data/
+
+# IDE files
+.idea/
+.vscode/
+
+# Binaries
 *.exe
 *.exe~
 *.dll
@@ -11,10 +19,9 @@
 
 # Output of the go coverage tool
 *.out
-coverage.html
 
 # Dependency directories
-/vendor/
+vendor/
 
 # Go workspace file
 go.work

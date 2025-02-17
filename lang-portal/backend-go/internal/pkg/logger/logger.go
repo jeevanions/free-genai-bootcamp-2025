@@ -3,25 +3,41 @@ package logger
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
-func Setup(writer ...io.Writer) {
-	// Configure zerolog
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+var log zerolog.Logger
 
-	// Set global log level
+func Setup() {
+	// Set default level to info
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if os.Getenv("ENVIRONMENT") == "development" {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 
 	// Configure logger output
-	var output io.Writer = os.Stdout
-	if len(writer) > 0 && writer[0] != nil {
-		output = writer[0]
+	output := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
 	}
-	log.Logger = zerolog.New(output).With().Timestamp().Logger()
+
+	// Create logger
+	log = zerolog.New(output).With().Timestamp().Logger()
+
+	// Set log level based on environment
+	env := os.Getenv("APP_ENV")
+	if env == "development" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+}
+
+func SetupWithOutput(w io.Writer) {
+	output := zerolog.ConsoleWriter{
+		Out:        w,
+		TimeFormat: time.RFC3339,
+	}
+	log = zerolog.New(output).With().Timestamp().Logger()
+}
+
+func GetLogger() *zerolog.Logger {
+	return &log
 }

@@ -1,38 +1,30 @@
 package config
 
 import (
-	"fmt"
 	"os"
+	"strconv"
 )
 
+// Config holds all configuration for the application
 type Config struct {
-	Environment   string
-	DatabasePath  string
-	ServerAddress string
-	LogLevel      string
+	Port    int
+	DBPath  string
+	EnvMode string
 }
 
-func Load() (*Config, error) {
-	cfg := &Config{
-		Environment:   getEnvOrDefault("APP_ENV", "development"),
-		DatabasePath:  getEnvOrDefault("DB_PATH", "./data/italian-learning.db"),
-		ServerAddress: getEnvOrDefault("SERVER_ADDR", ":8080"),
-		LogLevel:      getEnvOrDefault("LOG_LEVEL", "info"),
+// Load returns a Config struct populated with values from environment variables
+func Load() *Config {
+	port, _ := strconv.Atoi(getEnvOrDefault("PORT", "8080"))
+	
+	return &Config{
+		Port:    port,
+		DBPath:  getEnvOrDefault("DB_PATH", "words.db"),
+		EnvMode: getEnvOrDefault("ENV_MODE", "development"),
 	}
-
-	// Validate environment
-	switch cfg.Environment {
-	case "development", "staging", "production":
-		// valid
-	default:
-		return nil, fmt.Errorf("invalid environment: %s", cfg.Environment)
-	}
-
-	return cfg, nil
 }
 
 func getEnvOrDefault(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
+	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue

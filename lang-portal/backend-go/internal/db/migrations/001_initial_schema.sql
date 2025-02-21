@@ -1,87 +1,63 @@
 -- +goose Up
--- Core Vocabulary with Italian-specific features
-CREATE TABLE IF NOT EXISTS words (
+-- SQL in this section is executed when the migration is applied.
+
+CREATE TABLE words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     italian TEXT NOT NULL,
     english TEXT NOT NULL,
-    parts_of_speech TEXT NOT NULL,
-    gender TEXT,
-    number TEXT,
-    difficulty_level INTEGER NOT NULL,
-    verb_conjugation JSON,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(italian),
-    CHECK (gender IS NULL OR gender IN ('masculine', 'feminine', 'neuter')),
-    CHECK (number IS NULL OR number IN ('singular', 'plural')),
-    CHECK (difficulty_level BETWEEN 1 AND 5)
+    parts JSON,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS groups (
+CREATE TABLE groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    description TEXT NOT NULL,
-    difficulty_level INTEGER NOT NULL CHECK (difficulty_level BETWEEN 1 AND 5),
-    category TEXT NOT NULL,               -- grammar/thematic/situational
+    name TEXT NOT NULL,
+    words_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE words_groups (
-    id INTEGER PRIMARY KEY,
-    word_id INTEGER REFERENCES words(id),
-    group_id INTEGER REFERENCES groups(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    word_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (word_id) REFERENCES words(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS study_activities (
+CREATE TABLE study_activities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    type TEXT NOT NULL,                   -- vocabulary/grammar/pronunciation
-    requires_audio BOOLEAN NOT NULL,      -- For pronunciation exercises
-    difficulty_level INTEGER NOT NULL,    -- Progressive difficulty
-    instructions TEXT NOT NULL,           -- Activity guidelines
+    thumbnail_url TEXT,
+    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE study_sessions (
-    id INTEGER PRIMARY KEY,
-    group_id INTEGER REFERENCES groups(id),
-    study_activity_id INTEGER REFERENCES study_activities(id),
-    total_words INTEGER NOT NULL,         -- Words attempted
-    correct_words INTEGER NOT NULL,       -- Successful attempts
-    duration_seconds INTEGER NOT NULL,    -- Session length
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL,
+    study_activity_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (study_activity_id) REFERENCES study_activities(id) ON DELETE CASCADE
 );
 
 CREATE TABLE word_review_items (
-    id INTEGER PRIMARY KEY,
-    word_id INTEGER REFERENCES words(id),
-    study_session_id INTEGER REFERENCES study_sessions(id),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    word_id INTEGER NOT NULL,
+    study_session_id INTEGER NOT NULL,
     correct BOOLEAN NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (word_id) REFERENCES words(id) ON DELETE CASCADE,
+    FOREIGN KEY (study_session_id) REFERENCES study_sessions(id) ON DELETE CASCADE
 );
 
--- Create all indexes
-CREATE INDEX idx_words_italian ON words(italian);
-CREATE INDEX idx_words_difficulty ON words(difficulty_level);
-CREATE INDEX idx_words_parts_speech ON words(parts_of_speech);
-
-CREATE INDEX idx_words_groups_word ON words_groups(word_id);
-CREATE INDEX idx_words_groups_group ON words_groups(group_id);
-
-CREATE INDEX idx_groups_category ON groups(category);
-CREATE INDEX idx_groups_difficulty ON groups(difficulty_level);
-
-CREATE INDEX idx_study_sessions_group ON study_sessions(group_id);
-CREATE INDEX idx_study_sessions_created ON study_sessions(created_at);
-CREATE INDEX idx_study_sessions_metrics ON study_sessions(correct_words, total_words);
-
-CREATE INDEX idx_study_activities_type ON study_activities(type);
-CREATE INDEX idx_study_activities_difficulty ON study_activities(difficulty_level);
-
-CREATE INDEX idx_word_review_performance ON word_review_items(word_id, correct);
-CREATE INDEX idx_word_review_session ON word_review_items(study_session_id);
-CREATE INDEX idx_word_review_created ON word_review_items(created_at);
+-- Create indexes for better query performance
+CREATE INDEX idx_words_groups_word_id ON words_groups(word_id);
+CREATE INDEX idx_words_groups_group_id ON words_groups(group_id);
+CREATE INDEX idx_study_sessions_group_id ON study_sessions(group_id);
+CREATE INDEX idx_word_review_items_word_id ON word_review_items(word_id);
+CREATE INDEX idx_word_review_items_study_session_id ON word_review_items(study_session_id);
 
 -- +goose Down
 -- SQL in this section is executed when the migration is rolled back.
@@ -90,4 +66,4 @@ DROP TABLE IF EXISTS study_sessions;
 DROP TABLE IF EXISTS study_activities;
 DROP TABLE IF EXISTS words_groups;
 DROP TABLE IF EXISTS groups;
-DROP TABLE IF EXISTS words; 
+DROP TABLE IF EXISTS words;

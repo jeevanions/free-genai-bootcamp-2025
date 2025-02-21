@@ -1,0 +1,88 @@
+basePath: /api
+definitions:
+  models.DashboardLastStudySession:
+    properties:
+      created_at:
+        type: string
+      group_id:
+        type: integer
+      group_name:
+        type: string
+      id:
+        type: integer
+      study_activity_id:
+        type: integer
+    type: object
+  models.DashboardQuickStats:
+    properties:
+      study_streak_days:
+        type: integer
+      success_rate:
+        type: number
+      total_active_groups:
+        type: integer
+      total_study_sessions:
+        type: integer
+    type: object
+  models.DashboardStudyProgress:
+    properties:
+      total_available_words:
+        type: integer
+      total_words_studied:
+        type: integer
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API for the Italian Language Learning Portal
+  title: Italian Language Learning Portal API
+  version: "1.0"
+paths:
+  /api/dashboard/last_study_session:
+    get:
+      consumes:
+      - application/json
+      description: Returns information about the most recent study session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DashboardLastStudySession'
+      summary: Get last study session
+      tags:
+      - dashboard
+  /api/dashboard/quick-stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns quick overview statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DashboardQuickStats'
+      summary: Get quick stats
+      tags:
+      - dashboard
+  /api/dashboard/study_progress:
+    get:
+      consumes:
+      - application/json
+      description: Returns study progress statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DashboardStudyProgress'
+      summary: Get study progress
+      tags:
+      - dashboard
+schemes:
+- http
+swagger: "2.0"

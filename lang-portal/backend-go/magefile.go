@@ -1,205 +1,156 @@
 //go:build mage
+// +build mage
 
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
-	"time"
+	"os/exec"
 
-	"github.com/jeevanions/italian-learning/internal/config"
-	"github.com/jeevanions/italian-learning/internal/db/repository"
-	"github.com/jeevanions/italian-learning/internal/db/seed"
-	"github.com/jeevanions/italian-learning/internal/domain/services"
-	"github.com/jeevanions/italian-learning/internal/pkg/backup"
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
 const (
-	dbPath = "./data/italian-learning.db"
+	dbFile = "words.db"
 )
 
-// ensureDataDir creates the data directory if it doesn't exist
-func ensureDataDir() error {
-	dir := filepath.Dir(dbPath)
-	return os.MkdirAll(dir, 0755)
-}
-
-// cleanDB removes the existing database file if it exists
-func cleanDB() error {
-	if _, err := os.Stat(dbPath); err == nil {
-		return os.Remove(dbPath)
-	}
-	return nil
-}
-
-// Generate runs code generation tools
-func Generate() error {
-	fmt.Println("Running code generation...")
-
-	// Run sqlc
-	if err := sh.Run("sqlc", "generate"); err != nil {
-		return fmt.Errorf("sqlc generate failed: %w", err)
-	}
-
-	// Run swag
-	if err := sh.Run("swag", "init", "-g", "cmd/server/main.go"); err != nil {
-		return fmt.Errorf("swagger generation failed: %w", err)
-	}
-
-	return nil
-}
-
-// Reset removes and recreates the database
-func Reset() error {
-	fmt.Println("Resetting database...")
-	if err := cleanDB(); err != nil {
-		return fmt.Errorf("failed to clean database: %w", err)
-	}
-	return Migrate()
-}
+// Default target to run when none is specified
+var Default = Build
 
 // Build builds the application
 func Build() error {
-	fmt.Println("Building application...")
-	return sh.Run("go", "build", "-o", "bin/server", "./cmd/server")
+	fmt.Println("Building...")
+	if err := os.MkdirAll("tmp", 0755); err != nil {
+		return err
+	}
+	return sh.Run("go", "build", "-o", "tmp/main", "./cmd/server")
 }
 
-// Dev runs the application in development mode
-func Dev() error {
-	fmt.Println("Running in development mode...")
-	return sh.Run("go", "run", "./cmd/server")
+// Clean cleans up build artifacts
+func Clean() error {
+	fmt.Println("Cleaning...")
+	dirs := []string{"bin", "tmp", "docs"}
+	for _, dir := range dirs {
+		if err := os.RemoveAll(dir); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
 }
 
 // Test runs the test suite
 func Test() error {
 	fmt.Println("Running tests...")
-	return sh.Run("go", "test", "./...", "-v", "-cover")
+	return sh.Run("go", "test", "-v", "./...")
 }
 
-// Docs generates Swagger documentation
-func Docs() error {
+// Coverage runs tests with coverage
+func Coverage() error {
+	fmt.Println("Running tests with coverage...")
+	if err := sh.Run("go", "test", "-coverprofile=coverage.out", "./..."); err != nil {
+		return err
+	}
+	return sh.Run("go", "tool", "cover", "-html=coverage.out")
+}
+
+// Lint runs golangci-lint
+func Lint() error {
+	fmt.Println("Running linter...")
+	return sh.Run("golangci-lint", "run")
+}
+
+// Generate runs code generation tools
+func Generate() error {
+	mg.SerialDeps(SQLc, Swagger)
+	fmt.Println("Running go generate...")
+	return sh.Run("go", "generate", "./...")
+}
+
+// SQLc generates database code
+func SQLc() error {
+	fmt.Println("Generating SQLc code...")
+	cmd := exec.Command("/Users/jeevan/go/bin/sqlc", "generate")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// Swagger generates API documentation
+func Swagger() error {
 	fmt.Println("Generating Swagger documentation...")
+	cmd := exec.Command("/Users/jeevan/go/bin/swag", "init", "-g", "cmd/server/main.go")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
-	// Clean any existing docs
-	if err := os.RemoveAll("./docs"); err != nil {
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("failed to clean docs directory: %w", err)
-		}
+type DB mg.Namespace
+
+// DB:Migrate runs database migrations
+func (DB) Migrate() error {
+	fmt.Println("Running database migrations...")
+	return sh.Run("goose", "-dir", "internal/db/migrations", "sqlite3", dbFile, "up")
+}
+
+// DB:Reset resets the database
+func (DB) Reset() error {
+	fmt.Println("Resetting database...")
+	if err := os.Remove(dbFile); err != nil && !os.IsNotExist(err) {
+		return err
 	}
-
-	// Create docs directory
-	if err := os.MkdirAll("./docs", 0755); err != nil {
-		return fmt.Errorf("failed to create docs directory: %w", err)
-	}
-
-	// Generate swagger docs
-	if err := sh.Run("swag", "init",
-		"-g", "cmd/server/main.go",
-		"--parseDependency",
-		"--parseInternal",
-		"--parseDepth", "2",
-		"--output", "docs"); err != nil {
-		return fmt.Errorf("swagger generation failed: %w", err)
-	}
-
 	return nil
 }
 
-// Tidy updates Go module dependencies
-func Tidy() error {
-	fmt.Println("Updating dependencies...")
-	return sh.Run("go", "mod", "tidy")
+// DB:Status shows migration status
+func (DB) Status() error {
+	fmt.Println("Checking migration status...")
+	return sh.Run("goose", "-dir", "internal/db/migrations", "sqlite3", dbFile, "status")
 }
 
-// Migrate runs database migrations
-func Migrate() error {
-	fmt.Println("Running database migrations...")
-	if err := ensureDataDir(); err != nil {
-		return fmt.Errorf("failed to create data directory: %w", err)
-	}
-	return sh.Run("goose", "-dir", "internal/db/migrations", "sqlite3", dbPath, "up")
+// Run runs the application
+func Run() error {
+	fmt.Println("Running server...")
+	cmd := exec.Command("go", "run", "./cmd/server")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
-// MigrateDown rolls back database migrations
-func MigrateDown() error {
-	fmt.Println("Rolling back database migrations...")
-	return sh.Run("goose", "-dir", "internal/db/migrations", "sqlite3", dbPath, "down")
+// Dev runs the application in development mode with live reload
+func Dev() error {
+	fmt.Println("Running server in development mode...")
+	cmd := exec.Command("/Users/jeevan/go/bin/air")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
-// Seed adds initial data to the database
-func Seed() error {
-	fmt.Println("Seeding database...")
-
-	// Initialize services
-	db, err := setupDatabase()
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	wordRepo := repository.NewSQLiteWordRepository(db)
-	groupRepo := repository.NewSQLiteGroupRepository(db)
-
-	wordService := services.NewWordService(wordRepo)
-	groupService := services.NewGroupService(groupRepo)
-
-	return seed.SeedBasicData(wordService, groupService)
-}
-
-func setupDatabase() (*sql.DB, error) {
-	cfg := &config.Config{
-		DatabasePath: "./data/italian-learning.db",
-	}
-	return config.NewDB(cfg)
-}
-
-// Backup creates a database backup
-func Backup() error {
-	fmt.Println("Creating database backup...")
-	cfg := backup.NewBackupConfig()
-	return backup.CreateBackup(cfg)
-}
-
-// BackupSchedule starts a scheduled backup process
-func BackupSchedule() error {
-	fmt.Println("Starting scheduled backups (Ctrl+C to stop)...")
-	cfg := backup.NewBackupConfig()
-
-	ticker := time.NewTicker(24 * time.Hour)
-	defer ticker.Stop()
-
-	// Create initial backup
-	if err := backup.CreateBackup(cfg); err != nil {
-		return err
+// Install installs development dependencies
+func Install() error {
+	fmt.Println("Installing development dependencies...")
+	deps := []string{
+		"github.com/golangci/golangci-lint/cmd/golangci-lint@latest",
+		"github.com/pressly/goose/v3/cmd/goose@v3.19.0",
+		"github.com/swaggo/swag/cmd/swag@v1.16.3",
+		"github.com/air-verse/air@latest",
+		"github.com/sqlc-dev/sqlc/cmd/sqlc@v1.24.0",
 	}
 
-	// Wait for ticker or interrupt
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	for {
-		select {
-		case <-ticker.C:
-			if err := backup.CreateBackup(cfg); err != nil {
-				fmt.Printf("Backup failed: %v\n", err)
-			}
-		case <-sigChan:
-			fmt.Println("\nStopping scheduled backups")
-			return nil
+	for _, dep := range deps {
+		fmt.Printf("Installing %s...\n", dep)
+		cmd := exec.Command("go", "install", dep)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to install %s: %w", dep, err)
 		}
 	}
+	return nil
 }
 
-// Clean removes generated files and artifacts
-func Clean() error {
-	fmt.Println("Cleaning generated files...")
-	if err := cleanDB(); err != nil {
-		return err
-	}
-	return os.RemoveAll("bin")
+// All runs all tasks in sequence: clean, generate, build, test
+func All() {
+	mg.SerialDeps(Clean, Generate, Build, Test)
 }

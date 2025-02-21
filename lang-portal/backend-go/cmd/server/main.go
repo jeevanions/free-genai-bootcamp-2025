@@ -1,78 +1,72 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/jeevanions/italian-learning/docs"
-	"github.com/jeevanions/italian-learning/internal/api/router"
-	"github.com/jeevanions/italian-learning/internal/config"
-	"github.com/jeevanions/italian-learning/internal/db/repository"
-	"github.com/jeevanions/italian-learning/internal/domain/services"
-	"github.com/jeevanions/italian-learning/internal/pkg/logger"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/jeevanions/lang-portal/backend-go/internal/api/router"
+	"github.com/jeevanions/lang-portal/backend-go/internal/config"
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
+	_ "github.com/jeevanions/lang-portal/backend-go/docs" // Import swagger docs
 )
 
-// @title           Italian Learning API
-// @version         1.0
-// @description     API for Italian language learning platform
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host      localhost:8080
-// @BasePath  /api/v1
-
-// @securityDefinitions.basic  BasicAuth
+// @title Italian Language Learning Portal API
+// @version 1.0
+// @description API for the Italian Language Learning Portal
+// @host localhost:3000
+// @BasePath /api
+// @schemes http
 func main() {
 	// Initialize logger
-	logger.Setup()
-	log := logger.GetLogger()
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
 
 	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration")
-	}
+	cfg := config.Load()
 
 	// Initialize database
-	db, err := config.NewDB(cfg)
+	db, err := repository.NewDB(cfg.DBPath)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to database")
+		log.Fatal().Err(err).Msg("Failed to initialize database")
+	}
+	defer db.Close()
+
+	// Initialize router
+	r := router.Setup(db)
+
+	// Initialize HTTP server
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
+		Handler: r,
 	}
 
-	// Initialize repositories
-	wordRepo := repository.NewSQLiteWordRepository(db)
-	groupRepo := repository.NewSQLiteGroupRepository(db)
-	sessionRepo := repository.NewSQLiteStudySessionRepository(db)
-	reviewRepo := repository.NewSQLiteWordReviewRepository(db)
-	activityRepo := repository.NewSQLiteStudyActivityRepository(db)
+	// Start server in a goroutine
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msg("Failed to start server")
+		}
+	}()
 
-	// Initialize services
-	wordService := services.NewWordService(wordRepo)
-	groupService := services.NewGroupService(groupRepo)
-	sessionService := services.NewStudySessionService(sessionRepo, groupRepo, activityRepo)
-	reviewService := services.NewWordReviewService(reviewRepo, wordRepo, sessionRepo)
-	activityService := services.NewStudyActivityService(activityRepo)
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Info().Msg("Shutting down server...")
 
-	// Initialize Gin router
-	r := gin.Default()
-
-	// Setup API v1 routes
-	v1 := r.Group("/api/v1")
-	router.SetupRoutes(v1, wordService, groupService, sessionService, reviewService, activityService)
-
-	// Swagger documentation
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// Start server
-	log.Info().Str("address", cfg.ServerAddress).Msg("Starting server")
-	if err := r.Run(cfg.ServerAddress); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start server")
+	// The context is used to inform the server it has 5 seconds to finish
+	// the request it is currently handling
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
+
+	log.Info().Msg("Server exiting")
 }

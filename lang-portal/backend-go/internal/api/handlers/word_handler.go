@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
@@ -67,7 +68,7 @@ func (h *WordHandler) GetWordByID(c *gin.Context) {
 	}
 
 	if word == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Word not found"})
+		c.JSON(http.StatusOK, models.WordResponse{})
 		return
 	}
 

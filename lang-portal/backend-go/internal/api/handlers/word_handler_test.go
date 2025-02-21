@@ -143,7 +143,8 @@ func TestWordHandler_GetWordByID(t *testing.T) {
 			mockSetup: func(m *MockWordService) {
 				m.On("GetWordByID", int64(999)).Return(nil, nil)
 			},
-			wantStatus: http.StatusNotFound,
+			wantStatus: http.StatusOK,
+			wantBody: &models.WordResponse{},
 		},
 		{
 			name:   "invalid id",

@@ -1,0 +1,53 @@
+{
+  "words": [
+    {
+      "italian": "ciao",
+      "english": "hello",
+      "parts": {
+        "type": "interjection",
+        "informal": true,
+        "usage": ["greeting", "farewell"]
+      }
+    },
+    {
+      "italian": "grazie",
+      "english": "thank you",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["gratitude"]
+      }
+    },
+    {
+      "italian": "mangiare",
+      "english": "to eat",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-are",
+        "irregular": false
+      }
+    },
+    {
+      "italian": "casa",
+      "english": "house",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "case"
+      }
+    },
+    {
+      "italian": "bello",
+      "english": "beautiful",
+      "parts": {
+        "type": "adjective",
+        "gender": "masculine",
+        "feminine": "bella",
+        "plural": {
+          "masculine": "belli",
+          "feminine": "belle"
+        }
+      }
+    }
+  ]
+}

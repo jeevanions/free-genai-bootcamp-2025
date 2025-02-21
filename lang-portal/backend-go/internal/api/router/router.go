@@ -19,11 +19,12 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 
 	// Configure CORS
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: false,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		AllowWildcard:    true,
 		MaxAge:           12 * 3600,
 	}))
 
@@ -36,6 +37,9 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 	dashboardService := services.NewDashboardService(db)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
+	studyActivityService := services.NewStudyActivityService(db)
+	studyActivityHandler := handlers.NewStudyActivityHandler(studyActivityService)
+
 	// API routes
 	api := r.Group("/api")
 	{
@@ -46,13 +50,20 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 			dashboard.GET("/study_progress", dashboardHandler.GetStudyProgress)
 			dashboard.GET("/quick-stats", dashboardHandler.GetQuickStats)
 		}
+
+		// Study Activity routes
+		studyActivities := api.Group("/study_activities")
+		{
+			studyActivities.GET("/:id", studyActivityHandler.GetStudyActivity)
+			studyActivities.GET("/:id/study_sessions", studyActivityHandler.GetStudyActivitySessions)
+		}
 	}
 
 	// Swagger documentation
-	r.GET("/swagger/*any", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
-	})
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
+		ginSwagger.URL("http://localhost:8080/swagger/doc.json"), // The url pointing to API definition
+		ginSwagger.DefaultModelsExpandDepth(-1),
+	))
 
 	return r
 }

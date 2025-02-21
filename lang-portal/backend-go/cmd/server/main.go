@@ -21,9 +21,9 @@ import (
 // @title Italian Language Learning Portal API
 // @version 1.0
 // @description API for the Italian Language Learning Portal
-// @host localhost:3000
-// @BasePath /api
-// @schemes http
+// @host localhost:8080
+// @BasePath /
+// @schemes http https
 func main() {
 	// Initialize logger
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})

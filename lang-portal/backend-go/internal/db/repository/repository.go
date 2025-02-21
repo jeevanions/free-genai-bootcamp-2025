@@ -17,6 +17,8 @@ type Repository interface {
 	// Study activities
 	GetStudyActivity(id int64) (*models.StudyActivity, error)
 	GetStudyActivitySessions(activityID int64, limit, offset int) ([]models.StudySession, error)
+	GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error)
+	GetGroupByID(id int64) (*models.Group, error)
 
 	// Close the database connection
 	Close() error
@@ -97,21 +99,27 @@ func (r *SQLiteRepository) GetStudyProgress() (*models.DashboardStudyProgress, e
 
 func (r *SQLiteRepository) GetQuickStats() (*models.DashboardQuickStats, error) {
 	query := `
-		WITH stats AS (
-			SELECT 
-				CAST(SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100 as success_rate,
-				(SELECT COUNT(DISTINCT id) FROM study_sessions) as total_sessions,
-				(SELECT COUNT(DISTINCT group_id) FROM study_sessions WHERE created_at >= date('now', '-30 days')) as active_groups,
-				(SELECT COUNT(DISTINCT date(created_at)) FROM study_sessions WHERE created_at >= date('now', '-30 days')) as streak_days
-			FROM word_review_items
-			WHERE created_at >= date('now', '-30 days')
-		)
-		SELECT 
-			success_rate,
-			total_sessions,
-			active_groups,
-			streak_days
-		FROM stats
+		SELECT
+			COALESCE(
+				(
+					SELECT CAST(SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS FLOAT) * 100.0 / COUNT(*)
+					FROM word_review_items
+					WHERE created_at >= date('now', '-30 days')
+				), 0.0
+			) as success_rate,
+			COALESCE((SELECT COUNT(DISTINCT id) FROM study_sessions), 0) as total_sessions,
+			COALESCE(
+				(SELECT COUNT(DISTINCT group_id)
+				FROM study_sessions
+				WHERE created_at >= date('now', '-30 days')
+				), 0
+			) as active_groups,
+			COALESCE(
+				(SELECT COUNT(DISTINCT date(created_at))
+				FROM study_sessions
+				WHERE created_at >= date('now', '-30 days')
+				), 0
+			) as streak_days
 	`
 
 	var stats models.DashboardQuickStats
@@ -184,4 +192,60 @@ func (r *SQLiteRepository) GetStudyActivitySessions(activityID int64, limit, off
 	}
 
 	return sessions, rows.Err()
+}
+
+func (r *SQLiteRepository) GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error) {
+	query := `
+		SELECT id, word_id, study_session_id, correct, created_at
+		FROM word_review_items
+		WHERE study_session_id = ?
+	`
+
+	rows, err := r.db.Query(query, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reviews []models.WordReviewItem
+	for rows.Next() {
+		var review models.WordReviewItem
+		err := rows.Scan(
+			&review.ID,
+			&review.WordID,
+			&review.StudySessionID,
+			&review.Correct,
+			&review.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		reviews = append(reviews, review)
+	}
+
+	return reviews, rows.Err()
+}
+
+func (r *SQLiteRepository) GetGroupByID(id int64) (*models.Group, error) {
+	query := `
+		SELECT id, name, words_count, created_at
+		FROM groups
+		WHERE id = ?
+	`
+
+	var group models.Group
+	err := r.db.QueryRow(query, id).Scan(
+		&group.ID,
+		&group.Name,
+		&group.WordsCount,
+		&group.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &group, nil
 }

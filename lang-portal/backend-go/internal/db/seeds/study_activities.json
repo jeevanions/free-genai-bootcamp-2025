@@ -1,0 +1,19 @@
+{
+  "study_activities": [
+    {
+      "name": "Flashcards",
+      "thumbnail_url": "https://example.com/images/flashcards.png",
+      "description": "Practice vocabulary with digital flashcards"
+    },
+    {
+      "name": "Word Matching",
+      "thumbnail_url": "https://example.com/images/matching.png",
+      "description": "Match Italian words with their English translations"
+    },
+    {
+      "name": "Spelling Practice",
+      "thumbnail_url": "https://example.com/images/spelling.png",
+      "description": "Practice spelling Italian words correctly"
+    }
+  ]
+}

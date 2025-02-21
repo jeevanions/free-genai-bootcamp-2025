@@ -1,4 +1,4 @@
-basePath: /api
+basePath: /
 definitions:
   models.DashboardLastStudySession:
     properties:
@@ -31,7 +31,44 @@ definitions:
       total_words_studied:
         type: integer
     type: object
-host: localhost:3000
+  models.StudyActivityResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      thumbnail_url:
+        type: string
+    type: object
+  models.StudySessionResponse:
+    properties:
+      activity_name:
+        type: string
+      correct_count:
+        type: integer
+      created_at:
+        type: string
+      group_id:
+        type: integer
+      group_name:
+        type: string
+      id:
+        type: integer
+      words_count:
+        type: integer
+    type: object
+  models.StudySessionsListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.StudySessionResponse'
+        type: array
+    type: object
+host: localhost:8080
 info:
   contact: {}
   description: API for the Italian Language Learning Portal
@@ -83,6 +120,49 @@ paths:
       summary: Get study progress
       tags:
       - dashboard
+  /api/study_activities/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns details about a specific study activity
+      parameters:
+      - description: Study Activity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StudyActivityResponse'
+      summary: Get study activity details
+      tags:
+      - study_activities
+  /api/study_activities/{id}/study_sessions:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of study sessions for a specific activity
+      parameters:
+      - description: Study Activity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StudySessionsListResponse'
+      summary: Get study sessions for an activity
+      tags:
+      - study_activities
 schemes:
 - http
+- https
 swagger: "2.0"

@@ -4,12 +4,15 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/seeder"
+	_ "modernc.org/sqlite"
 )
 
 const (
@@ -92,6 +95,32 @@ type DB mg.Namespace
 func (DB) Migrate() error {
 	fmt.Println("Running database migrations...")
 	return sh.Run("goose", "-dir", "internal/db/migrations", "sqlite3", dbFile, "up")
+}
+
+// DB:Seed seeds the database with initial data
+func (DB) Seed() error {
+	fmt.Println("Seeding database...")
+	
+	// Ensure migrations are up to date
+	mg.SerialDeps(DB.Migrate)
+
+	// Open database connection
+	db, err := sql.Open("sqlite", dbFile)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer db.Close()
+
+	// Create seeder instance
+	seeder := seeder.New(db)
+
+	// Run seeder
+	if err := seeder.SeedFromJSON("internal/db/seeds"); err != nil {
+		return fmt.Errorf("failed to seed database: %w", err)
+	}
+
+	fmt.Println("Database seeded successfully")
+	return nil
 }
 
 // DB:Reset resets the database

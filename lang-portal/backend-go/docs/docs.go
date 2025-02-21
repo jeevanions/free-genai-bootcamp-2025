@@ -83,6 +83,70 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/study_activities/{id}": {
+            "get": {
+                "description": "Returns details about a specific study activity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_activities"
+                ],
+                "summary": "Get study activity details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StudyActivityResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/study_activities/{id}/study_sessions": {
+            "get": {
+                "description": "Returns a list of study sessions for a specific activity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_activities"
+                ],
+                "summary": "Get study sessions for an activity",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StudySessionsListResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -133,6 +197,63 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "models.StudyActivityResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.StudySessionResponse": {
+            "type": "object",
+            "properties": {
+                "activity_name": {
+                    "type": "string"
+                },
+                "correct_count": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "type": "integer"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "words_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.StudySessionsListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StudySessionResponse"
+                    }
+                }
+            }
         }
     }
 }`
@@ -140,9 +261,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:3000",
-	BasePath:         "/api",
-	Schemes:          []string{"http"},
+	Host:             "localhost:8080",
+	BasePath:         "/",
+	Schemes:          []string{"http", "https"},
 	Title:            "Italian Language Learning Portal API",
 	Description:      "API for the Italian Language Learning Portal",
 	InfoInstanceName: "swagger",

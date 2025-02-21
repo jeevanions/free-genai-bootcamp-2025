@@ -11,7 +11,12 @@ import (
 type Querier interface {
 	CreateWord(ctx context.Context, arg CreateWordParams) (Word, error)
 	DeleteWord(ctx context.Context, id int64) error
+	GetGroupByID(ctx context.Context, id int64) (Group, error)
+	GetSessionStats(ctx context.Context, studySessionID int64) (GetSessionStatsRow, error)
+	GetStudyActivityByID(ctx context.Context, id int64) (StudyActivity, error)
+	GetStudySessionsByActivityID(ctx context.Context, id int64) ([]GetStudySessionsByActivityIDRow, error)
 	GetWord(ctx context.Context, id int64) (Word, error)
+	GetWordReviewsBySessionID(ctx context.Context, studySessionID int64) ([]WordReviewItem, error)
 	ListWords(ctx context.Context) ([]Word, error)
 	UpdateWord(ctx context.Context, arg UpdateWordParams) (Word, error)
 }

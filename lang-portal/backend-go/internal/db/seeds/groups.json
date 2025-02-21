@@ -1,0 +1,74 @@
+{
+  "groups": [
+    {
+      "name": "A1 - Greetings and Basic Expressions",
+      "words_count": 200,
+      "level": "A1"
+    },
+    {
+      "name": "A1 - Numbers and Time",
+      "words_count": 300,
+      "level": "A1"
+    },
+    {
+      "name": "A1 - Family and Personal Information",
+      "words_count": 300,
+      "level": "A1"
+    },
+    {
+      "name": "A1 - Food and Drink",
+      "words_count": 400,
+      "level": "A1"
+    },
+    {
+      "name": "A1 - Common Verbs",
+      "words_count": 300,
+      "level": "A1"
+    },
+    {
+      "name": "A2 - House and Furniture",
+      "words_count": 400,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Travel and Transportation",
+      "words_count": 500,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Shopping and Services",
+      "words_count": 500,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Health and Body",
+      "words_count": 400,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Work and Education",
+      "words_count": 400,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Hobbies and Free Time",
+      "words_count": 400,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Weather and Nature",
+      "words_count": 300,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Technology and Communication",
+      "words_count": 300,
+      "level": "A2"
+    },
+    {
+      "name": "A2 - Emotions and Feelings",
+      "words_count": 300,
+      "level": "A2"
+    }
+  ]
+}

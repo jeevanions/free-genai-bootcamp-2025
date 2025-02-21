@@ -18,7 +18,16 @@ type Repository interface {
 	GetStudyActivity(id int64) (*models.StudyActivity, error)
 	GetStudyActivitySessions(activityID int64, limit, offset int) ([]models.StudySession, error)
 	GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error)
-	GetGroupByID(id int64) (*models.Group, error)
+
+	// Words
+	GetWords(limit, offset int) (*models.WordListResponse, error)
+	GetWordByID(id int64) (*models.WordResponse, error)
+
+	// Groups
+	GetGroups(limit, offset int) (*models.GroupListResponse, error)
+	GetGroupByID(id int64) (*models.GroupDetailResponse, error)
+	GetGroupWords(groupID int64, limit, offset int) (*models.GroupWordsResponse, error)
+	GetGroupStudySessions(groupID int64, limit, offset int) (*models.GroupStudySessionsResponse, error)
 
 	// Close the database connection
 	Close() error
@@ -226,26 +235,4 @@ func (r *SQLiteRepository) GetWordReviewsBySessionID(sessionID int64) ([]models.
 	return reviews, rows.Err()
 }
 
-func (r *SQLiteRepository) GetGroupByID(id int64) (*models.Group, error) {
-	query := `
-		SELECT id, name, words_count, created_at
-		FROM groups
-		WHERE id = ?
-	`
 
-	var group models.Group
-	err := r.db.QueryRow(query, id).Scan(
-		&group.ID,
-		&group.Name,
-		&group.WordsCount,
-		&group.CreatedAt,
-	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return &group, nil
-}

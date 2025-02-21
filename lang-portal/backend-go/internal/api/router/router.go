@@ -40,6 +40,12 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 	studyActivityService := services.NewStudyActivityService(db)
 	studyActivityHandler := handlers.NewStudyActivityHandler(studyActivityService)
 
+	wordService := services.NewWordService(db)
+	wordHandler := handlers.NewWordHandler(wordService)
+
+	groupService := services.NewGroupService(db)
+	groupHandler := handlers.NewGroupHandler(groupService)
+
 	// API routes
 	api := r.Group("/api")
 	{
@@ -56,6 +62,22 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 		{
 			studyActivities.GET("/:id", studyActivityHandler.GetStudyActivity)
 			studyActivities.GET("/:id/study_sessions", studyActivityHandler.GetStudyActivitySessions)
+		}
+
+		// Word routes
+		words := api.Group("/words")
+		{
+			words.GET("", wordHandler.GetWords)
+			words.GET("/:id", wordHandler.GetWordByID)
+		}
+
+		// Group routes
+		groups := api.Group("/groups")
+		{
+			groups.GET("", groupHandler.GetGroups)
+			groups.GET("/:id", groupHandler.GetGroupByID)
+			groups.GET("/:id/words", groupHandler.GetGroupWords)
+			groups.GET("/:id/study_sessions", groupHandler.GetGroupStudySessions)
 		}
 	}
 

@@ -1,0 +1,1050 @@
+# Technical Specification: Italian Language Learning Portal Backend
+
+## 1. Overview
+
+### 1.1 Business Objective
+
+The objective is to build a platform that will allow students to learn Italian by practicing vocabulary, grammar, and pronunciation.
+
+The platform will have the following core capabilities:
+1. **Vocabulary Management**: Central repository for 5000+ Italian words with linguistic metadata
+2. **Learning Record Store**: Record practice performance with spaced repetition statistics
+3. **Activity Launchpad**: Unified interface for launching learning exercises
+
+## 2. System Architecture
+
+### 2.1 Tech Stack
+
+| Component       | Technology       | Rationale                                                                 |
+|-----------------|------------------|---------------------------------------------------------------------------|
+| Language        | Go 1.21+         | Strong concurrency support, excellent performance characteristics        |
+| Web Framework   | Gin v1.9.1       | High-performance HTTP framework with middleware ecosystem                |
+| Database        | SQLite3          | Single-file storage, ACID compliance, suitable for single-user prototype |
+| Task Runner     | Mage v1.15.0     | Go-native build tool with declarative task definitions                   |
+| ORM             | sqlc v1.24.0     | Type-safe SQL to Go code generation                                      |
+| Migrations      | goose v3.19.0    | Robust database migration management                                     |
+| API Docs        | swaggo/swag      | OpenAPI/Swagger documentation generation                                 |
+
+API Format: RESTful JSON endpoints
+
+Auth: None (single-user system)
+
+### 2.2 Architectural Diagram
+
+#### 2.2.1 Component Diagram
+
+[Frontend] 
+  ↔ [Gin HTTP Server]
+    ↔ [SQLite Database]
+    ↔ [Business Logic]
+    ↔ [Session Manager]
+
+### 2.3 Library Dependencies
+
+| Package             | Version | Purpose                              |
+|---------------------|---------|--------------------------------------|
+| github.com/gin-gonic/gin | v1.9.1  | HTTP routing and middleware          |
+| modernc.org/sqlite  | v1.29.0 | Pure-Go SQLite implementation        |
+| github.com/stretchr/testify | v1.9.0 | Testing framework                    |
+| github.com/rs/zerolog | v1.32.0 | Structured logging                   |
+| github.com/swaggo/swag | v1.16.3 | Swagger documentation generation     |
+| github.com/swaggo/gin-swagger | v1.6.0 | Swagger UI for Gin                   |
+
+### 2.4 Backend project structure
+
+```
+.
+├── cmd/                    # Application entry points
+│   └── server/            # Main server binary
+│       └── main.go        # Server initialization
+├── internal/              # Private application code
+│   ├── api/              # API layer
+│   │   ├── handlers/     # HTTP request handlers
+│   │   ├── middleware/   # HTTP middleware
+│   │   └── router/       # Route definitions
+│   ├── config/           # Configuration management
+│   ├── domain/           # Business/domain logic
+│   │   ├── models/       # Domain models
+│   │   └── services/     # Business logic services
+│   ├── db/               # Database access
+│   │   ├── migrations/   # SQL migrations
+│   │   ├── queries/      # SQL queries (for sqlc)
+│   │   └── repository/   # Data access layer
+│   └── pkg/              # Internal shared packages
+│       ├── logger/       # Logging utilities
+│       └── validator/    # Input validation
+├── pkg/                  # Public shared packages
+├── scripts/              # Build/deployment scripts
+├── test/                 # Integration/E2E tests
+├── .env.example         # Environment template
+├── .gitignore
+├── go.mod
+├── go.sum
+├── magefile.go          # Build automation
+└── README.md
+```
+
+Key aspects of this structure:
+- `cmd/`: Contains the main application entry points
+- `internal/`: Private application code not meant for external use
+- `pkg/`: Shared code that could be used by other projects
+- Clear separation between API, domain logic, and data access layers
+- Follows Go project layout conventions and clean architecture principles
+
+## 3. Database Definition
+
+### 3.1 Schema Definition
+
+```sql
+-- Core Vocabulary with Italian-specific features
+CREATE TABLE words (
+    id INTEGER PRIMARY KEY,
+    italian TEXT NOT NULL,                -- Base form of the word
+    english TEXT NOT NULL,                -- English translation
+    parts_of_speech TEXT NOT NULL,        -- noun, verb, adjective, etc.
+    gender TEXT,                          -- masculine/feminine for nouns
+    number TEXT,                          -- singular/plural forms
+    difficulty_level INTEGER NOT NULL,    -- 1-5 scale for progression
+    verb_conjugation JSON,                -- Store all tenses for verbs
+    notes TEXT,                           -- Usage notes, idioms
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Words to Groups Many-to-Many Relationship
+CREATE TABLE words_groups (
+    id INTEGER PRIMARY KEY,
+    word_id INTEGER REFERENCES words(id),
+    group_id INTEGER REFERENCES groups(id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Thematic Groups (e.g., Food, Travel, Business)
+CREATE TABLE groups (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    difficulty_level INTEGER NOT NULL,    -- Match with word difficulty
+    category TEXT NOT NULL,               -- grammar/thematic/situational
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enhanced Study Sessions with Metrics
+CREATE TABLE study_sessions (
+    id INTEGER PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id),
+    study_activity_id INTEGER REFERENCES study_activities(id),
+    total_words INTEGER NOT NULL,         -- Words attempted
+    correct_words INTEGER NOT NULL,       -- Successful attempts
+    duration_seconds INTEGER NOT NULL,    -- Session length
+    start_time DATETIME NOT NULL,        -- When session started
+    end_time DATETIME,                   -- When session ended
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Activity Types for Italian Learning
+CREATE TABLE study_activities (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,                   -- vocabulary/grammar/pronunciation
+    requires_audio BOOLEAN NOT NULL,      -- For pronunciation exercises
+    difficulty_level INTEGER NOT NULL,    -- Progressive difficulty
+    instructions TEXT NOT NULL,           -- Activity guidelines
+    thumbnail_url TEXT,                  -- URL to activity thumbnail
+    category TEXT NOT NULL,              -- Activity category
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Word Review Records
+CREATE TABLE word_review_items (
+    id INTEGER PRIMARY KEY,
+    word_id INTEGER REFERENCES words(id),
+    study_session_id INTEGER REFERENCES study_sessions(id),
+    correct BOOLEAN NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 3.2 Index Strategy
+
+```sql
+-- Words table indexes
+CREATE INDEX idx_words_italian ON words(italian);         -- Fast word lookup
+CREATE INDEX idx_words_difficulty ON words(difficulty_level);  -- For progression filtering
+CREATE INDEX idx_words_parts_speech ON words(parts_of_speech);  -- Filter by word type
+
+-- Words Groups indexes
+CREATE INDEX idx_words_groups_word ON words_groups(word_id);    -- Word relationship lookups
+CREATE INDEX idx_words_groups_group ON words_groups(group_id);   -- Group relationship lookups
+
+-- Groups indexes
+CREATE INDEX idx_groups_category ON groups(category);      -- Group filtering
+CREATE INDEX idx_groups_difficulty ON groups(difficulty_level);  -- Difficulty filtering
+
+-- Study Sessions indexes
+CREATE INDEX idx_study_sessions_group ON study_sessions(group_id);  -- Group performance tracking
+CREATE INDEX idx_study_sessions_created ON study_sessions(created_at);  -- Time-based queries
+CREATE INDEX idx_study_sessions_metrics ON study_sessions(correct_words, total_words);  -- Performance analysis
+
+-- Study Activities indexes
+CREATE INDEX idx_study_activities_type ON study_activities(type);  -- Activity type filtering
+CREATE INDEX idx_study_activities_difficulty ON study_activities(difficulty_level);  -- Difficulty filtering
+
+-- Word Review Items indexes
+CREATE INDEX idx_word_review_performance ON word_review_items(word_id, correct);  -- Word success tracking
+CREATE INDEX idx_word_review_session ON word_review_items(study_session_id);  -- Session lookups
+CREATE INDEX idx_word_review_created ON word_review_items(created_at);  -- Time-based analysis
+
+-- User Settings and Preferences
+CREATE TABLE user_settings (
+    id INTEGER PRIMARY KEY,
+    notification_enabled BOOLEAN DEFAULT true,
+    study_reminder_time TEXT,            -- Time of day for reminders
+    difficulty_preference INTEGER CHECK (difficulty_preference BETWEEN 1 AND 5),
+    ui_theme TEXT DEFAULT 'light',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Study Streaks
+CREATE TABLE study_streaks (
+    id INTEGER PRIMARY KEY,
+    current_streak INTEGER DEFAULT 0,    -- Current consecutive days
+    longest_streak INTEGER DEFAULT 0,    -- Longest streak achieved
+    last_study_date DATE,               -- Last study date for streak calculation
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Settings indexes
+CREATE INDEX idx_study_streaks_last_date ON study_streaks(last_study_date);  -- Streak calculation
+
+```
+
+
+
+## 4. API Endpoints
+
+### 4.1 Dashboard Endpoints
+
+**GET /api/dashboard/last_study_session**
+Returns details about the user's most recent study session.
+```json
+{
+  "id": 123,
+  "activity_name": "Basic Verbs Practice",
+  "group_name": "Common Verbs",
+  "timestamp": "2025-02-18T23:30:00Z",
+  "correct_count": 8,
+  "total_count": 10
+}
+```
+
+**GET /api/dashboard/study_progress**
+Returns overall study progress statistics.
+```json
+{
+  "total_words_studied": 150,
+  "total_available_words": 5000,
+  "mastery_percentage": 35
+}
+```
+
+**GET /api/dashboard/quick-stats**
+Returns key performance indicators.
+```json
+{
+  "success_rate": 80,
+  "total_sessions": 45,
+  "active_groups": 3
+}
+```
+
+**GET /api/dashboard/streak**
+Returns current study streak information.
+```json
+{
+  "current_streak": 4,
+  "longest_streak": 7,
+  "last_study_date": "2025-02-18"
+}
+```
+
+**GET /api/dashboard/mastery**
+Returns overall mastery metrics.
+```json
+{
+  "overall_mastery": 35,
+  "by_category": {
+    "vocabulary": 40,
+    "grammar": 30,
+    "pronunciation": 35
+  }
+}
+```
+
+### 4.2 Study Activities Endpoints
+
+**GET /api/activities**
+Returns list of available study activities.
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Basic Verb Conjugation",
+      "type": "grammar",
+      "difficulty_level": 2,
+      "thumbnail_url": "/thumbnails/verb-conj.png",
+      "category": "Verbs"
+    }
+  ],
+  "total": 10,
+  "page": 1,
+  "per_page": 20
+}
+```
+
+**GET /api/activities/categories**
+Returns available activity categories.
+```json
+{
+  "categories": [
+    {
+      "name": "Vocabulary",
+      "count": 5
+    },
+    {
+      "name": "Grammar",
+      "count": 3
+    }
+  ]
+}
+```
+
+**GET /api/activities/recommended**
+Returns personalized activity recommendations.
+```json
+{
+  "recommendations": [
+    {
+      "activity_id": 1,
+      "name": "Food Vocabulary",
+      "reason": "Matches your current level"
+    }
+  ]
+}
+```
+
+**GET /api/activities/:id**
+Returns detailed information about a specific activity.
+```json
+{
+  "id": 1,
+  "name": "Basic Verb Conjugation",
+  "type": "grammar",
+  "difficulty_level": 2,
+  "instructions": "Practice conjugating basic verbs...",
+  "requires_audio": false,
+  "thumbnail_url": "/thumbnails/verb-conj.png",
+  "category": "Verbs"
+}
+```
+
+### 4.3 Study Sessions Endpoints
+
+**POST /api/sessions**
+Creates a new study session.
+```json
+// Request
+{
+  "activity_id": 1,
+  "group_id": 2,
+  "start_time": "2025-02-18T23:30:00Z"
+}
+
+// Response
+{
+  "id": 123,
+  "activity_id": 1,
+  "group_id": 2,
+  "start_time": "2025-02-18T23:30:00Z"
+}
+```
+
+**GET /api/groups/compatible/:activityId**
+Returns groups compatible with the given activity.
+```json
+{
+  "compatible_groups": [
+    {
+      "id": 1,
+      "name": "Basic Verbs",
+      "difficulty_level": 2
+    }
+  ]
+}
+```
+
+### 4.4 Words Endpoints
+
+**GET /api/words**
+Returns paginated list of words with optional filters.
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "italian": "ciao",
+      "english": "hello",
+      "parts_of_speech": "interjection",
+      "correct_count": 10,
+      "wrong_count": 2
+    }
+  ],
+  "total": 5000,
+  "page": 1,
+  "per_page": 100
+}
+```
+
+**GET /api/words/search**
+Searches words in both languages.
+```json
+{
+  "query": "man",
+  "results": [
+    {
+      "id": 1,
+      "italian": "uomo",
+      "english": "man",
+      "match_type": "exact"
+    }
+  ]
+}
+```
+
+**GET /api/words/filters**
+Returns available filter options.
+```json
+{
+  "parts_of_speech": ["noun", "verb", "adjective"],
+  "difficulty_levels": [1, 2, 3, 4, 5],
+  "categories": ["Basic", "Food", "Travel"]
+}
+```
+
+### 4.5 Groups Endpoints
+
+**GET /api/groups/:id**
+Returns group details.
+```json
+{
+  "id": 1,
+  "name": "Basic Verbs",
+  "description": "Common verbs for daily use",
+  "difficulty_level": 2,
+  "category": "grammar",
+  "word_count": 50
+}
+```
+
+**GET /api/groups/:id/progress**
+Returns learning progress for the group.
+```json
+{
+  "mastery_level": 45,
+  "success_rate": 75,
+  "words_mastered": 25,
+  "total_words": 50
+}
+```
+
+**POST /api/groups/:id/words**
+Adds words to a group.
+```json
+// Request
+{
+  "word_ids": [1, 2, 3]
+}
+
+// Response
+{
+  "added_count": 3,
+  "new_total": 53
+}
+```
+
+**DELETE /api/groups/:id/words/:wordId**
+Removes a word from a group.
+```json
+// Response
+{
+  "success": true,
+  "new_total": 52
+}
+```
+
+### 4.6 Settings Endpoints
+
+**GET /api/settings**
+Returns user settings.
+```json
+{
+  "notification_enabled": true,
+  "study_reminder_time": "18:00",
+  "difficulty_preference": 3,
+  "ui_theme": "light"
+}
+```
+
+**PUT /api/settings**
+Updates user settings.
+```json
+// Request
+{
+  "notification_enabled": false,
+  "study_reminder_time": "19:00"
+}
+
+// Response
+{
+  "success": true
+}
+```
+
+### 4.6 Settings Endpoints
+
+**GET /api/settings**
+Returns user settings.
+```json
+{
+  "notification_enabled": true,
+  "study_reminder_time": "18:00",
+  "difficulty_preference": 3,
+  "ui_theme": "light"
+}
+```
+
+**PUT /api/settings**
+Updates user settings.
+```json
+// Request
+{
+  "notification_enabled": false,
+  "study_reminder_time": "19:00"
+}
+
+// Response
+{
+  "success": true
+}
+```
+
+**GET /api/settings/preferences**
+Returns user preferences.
+```json
+{
+  "language": "en",
+  "notifications": {
+    "email": true,
+    "push": false
+  },
+  "study_goals": {
+    "daily_words": 20,
+    "weekly_sessions": 5
+  }
+}
+```
+
+**PUT /api/settings/preferences**
+Updates user preferences.
+```json
+// Request
+{
+  "study_goals": {
+    "daily_words": 30
+  }
+}
+
+// Response
+{
+  "success": true
+}
+```
+
+### 4.7 Analytics Endpoints
+
+**GET /api/sessions/analytics**
+Returns session performance analytics.
+```json
+{
+  "performance_trend": [
+    {
+      "date": "2025-02-18",
+      "success_rate": 80,
+      "words_studied": 50
+    }
+  ],
+  "total_study_time": 3600,
+  "average_session_length": 300
+}
+```
+
+**GET /api/sessions/calendar**
+Returns calendar view of study sessions.
+```json
+{
+  "sessions": [
+    {
+      "date": "2025-02-18",
+      "session_count": 2,
+      "total_words": 100,
+      "success_rate": 75
+    }
+  ]
+}
+```
+  "id": 123,
+  "group_id": 456,
+  "created_at": "2024-03-10T15:30:00Z",
+  "study_activity_id": 789,
+  "group_name": "Basic Verbs"
+}
+```
+
+**GET /api/dashboard/study_progress**
+```json
+{
+  "total_words_studied": 150,
+  "total_available_words": 500,
+  "groups_progress": [
+    {
+      "group_id": 1,
+      "group_name": "Basic Verbs",
+      "words_mastered": 45,
+      "total_words": 100
+    }
+  ]
+}
+```
+
+**GET /api/dashboard/quick-stats**
+```json
+{
+  "success_rate": 80.0,
+  "total_study_sessions": 4,
+  "total_active_groups": 3,
+  "study_streak_days": 4
+}
+```
+
+### 4.2 Words Management
+
+**GET /api/words**
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "italian": "ciao",
+      "english": "hello",
+      "parts": {
+        "type": "greeting",
+        "usage": "informal"
+      },
+      "parts_of_speech": "interjection",
+      "difficulty_level": 1,
+      "notes": "Common informal greeting",
+      "stats": {
+        "correct_count": 5,
+        "incorrect_count": 2,
+        "last_reviewed": "2024-03-10T15:30:00Z"
+      }
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 100,
+    "items_per_page": 20
+  }
+}
+```
+
+**GET /api/words/:id**
+```json
+{
+  "id": 1,
+  "italian": "ciao",
+  "english": "hello",
+  "parts": {
+    "type": "greeting",
+    "usage": "informal"
+  },
+  "parts_of_speech": "interjection",
+  "difficulty_level": 1,
+  "notes": "Common informal greeting"
+}
+```
+
+### 4.3 Groups Management
+
+**GET /api/groups**
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Basic Greetings",
+      "description": "Essential Italian greetings",
+      "difficulty_level": 1,
+      "category": "thematic",
+      "word_count": 20,
+      "completion_rate": 75.5
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 100,
+    "items_per_page": 20
+  }
+}
+```
+
+**GET /api/groups/:id/words**
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "italian": "ciao",
+      "english": "hello",
+      "stats": {
+        "correct_count": 5,
+        "incorrect_count": 2,
+        "last_reviewed": "2024-03-10T15:30:00Z"
+      }
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 20,
+    "items_per_page": 20
+  }
+}
+```
+
+### 4.4 Study Sessions
+
+**POST /api/study_sessions**
+```json
+Request:
+{
+  "group_id": 123,
+  "study_activity_id": 456
+}
+
+Response:
+{
+  "id": 789,
+  "group_id": 123,
+  "study_activity_id": 456,
+  "created_at": "2024-03-10T15:30:00Z"
+}
+```
+
+**GET /api/study_sessions/:id**
+```json
+{
+  "id": 789,
+  "group_id": 123,
+  "study_activity_id": 456,
+  "total_words": 20,
+  "correct_words": 15,
+  "duration_seconds": 300,
+  "created_at": "2024-03-10T15:30:00Z"
+}
+```
+
+### 4.5 Word Reviews
+
+**POST /api/study_sessions/:session_id/reviews**
+```json
+Request:
+{
+  "word_id": 1,
+  "correct": true
+}
+
+Response:
+{
+  "id": 123,
+  "word_id": 1,
+  "study_session_id": 789,
+  "correct": true,
+  "created_at": "2024-03-10T15:30:00Z"
+}
+```
+
+**GET /api/study_sessions/:session_id/reviews**
+```json
+{
+  "items": [
+    {
+      "id": 123,
+      "word_id": 1,
+      "correct": true,
+      "created_at": "2024-03-10T15:30:00Z",
+      "word": {
+        "italian": "ciao",
+        "english": "hello"
+      }
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 20,
+    "items_per_page": 20
+  }
+}
+```
+
+### 4.6 Study Activities
+
+**GET /api/study_activities**
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "type": "vocabulary",
+      "requires_audio": false,
+      "difficulty_level": 1,
+      "instructions": "Match the Italian words with their English translations"
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 5,
+    "items_per_page": 20
+  }
+}
+```
+
+### 4.7 System Management
+
+**POST /api/reset**
+```json
+Request:
+{
+  "reset_type": "study_history"  // or "full_system"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Study history has been reset",
+  "reset_type": "study_history",
+  "timestamp": "2024-03-10T15:30:00Z"
+}
+```
+
+## 5. Implementation Details
+
+### 5.1 Database Connection
+```go
+// internal/models/db.go
+func NewDB() (*sql.DB, error) {
+    return sql.Open("sqlite", "./words.db")
+}
+```
+
+### 5.2 Request Validation
+```go
+// internal/handlers/sessions.go
+type ReviewRequest struct {
+    Correct bool `json:"correct" binding:"required"`
+}
+
+func SubmitReview(c *gin.Context) {
+    var req ReviewRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(400, gin.H{"error": "Invalid review data"})
+        return
+    }
+}
+```
+
+## 6. Development Workflow
+
+### 6.1 Mage Tasks
+```go
+// magefile.go
+func Migrate() error {
+    return sh.Run("sqlite3", "words.db", ".read db/migrations/0001_init.sql")
+}
+
+func Seed() error {
+    return sh.Run("sqlite3", "words.db", ".read db/seeds/initial_data.sql")
+}
+```
+
+### 6.2 Setup Guide
+```bash
+# Initialize system
+go mod init
+mage init
+mage migrate
+mage seed
+
+# Start server
+go run cmd/server/main.go
+```
+
+## 7. Error Handling
+
+### 7.1 Standard Error Response
+```json
+{
+  "error": "Invalid session ID",
+  "code": "ERR-400-002",
+  "documentation": "/api/docs#error-codes"
+}
+```
+
+### 7.2 Common Status Codes
+- 400: Invalid request format
+- 404: Resource not found
+- 500: Database connection error
+- 422: Validation error
+
+### 7.3 Error Logging
+All errors will be logged using zerolog with contextual information including:
+- Request ID
+- User IP
+- Endpoint
+- Error stack trace 
+
+## 8. Testing Strategy
+
+### 8.1 Testing Framework Stack
+
+| Component          | Technology                | Purpose                                          |
+|-------------------|---------------------------|--------------------------------------------------|
+| Testing Framework | testify v1.9.0           | Assertions and test suite organization           |
+| HTTP Testing      | httptest (stdlib)        | HTTP handler testing                             |
+| Mock Generation   | mockery v2.40.1          | Interface mocking for unit tests                 |
+| Coverage Tool     | go test -cover           | Code coverage reporting                          |
+| Performance Tests | k6 v0.49.0               | Load and performance testing                     |
+
+### 8.2 Test Categories
+
+1. **Unit Tests**
+   - Location: Next to the source files (`*_test.go`)
+   - Naming: `TestXxx` for test functions
+   - Coverage target: 80% minimum
+   - Mock external dependencies
+   - Focus on single component behavior
+
+2. **Integration Tests**
+   - Location: `test/integration/`
+   - Test component interactions
+   - Use test containers for dependencies
+   - Focus on API contract validation
+   - Include database interactions
+
+3. **End-to-End Tests**
+   - Location: `test/e2e/`
+   - Test complete user workflows
+   - Use staging environment
+   - Include API sequence testing
+   - Validate business requirements
+
+4. **Performance Tests**
+   - Location: `test/performance/`
+   - Load testing scripts
+   - Benchmark critical paths
+   - Resource utilization tests
+   - Concurrency testing
+
+### 8.3 Testing Standards
+
+1. **Test Structure (AAA Pattern)**
+   ```go
+   func TestSomething(t *testing.T) {
+       // Arrange
+       expected := "expected result"
+       sut := NewSystemUnderTest()
+
+       // Act
+       result, err := sut.DoSomething()
+
+       // Assert
+       assert.NoError(t, err)
+       assert.Equal(t, expected, result)
+   }
+   ```
+
+2. **Table-Driven Tests**
+   ```go
+   func TestOperation(t *testing.T) {
+       tests := []struct {
+           name     string
+           input    string
+           expected string
+           wantErr  bool
+       }{
+           {
+               name:     "valid input",
+               input:    "test",
+               expected: "result",
+               wantErr:  false,
+           },
+           // More test cases...
+       }
+
+       for _, tt := range tests {
+           t.Run(tt.name, func(t *testing.T) {
+               // Test implementation
+           })
+       }
+   }
+   ```
+
+3. **Mock Generation**
+   ```go
+   //go:generate mockery --name=Repository --output=mocks --outpkg=mocks --case=snake
+   type Repository interface {
+       FindByID(id string) (*Entity, error)
+   }
+   ```
+
+### 8.4 Test Execution
+
+```bash
+# Run all tests
+go test ./...
+
+# Run with coverage
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
+# Run specific test
+go test -run TestSpecificFunction
+
+# Run performance tests
+k6 run test/performance/scenario.js
+```
+
+### 8.5 CI Integration
+
+- Run unit tests on every commit
+- Run integration tests on PR
+- Run E2E tests before deployment
+- Generate and archive coverage reports
+- Fail builds if coverage drops below threshold
+- Performance test results comparison with baseline 

@@ -1,0 +1,81 @@
+# Generated files
+/docs/
+/bin/
+/data/
+
+# IDE files
+.idea/
+.vscode/
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Swagger generated files
+/docs/swagger.json
+/docs/swagger.yaml
+/docs/docs.go
+
+# Log files
+*.log
+/logs/
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Binary output directory
+/dist/
+
+# Test cache
+.testCoverage.txt
+
+# Air live reload
+tmp/
+
+# Local development files
+notes.md
+TODO.md
+
+# Temporary files
+*.tmp
+*~
+
+# Performance test results
+/test/performance/results/
+
+# K6 test output
+k6-report.json
+
+# Debug files
+__debug_bin
+debug.test 

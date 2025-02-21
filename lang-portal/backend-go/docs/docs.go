@@ -247,6 +247,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/study_activities": {
+            "get": {
+                "description": "Returns a list of available study activities",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_activities"
+                ],
+                "summary": "Get all study activities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StudyActivityListResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/study_activities/{id}": {
             "get": {
                 "description": "Returns details about a specific study activity",
@@ -279,19 +318,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/study_activities/{id}/study_sessions": {
-            "get": {
-                "description": "Returns a list of study sessions for a specific activity",
+        "/api/study_activities/{id}/launch": {
+            "post": {
+                "description": "Returns a list of study sessions for a specific activity\nLaunches a new study activity session for a specific group",
                 "consumes": [
+                    "application/json",
                     "application/json"
                 ],
                 "produces": [
+                    "application/json",
                     "application/json"
                 ],
                 "tags": [
+                    "study_activities",
                     "study_activities"
                 ],
-                "summary": "Get study sessions for an activity",
+                "summary": "Launch a new study activity session",
                 "parameters": [
                     {
                         "type": "integer",
@@ -299,13 +341,80 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Study Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Launch request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LaunchStudyActivityRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.StudySessionsListResponse"
+                            "$ref": "#/definitions/models.LaunchStudyActivityResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/study_activities/{id}/study_sessions": {
+            "get": {
+                "description": "Returns a list of study sessions for a specific activity\nLaunches a new study activity session for a specific group",
+                "consumes": [
+                    "application/json",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/json"
+                ],
+                "tags": [
+                    "study_activities",
+                    "study_activities"
+                ],
+                "summary": "Launch a new study activity session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Study Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Launch request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LaunchStudyActivityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LaunchStudyActivityResponse"
                         }
                     }
                 }
@@ -510,6 +619,34 @@ const docTemplate = `{
                 }
             }
         },
+        "models.LaunchStudyActivityRequest": {
+            "type": "object",
+            "required": [
+                "group_id"
+            ],
+            "properties": {
+                "group_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.LaunchStudyActivityResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "type": "integer"
+                },
+                "study_activity_id": {
+                    "type": "integer"
+                },
+                "study_session_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.PaginationResponse": {
             "type": "object",
             "properties": {
@@ -524,6 +661,20 @@ const docTemplate = `{
                 },
                 "total_pages": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.StudyActivityListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StudyActivityResponse"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/models.PaginationResponse"
                 }
             }
         },

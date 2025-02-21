@@ -1,9 +1,22 @@
 import { useQuery } from "@tanstack/react-query"
 import { getStudyActivities } from "@/lib/api"
+import { StudyActivity, getActivityType } from "@/types/study-activity"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, Play } from "lucide-react"
+
+// Import activity images
+import flashcardsImage from "@/assets/activity-images/flashcards.svg"
+import quizImage from "@/assets/activity-images/quiz.svg"
+import matchingImage from "@/assets/activity-images/matching.svg"
+
+// Map activity types to their images
+const activityImages: Record<string, string> = {
+  flashcards: flashcardsImage,
+  quiz: quizImage,
+  matching: matchingImage,
+}
 
 export function StudyActivitiesPage() {
   const { data, isLoading } = useQuery({
@@ -11,7 +24,7 @@ export function StudyActivitiesPage() {
     queryFn: getStudyActivities
   })
 
-  const activities = data?.items ?? []
+  const activities: StudyActivity[] = data?.items ?? []
 
   return (
     <div className="space-y-8">
@@ -58,7 +71,7 @@ export function StudyActivitiesPage() {
               <CardContent className="space-y-4">
                 <div className="aspect-video relative rounded-md overflow-hidden">
                   <img
-                    src={activity.thumbnail_url}
+                    src={activityImages[getActivityType(activity)] || activity.thumbnail_url}
                     alt={activity.name}
                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                   />

@@ -48,6 +48,378 @@
           "feminine": "belle"
         }
       }
+    },
+    {
+      "italian": "ciao",
+      "english": "hello/goodbye",
+      "parts": {
+        "type": "interjection",
+        "informal": true,
+        "usage": ["greeting", "farewell"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"],
+        "time": "morning",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "buonasera",
+      "english": "good evening",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"],
+        "time": "evening",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "grazie",
+      "english": "thank you",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["gratitude"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "prego",
+      "english": "you're welcome",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["response", "courtesy"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "per favore",
+      "english": "please",
+      "parts": {
+        "type": "adverb",
+        "formal": true,
+        "usage": ["request", "courtesy"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "scusi",
+      "english": "excuse me (formal)",
+      "parts": {
+        "type": "verb",
+        "conjugation": "irregular",
+        "formal": true,
+        "usage": ["apology", "attention"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "come stai",
+      "english": "how are you (informal)",
+      "parts": {
+        "type": "phrase",
+        "informal": true,
+        "usage": ["greeting", "inquiry"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "bene",
+      "english": "well/fine",
+      "parts": {
+        "type": "adverb",
+        "usage": ["response", "state"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "male",
+      "english": "bad",
+      "parts": {
+        "type": "adverb",
+        "usage": ["response", "state"],
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "uno",
+      "english": "one",
+      "parts": {
+        "type": "number",
+        "cardinal": true,
+        "gender": "masculine",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "due",
+      "english": "two",
+      "parts": {
+        "type": "number",
+        "cardinal": true,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "tre",
+      "english": "three",
+      "parts": {
+        "type": "number",
+        "cardinal": true,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "pane",
+      "english": "bread",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "category": "food",
+        "plural": "pani",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "acqua",
+      "english": "water",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "category": "food",
+        "plural": "acque",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "caffè",
+      "english": "coffee",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "category": "food",
+        "invariable": true,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "mangiare",
+      "english": "to eat",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-are",
+        "category": "food",
+        "irregular": false,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "bere",
+      "english": "to drink",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-ere",
+        "category": "food",
+        "irregular": true,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "treno",
+      "english": "train",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "category": "transportation",
+        "plural": "treni",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "autobus",
+      "english": "bus",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "category": "transportation",
+        "plural": "autobus",
+        "invariable": true,
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"]
+      }
+    },
+    {
+      "italian": "buonasera",
+      "english": "good evening",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"]
+      }
+    },
+    {
+      "italian": "buonanotte",
+      "english": "good night",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["farewell"]
+      }
+    },
+    {
+      "italian": "prego",
+      "english": "you're welcome",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["response", "invitation"]
+      }
+    },
+    {
+      "italian": "scusa",
+      "english": "excuse me",
+      "parts": {
+        "type": "interjection",
+        "informal": true,
+        "usage": ["apology"]
+      }
+    },
+    {
+      "italian": "scusi",
+      "english": "excuse me",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["apology"]
+      }
+    },
+    {
+      "italian": "madre",
+      "english": "mother",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "madri"
+      }
+    },
+    {
+      "italian": "padre",
+      "english": "father",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "padri"
+      }
+    },
+    {
+      "italian": "fratello",
+      "english": "brother",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "fratelli"
+      }
+    },
+    {
+      "italian": "sorella",
+      "english": "sister",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sorelle"
+      }
+    },
+    {
+      "italian": "essere",
+      "english": "to be",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-ere",
+        "irregular": true
+      }
+    },
+    {
+      "italian": "avere",
+      "english": "to have",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-ere",
+        "irregular": true
+      }
+    },
+    {
+      "italian": "fare",
+      "english": "to do",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-are",
+        "irregular": true
+      }
+    },
+    {
+      "italian": "andare",
+      "english": "to go",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-are",
+        "irregular": true
+      }
+    },
+    {
+      "italian": "rosso",
+      "english": "red",
+      "parts": {
+        "type": "adjective",
+        "gender": "masculine",
+        "feminine": "rossa",
+        "plural": {
+          "masculine": "rossi",
+          "feminine": "rosse"
+        }
+      }
+    },
+    {
+      "italian": "blu",
+      "english": "blue",
+      "parts": {
+        "type": "adjective",
+        "invariable": true
+      }
+    },
+    {
+      "italian": "verde",
+      "english": "green",
+      "parts": {
+        "type": "adjective",
+        "invariable": true,
+        "plural": "verdi",
+        "level": "A1"
+      }
+    },
+    {
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": {
+        "type": "interjection",
+        "level": "A1"
+      } 
     }
-  ]
-}
+    ]
+  }

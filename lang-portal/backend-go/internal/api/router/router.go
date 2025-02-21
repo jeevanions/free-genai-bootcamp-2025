@@ -60,8 +60,10 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 		// Study Activity routes
 		studyActivities := api.Group("/study_activities")
 		{
+			studyActivities.GET("", studyActivityHandler.GetStudyActivities)
 			studyActivities.GET("/:id", studyActivityHandler.GetStudyActivity)
 			studyActivities.GET("/:id/study_sessions", studyActivityHandler.GetStudyActivitySessions)
+			studyActivities.POST("/:id/launch", studyActivityHandler.LaunchStudyActivity)
 		}
 
 		// Word routes

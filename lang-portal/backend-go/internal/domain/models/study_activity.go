@@ -10,6 +10,22 @@ type StudyActivityResponse struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
+type StudyActivityListResponse struct {
+	Items      []StudyActivityResponse `json:"items"`
+	Pagination PaginationResponse     `json:"pagination"`
+}
+
+type LaunchStudyActivityRequest struct {
+	GroupID int64 `json:"group_id" binding:"required"`
+}
+
+type LaunchStudyActivityResponse struct {
+	StudySessionID   int64     `json:"study_session_id"`
+	StudyActivityID  int64     `json:"study_activity_id"`
+	GroupID         int64     `json:"group_id"`
+	CreatedAt       time.Time `json:"created_at"`
+}
+
 type StudySessionResponse struct {
 	ID           int64     `json:"id"`
 	ActivityName string    `json:"activity_name"`

@@ -15,8 +15,10 @@ type Repository interface {
 	GetQuickStats() (*models.DashboardQuickStats, error)
 
 	// Study activities
+	GetStudyActivities(limit, offset int) ([]models.StudyActivity, error)
 	GetStudyActivity(id int64) (*models.StudyActivity, error)
 	GetStudyActivitySessions(activityID int64, limit, offset int) ([]models.StudySession, error)
+	CreateStudyActivitySession(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error)
 	GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error)
 
 	// Words

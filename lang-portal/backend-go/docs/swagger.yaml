@@ -81,6 +81,24 @@ definitions:
       pagination:
         $ref: '#/definitions/models.PaginationResponse'
     type: object
+  models.LaunchStudyActivityRequest:
+    properties:
+      group_id:
+        type: integer
+    required:
+    - group_id
+    type: object
+  models.LaunchStudyActivityResponse:
+    properties:
+      created_at:
+        type: string
+      group_id:
+        type: integer
+      study_activity_id:
+        type: integer
+      study_session_id:
+        type: integer
+    type: object
   models.PaginationResponse:
     properties:
       current_page:
@@ -91,6 +109,15 @@ definitions:
         type: integer
       total_pages:
         type: integer
+    type: object
+  models.StudyActivityListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.StudyActivityResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
     type: object
   models.StudyActivityResponse:
     properties:
@@ -316,6 +343,32 @@ paths:
       summary: Get words in a group
       tags:
       - groups
+  /api/study_activities:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of available study activities
+      parameters:
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StudyActivityListResponse'
+      summary: Get all study activities
+      tags:
+      - study_activities
   /api/study_activities/{id}:
     get:
       consumes:
@@ -337,26 +390,79 @@ paths:
       summary: Get study activity details
       tags:
       - study_activities
-  /api/study_activities/{id}/study_sessions:
-    get:
+  /api/study_activities/{id}/launch:
+    post:
       consumes:
       - application/json
-      description: Returns a list of study sessions for a specific activity
+      - application/json
+      description: |-
+        Returns a list of study sessions for a specific activity
+        Launches a new study activity session for a specific group
       parameters:
       - description: Study Activity ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Study Activity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Launch request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LaunchStudyActivityRequest'
       produces:
+      - application/json
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.StudySessionsListResponse'
-      summary: Get study sessions for an activity
+            $ref: '#/definitions/models.LaunchStudyActivityResponse'
+      summary: Launch a new study activity session
       tags:
+      - study_activities
+      - study_activities
+  /api/study_activities/{id}/study_sessions:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      description: |-
+        Returns a list of study sessions for a specific activity
+        Launches a new study activity session for a specific group
+      parameters:
+      - description: Study Activity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Study Activity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Launch request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LaunchStudyActivityRequest'
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LaunchStudyActivityResponse'
+      summary: Launch a new study activity session
+      tags:
+      - study_activities
       - study_activities
   /api/words:
     get:

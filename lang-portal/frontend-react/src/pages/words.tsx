@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { Word } from "@/services/word-service"
 import { getWords } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -6,14 +7,17 @@ import { Link } from "@tanstack/react-router"
 import { ArrowLeft, Search } from "lucide-react"
 import { useState } from "react"
 import { Pagination } from "@/components/ui/pagination"
+import { useNavigate } from "@tanstack/react-router"
 
 export function WordsPage() {
   const [page, setPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
+  const navigate = useNavigate({ from: "/words" })
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["words", page],
     queryFn: () => getWords(page),
+    keepPreviousData: true // Keep previous data while fetching new data
   })
 
   const words = data?.items ?? []
@@ -81,42 +85,44 @@ export function WordsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredWords.map((word) => (
-              <Card key={word.italian} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold text-primary">
-                    {word.italian}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-lg">{word.english}</p>
-                    {word.parts && word.parts.length > 0 && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {word.parts.join(", ")}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <span className="text-green-600">✓ {word.correct_count}</span>
+              <Link key={word.italian} to={`/words/${word.id}`}>
+                <Card className="hover:shadow-md transition-shadow hover:border-primary cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-primary">
+                      {word.italian}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-lg">{word.english}</p>
+                      {word.parts && word.parts.length > 0 && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {word.parts.join(", ")}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-red-600">✗ {word.wrong_count}</span>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <span className="text-green-600">✓ {word.correct_count}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-600">✗ {word.wrong_count}</span>
+                      </div>
+                      <div className="flex-1 text-right">
+                        <span className="text-muted-foreground">
+                          Success rate:{" "}
+                          {Math.round(
+                            (word.correct_count /
+                              (word.correct_count + word.wrong_count || 1)) *
+                              100
+                          )}
+                          %
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex-1 text-right">
-                      <span className="text-muted-foreground">
-                        Success rate:{" "}
-                        {Math.round(
-                          (word.correct_count /
-                            (word.correct_count + word.wrong_count || 1)) *
-                            100
-                        )}
-                        %
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
@@ -124,7 +130,10 @@ export function WordsPage() {
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={setPage}
+              onPageChange={(newPage) => {
+                setPage(newPage);
+                refetch();
+              }}
               className="mt-8"
             />
           )}

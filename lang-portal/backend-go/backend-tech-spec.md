@@ -190,6 +190,27 @@ Returns quick overview statistics.
 }
 ```
 
+### POST /api/study_activities/:id/launch
+
+Launches a new study activity session for a specific group.
+
+#### Request Body
+```json
+{
+  "group_id": 123
+}
+```
+
+#### JSON Response
+```json
+{
+  "study_session_id": 456,
+  "study_activity_id": 789,
+  "group_id": 123,
+  "created_at": "2025-02-21T22:28:24Z"
+}
+```
+
 ### GET /api/study_activities/:id/study_sessions
 
 - pagination with 100 items per page

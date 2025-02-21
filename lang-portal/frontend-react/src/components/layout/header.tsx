@@ -1,6 +1,6 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -14,8 +14,6 @@ const navigationItems = [
 ]
 
 export function Header() {
-  const navigate = useNavigate()
-
   return (
     <header className="border-b">
       <div className="container flex h-16 items-center">
@@ -27,12 +25,8 @@ export function Header() {
           <NavigationMenuList>
             {navigationItems.map((item) => (
               <NavigationMenuItem key={item.path}>
-                <Button
-                  variant="ghost"
-                  className="h-auto px-3 py-2"
-                  onClick={() => navigate({ to: item.path })}
-                >
-                  {item.name}
+                <Button variant="ghost" className="h-auto px-3 py-2" asChild>
+                  <Link to={item.path}>{item.name}</Link>
                 </Button>
               </NavigationMenuItem>
             ))}

@@ -2,18 +2,28 @@
   "study_activities": [
     {
       "name": "Flashcards",
-      "thumbnail_url": "https://example.com/images/flashcards.png",
-      "description": "Practice vocabulary with digital flashcards"
+      "thumbnail_url": "https://raw.githubusercontent.com/jeevanions/lang-portal/main/assets/images/flashcards.jpg",
+      "description": "Practice vocabulary with digital flashcards. Flip through cards to test your knowledge of Italian words and their English translations."
     },
     {
       "name": "Word Matching",
-      "thumbnail_url": "https://example.com/images/matching.png",
-      "description": "Match Italian words with their English translations"
+      "thumbnail_url": "https://raw.githubusercontent.com/jeevanions/lang-portal/main/assets/images/matching.jpg",
+      "description": "Match Italian words with their English translations. Drag and drop pairs to improve your vocabulary recognition."
     },
     {
       "name": "Spelling Practice",
-      "thumbnail_url": "https://example.com/images/spelling.png",
-      "description": "Practice spelling Italian words correctly"
+      "thumbnail_url": "https://raw.githubusercontent.com/jeevanions/lang-portal/main/assets/images/spelling.jpg",
+      "description": "Practice spelling Italian words correctly. Type the Italian translation of English words to improve your writing skills."
+    },
+    {
+      "name": "Vocabulary Quiz",
+      "thumbnail_url": "https://raw.githubusercontent.com/jeevanions/lang-portal/main/assets/images/quiz.jpg",
+      "description": "Test your knowledge with multiple choice questions. Select the correct translation from four options."
+    },
+    {
+      "name": "Word Builder",
+      "thumbnail_url": "https://raw.githubusercontent.com/jeevanions/lang-portal/main/assets/images/builder.jpg",
+      "description": "Build Italian words by arranging letters in the correct order. Great for learning word structure and spelling."
     }
   ]
 }

@@ -4,6 +4,7 @@ import { QueryClient } from "@tanstack/react-query"
 import { DashboardPage } from "@/pages/dashboard"
 import { StudyActivitiesPage } from "@/pages/study-activities"
 import { WordsPage } from "@/pages/words"
+import { WordDetailsPage } from "@/pages/word-details"
 import { GroupsPage } from "@/pages/groups"
 import { StudySessionsPage } from "@/pages/study-sessions"
 import { SettingsPage } from "@/pages/settings"
@@ -68,6 +69,12 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 })
 
+const wordDetailsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "words/$wordId",
+  component: WordDetailsPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   studyActivitiesRoute,
@@ -78,6 +85,7 @@ const routeTree = rootRoute.addChildren([
   studySessionsRoute,
   studySessionRoute,
   settingsRoute,
+  wordDetailsRoute,
 ])
 
 export const router = createRouter({

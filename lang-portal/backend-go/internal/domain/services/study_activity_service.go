@@ -1,13 +1,17 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 )
 
 type StudyActivityServiceInterface interface {
+	GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error)
 	GetStudyActivity(id int64) (*models.StudyActivityResponse, error)
 	GetStudyActivitySessions(activityID int64) (*models.StudySessionsListResponse, error)
+	LaunchStudyActivity(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error)
 }
 
 type StudyActivityService struct {
@@ -16,6 +20,33 @@ type StudyActivityService struct {
 
 func NewStudyActivityService(repo repository.Repository) StudyActivityServiceInterface {
 	return &StudyActivityService{repo: repo}
+}
+
+func (s *StudyActivityService) GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error) {
+	activities, err := s.repo.GetStudyActivities(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &models.StudyActivityListResponse{
+		Items: make([]models.StudyActivityResponse, 0, len(activities)),
+		Pagination: models.PaginationResponse{
+			CurrentPage: offset/limit + 1,
+			ItemsPerPage: limit,
+		},
+	}
+
+	for _, activity := range activities {
+		response.Items = append(response.Items, models.StudyActivityResponse{
+			ID:           activity.ID,
+			Name:         activity.Name,
+			ThumbnailURL: activity.ThumbnailURL,
+			Description:  activity.Description,
+			CreatedAt:    activity.CreatedAt,
+		})
+	}
+
+	return response, nil
 }
 
 func (s *StudyActivityService) GetStudyActivity(id int64) (*models.StudyActivityResponse, error) {
@@ -35,6 +66,20 @@ func (s *StudyActivityService) GetStudyActivity(id int64) (*models.StudyActivity
 		Description:  activity.Description,
 		CreatedAt:    activity.CreatedAt,
 	}, nil
+}
+
+func (s *StudyActivityService) LaunchStudyActivity(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error) {
+	// Verify activity exists
+	activity, err := s.repo.GetStudyActivity(activityID)
+	if err != nil {
+		return nil, err
+	}
+	if activity == nil {
+		return nil, fmt.Errorf("study activity not found")
+	}
+
+	// Create study session
+	return s.repo.CreateStudyActivitySession(activityID, groupID)
 }
 
 func (s *StudyActivityService) GetStudyActivitySessions(activityID int64) (*models.StudySessionsListResponse, error) {

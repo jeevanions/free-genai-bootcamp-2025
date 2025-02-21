@@ -1,0 +1,5 @@
+1. Always confirm to the backend spec @backend-spec.md 
+2. Follow the project structure in the backend spec but do suggest if it is not industry standard.
+3. Afer implementing an endpoint, backend api should in running condition with all tests passed and swagger docs updated.
+4. Do not duplicate models and move it around the files. Keep it consistent throughout the project.
+5. Go is from "/opt/homebrew/bin/go"

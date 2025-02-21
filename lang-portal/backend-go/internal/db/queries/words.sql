@@ -4,29 +4,22 @@ WHERE id = ? LIMIT 1;
 
 -- name: ListWords :many
 SELECT * FROM words
-ORDER BY created_at DESC
-LIMIT ? OFFSET ?;
+ORDER BY id;
 
--- name: CreateWord :execresult
+-- name: CreateWord :one
 INSERT INTO words (
-  italian, english, parts_of_speech, gender,
-  number, difficulty_level, verb_conjugation, notes
+  italian, english, parts
 ) VALUES (
-  ?, ?, ?, ?, ?, ?, ?, ?
-);
+  ?, ?, ?
+)
+RETURNING *;
 
--- name: UpdateWord :exec
+-- name: UpdateWord :one
 UPDATE words
-SET italian = ?,
-    english = ?,
-    parts_of_speech = ?,
-    gender = ?,
-    number = ?,
-    difficulty_level = ?,
-    verb_conjugation = ?,
-    notes = ?
-WHERE id = ?;
+SET italian = ?, english = ?, parts = ?
+WHERE id = ?
+RETURNING *;
 
 -- name: DeleteWord :exec
 DELETE FROM words
-WHERE id = ?; 
+WHERE id = ?;

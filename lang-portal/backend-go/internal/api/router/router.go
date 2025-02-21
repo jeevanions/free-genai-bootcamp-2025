@@ -1,64 +1,58 @@
 package router
 
 import (
+	"net/http"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/jeevanions/italian-learning/internal/api/handlers"
-	"github.com/jeevanions/italian-learning/internal/domain/services"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/jeevanions/lang-portal/backend-go/internal/api/handlers"
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
+	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
-func SetupRoutes(
-	r *gin.RouterGroup,
-	wordService services.WordService,
-	groupService services.GroupService,
-	sessionService services.StudySessionService,
-	reviewService services.WordReviewService,
-	activityService services.StudyActivityService,
-) {
+// Setup initializes the router with all routes and middleware
+func Setup(db *repository.SQLiteRepository) *gin.Engine {
+	r := gin.Default()
+
+	// Configure CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           12 * 3600,
+	}))
+
 	// Health check
-	r.GET("/health", handlers.HealthCheck)
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
-	// Word routes
-	wordHandler := handlers.NewWordHandler(wordService)
-	words := r.Group("/words")
+	// Initialize services and handlers
+	dashboardService := services.NewDashboardService(db)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
+
+	// API routes
+	api := r.Group("/api")
 	{
-		words.GET("/", wordHandler.ListWords)
-		words.POST("/", wordHandler.CreateWord)
-		words.GET("/:id", wordHandler.GetWord)
+		// Dashboard routes
+		dashboard := api.Group("/dashboard")
+		{
+			dashboard.GET("/last_study_session", dashboardHandler.GetLastStudySession)
+			dashboard.GET("/study_progress", dashboardHandler.GetStudyProgress)
+			dashboard.GET("/quick-stats", dashboardHandler.GetQuickStats)
+		}
 	}
 
-	// Group endpoints
-	groupHandler := handlers.NewGroupHandler(groupService)
-	groups := r.Group("/groups")
-	{
-		groups.POST("/", groupHandler.CreateGroup)
-		groups.GET("/:id", groupHandler.GetGroup)
-		groups.GET("/", groupHandler.ListGroups)
-	}
+	// Swagger documentation
+	r.GET("/swagger/*any", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+	})
 
-	// Study session endpoints
-	sessionHandler := handlers.NewStudySessionHandler(sessionService)
-	sessions := r.Group("/sessions")
-	{
-		sessions.POST("/", sessionHandler.CreateSession)
-		sessions.GET("/groups/:groupId/stats/", sessionHandler.GetGroupStats)
-		sessions.GET("/groups/:groupId/", sessionHandler.ListGroupSessions)
-	}
-
-	// Word review endpoints
-	reviewHandler := handlers.NewWordReviewHandler(reviewService)
-	reviews := r.Group("/reviews")
-	{
-		reviews.POST("/", reviewHandler.CreateReview)
-		reviews.GET("/sessions/:sessionId/", reviewHandler.ListSessionReviews)
-		reviews.GET("/words/:wordId/stats/", reviewHandler.GetWordStats)
-	}
-
-	// Study activity endpoints
-	activityHandler := handlers.NewStudyActivityHandler(activityService)
-	activities := r.Group("/activities")
-	{
-		activities.POST("/", activityHandler.CreateActivity)
-		activities.GET("/:id", activityHandler.GetActivity)
-		activities.GET("/", activityHandler.ListActivities)
-	}
+	return r
 }

@@ -1,0 +1,135 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API for the Italian Language Learning Portal",
+        "title": "Italian Language Learning Portal API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "paths": {
+        "/api/dashboard/last_study_session": {
+            "get": {
+                "description": "Returns information about the most recent study session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get last study session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DashboardLastStudySession"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard/quick-stats": {
+            "get": {
+                "description": "Returns quick overview statistics",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get quick stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DashboardQuickStats"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard/study_progress": {
+            "get": {
+                "description": "Returns study progress statistics",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get study progress",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.DashboardStudyProgress"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.DashboardLastStudySession": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "type": "integer"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "study_activity_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.DashboardQuickStats": {
+            "type": "object",
+            "properties": {
+                "study_streak_days": {
+                    "type": "integer"
+                },
+                "success_rate": {
+                    "type": "number"
+                },
+                "total_active_groups": {
+                    "type": "integer"
+                },
+                "total_study_sessions": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.DashboardStudyProgress": {
+            "type": "object",
+            "properties": {
+                "total_available_words": {
+                    "type": "integer"
+                },
+                "total_words_studied": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

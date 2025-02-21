@@ -31,6 +31,67 @@ definitions:
       total_words_studied:
         type: integer
     type: object
+  models.GroupDetailResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      stats:
+        $ref: '#/definitions/models.GroupStats'
+    type: object
+  models.GroupListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.GroupResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
+  models.GroupResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      word_count:
+        type: integer
+    type: object
+  models.GroupStats:
+    properties:
+      total_word_count:
+        type: integer
+    type: object
+  models.GroupStudySessionsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.StudySessionResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
+  models.GroupWordsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.WordResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
+  models.PaginationResponse:
+    properties:
+      current_page:
+        type: integer
+      items_per_page:
+        type: integer
+      total_items:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   models.StudyActivityResponse:
     properties:
       created_at:
@@ -67,6 +128,32 @@ definitions:
         items:
           $ref: '#/definitions/models.StudySessionResponse'
         type: array
+    type: object
+  models.WordListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.WordResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
+  models.WordResponse:
+    properties:
+      correct_count:
+        type: integer
+      english:
+        type: string
+      id:
+        type: integer
+      italian:
+        type: string
+      parts:
+        items:
+          type: string
+        type: array
+      wrong_count:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -120,6 +207,115 @@ paths:
       summary: Get study progress
       tags:
       - dashboard
+  /api/groups:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of groups
+      parameters:
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupListResponse'
+      summary: Get all groups
+      tags:
+      - groups
+  /api/groups/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns details about a specific group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupDetailResponse'
+      summary: Get group by ID
+      tags:
+      - groups
+  /api/groups/{id}/study_sessions:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of study sessions for a specific group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupStudySessionsResponse'
+      summary: Get study sessions for a group
+      tags:
+      - groups
+  /api/groups/{id}/words:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of words in a specific group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupWordsResponse'
+      summary: Get words in a group
+      tags:
+      - groups
   /api/study_activities/{id}:
     get:
       consumes:
@@ -162,6 +358,53 @@ paths:
       summary: Get study sessions for an activity
       tags:
       - study_activities
+  /api/words:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of words
+      parameters:
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WordListResponse'
+      summary: Get all words
+      tags:
+      - words
+  /api/words/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns details about a specific word
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WordResponse'
+      summary: Get word by ID
+      tags:
+      - words
 schemes:
 - http
 - https

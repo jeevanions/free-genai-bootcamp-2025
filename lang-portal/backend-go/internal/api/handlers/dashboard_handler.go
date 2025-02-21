@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
@@ -34,7 +35,7 @@ func (h *DashboardHandler) GetLastStudySession(c *gin.Context) {
 	}
 
 	if session == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No study sessions found"})
+		c.JSON(http.StatusOK, models.DashboardLastStudySession{})
 		return
 	}
 

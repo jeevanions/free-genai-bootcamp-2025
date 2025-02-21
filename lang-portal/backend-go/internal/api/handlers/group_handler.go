@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
@@ -67,7 +68,7 @@ func (h *GroupHandler) GetGroupByID(c *gin.Context) {
 	}
 
 	if group == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
+		c.JSON(http.StatusOK, models.GroupDetailResponse{})
 		return
 	}
 

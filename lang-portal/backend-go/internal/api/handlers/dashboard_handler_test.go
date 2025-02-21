@@ -34,11 +34,17 @@ func (m *MockDashboardService) GetLastStudySession() (*models.DashboardLastStudy
 
 func (m *MockDashboardService) GetStudyProgress() (*models.DashboardStudyProgress, error) {
 	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*models.DashboardStudyProgress), args.Error(1)
 }
 
 func (m *MockDashboardService) GetQuickStats() (*models.DashboardQuickStats, error) {
 	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*models.DashboardQuickStats), args.Error(1)
 }
 
@@ -102,6 +108,47 @@ func TestDashboardHandler_GetStudyProgress(t *testing.T) {
 	t.Run("successful retrieval", func(t *testing.T) {
 		// Arrange
 		expectedProgress := &models.DashboardStudyProgress{
+			TotalWordsStudied:    50,
+			TotalAvailableWords: 124,
+		}
+		mockService.On("GetStudyProgress").Return(expectedProgress, nil).Once()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		// Act
+		handler.GetStudyProgress(c)
+
+		// Assert
+		assert.Equal(t, http.StatusOK, w.Code)
+		
+		var response models.DashboardStudyProgress
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedProgress.TotalWordsStudied, response.TotalWordsStudied)
+		assert.Equal(t, expectedProgress.TotalAvailableWords, response.TotalAvailableWords)
+		
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		// Arrange
+		mockService.On("GetStudyProgress").Return(nil, assert.AnError).Once()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		// Act
+		handler.GetStudyProgress(c)
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		// Arrange
+		expectedProgress := &models.DashboardStudyProgress{
 			TotalWordsStudied:    10,
 			TotalAvailableWords: 100,
 		}
@@ -131,6 +178,51 @@ func TestDashboardHandler_GetQuickStats(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockDashboardService)
 	handler := NewDashboardHandler(mockService)
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		// Arrange
+		expectedStats := &models.DashboardQuickStats{
+			SuccessRate:        80.0,
+			TotalStudySessions: 4,
+			TotalActiveGroups:  3,
+			StudyStreakDays:    4,
+		}
+		mockService.On("GetQuickStats").Return(expectedStats, nil).Once()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		// Act
+		handler.GetQuickStats(c)
+
+		// Assert
+		assert.Equal(t, http.StatusOK, w.Code)
+		
+		var response models.DashboardQuickStats
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedStats.SuccessRate, response.SuccessRate)
+		assert.Equal(t, expectedStats.TotalStudySessions, response.TotalStudySessions)
+		assert.Equal(t, expectedStats.TotalActiveGroups, response.TotalActiveGroups)
+		assert.Equal(t, expectedStats.StudyStreakDays, response.StudyStreakDays)
+		
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		// Arrange
+		mockService.On("GetQuickStats").Return(nil, assert.AnError).Once()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		// Act
+		handler.GetQuickStats(c)
+
+		// Assert
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		mockService.AssertExpectations(t)
+	})
 
 	t.Run("successful retrieval", func(t *testing.T) {
 		// Arrange

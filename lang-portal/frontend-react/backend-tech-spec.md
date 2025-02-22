@@ -190,6 +190,39 @@ Returns quick overview statistics.
 }
 ```
 
+### GET /api/dashboard/study-sessions
+
+Returns a paginated list of all study sessions across all activities.
+
+#### Query Parameters
+- `page`: Page number (default: 1)
+- `per_page`: Items per page (default: 10)
+
+#### JSON Response
+```json
+{
+  "items": [
+    {
+      "id": 123,
+      "activity_name": "Vocabulary Quiz",
+      "group_name": "Basic Greetings",
+      "review_items_count": 10,
+      "correct_count": 8,
+      "wrong_count": 2,
+      "start_time": "2025-02-08T17:20:23-05:00",
+      "end_time": "2025-02-08T17:25:23-05:00",
+      "duration_seconds": 300
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 45,
+    "per_page": 10
+  }
+}
+```
+
 ### GET /api/study_activities/:id/study_sessions
 
 - pagination with 100 items per page

@@ -7,6 +7,7 @@ import { StudyActivitiesPage } from './pages/study-activities';
 import { GroupsPage } from './pages/groups';
 import { StudySessionsPage } from './pages/study-sessions';
 import { RootLayout } from './components/layout/root-layout';
+import { SettingsPage } from './pages/settings';
 
 export const queryClient = new QueryClient();
 
@@ -44,6 +45,12 @@ const groupsRoute = new Route({
   component: GroupsPage,
 });
 
+const settingsRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/settings',
+  component: SettingsPage,
+});
+
 const studySessionsRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/study-sessions',
@@ -57,6 +64,7 @@ const routeTree = rootRoute.addChildren([
   studyActivitiesRoute,
   groupsRoute,
   studySessionsRoute,
+  settingsRoute,
 ]);
 
 export const router = new Router({ routeTree });

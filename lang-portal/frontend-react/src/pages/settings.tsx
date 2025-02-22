@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
-import { resetHistory, fullReset } from "@/lib/api"
+import { resetHistory, fullReset } from "@/services/settings-service"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"
 import { AlertCircle, ArrowLeft, RotateCcw, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function SettingsPage() {
   const [showConfirmReset, setShowConfirmReset] = useState(false)
@@ -41,6 +42,17 @@ export function SettingsPage() {
       </div>
 
       <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Theme</CardTitle>
+            <CardDescription>
+              Choose your preferred theme for the application.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeToggle />
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Reset Study History</CardTitle>

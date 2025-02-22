@@ -1,18 +1,19 @@
 package seeder
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
 )
 
 type Seeder struct {
-	db *sql.DB
+	db *repository.SQLiteRepository
 }
 
-func New(db *sql.DB) *Seeder {
+func New(db *repository.SQLiteRepository) *Seeder {
 	return &Seeder{db: db}
 }
 
@@ -45,7 +46,7 @@ type StudyActivity struct {
 
 func (s *Seeder) SeedFromJSON(seedDir string) error {
 	// Begin transaction
-	tx, err := s.db.Begin()
+	tx, err := s.db.DB().Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}

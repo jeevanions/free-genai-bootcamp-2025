@@ -132,6 +132,32 @@ definitions:
       thumbnail_url:
         type: string
     type: object
+  models.StudySessionDetailResponse:
+    properties:
+      activity_name:
+        type: string
+      created_at:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: integer
+      review_items:
+        items:
+          $ref: '#/definitions/models.WordReviewItem'
+        type: array
+      stats:
+        $ref: '#/definitions/models.StudySessionStats'
+    type: object
+  models.StudySessionListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.StudySessionDetailResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
   models.StudySessionResponse:
     properties:
       activity_name:
@@ -147,6 +173,19 @@ definitions:
       id:
         type: integer
       words_count:
+        type: integer
+    type: object
+  models.StudySessionStats:
+    properties:
+      average_time:
+        type: number
+      correct_words:
+        type: integer
+      success_rate:
+        type: number
+      total_duration:
+        type: number
+      total_words:
         type: integer
     type: object
   models.StudySessionsListResponse:
@@ -176,10 +215,22 @@ definitions:
       italian:
         type: string
       parts:
-        items:
-          type: string
-        type: array
+        additionalProperties: true
+        type: object
       wrong_count:
+        type: integer
+    type: object
+  models.WordReviewItem:
+    properties:
+      correct:
+        type: boolean
+      created_at:
+        type: string
+      id:
+        type: integer
+      study_session_id:
+        type: integer
+      word_id:
         type: integer
     type: object
 host: localhost:8080
@@ -234,6 +285,23 @@ paths:
       summary: Get study progress
       tags:
       - dashboard
+  /api/full_reset:
+    post:
+      consumes:
+      - application/json
+      description: Drops all tables and recreates them with seed data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Full system reset
+      tags:
+      - settings
   /api/groups:
     get:
       consumes:
@@ -343,6 +411,23 @@ paths:
       summary: Get words in a group
       tags:
       - groups
+  /api/reset_history:
+    post:
+      consumes:
+      - application/json
+      description: Deletes all study sessions and word review items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset study history
+      tags:
+      - settings
   /api/study_activities:
     get:
       consumes:
@@ -464,6 +549,33 @@ paths:
       tags:
       - study_activities
       - study_activities
+  /api/study_sessions:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all study sessions with activity name,
+        group name, and review items
+      parameters:
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StudySessionListResponse'
+      summary: Get all study sessions
+      tags:
+      - study_sessions
   /api/words:
     get:
       consumes:

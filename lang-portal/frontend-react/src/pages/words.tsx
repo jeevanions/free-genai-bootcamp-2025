@@ -1,36 +1,45 @@
 import { useQuery } from "@tanstack/react-query"
-import { Word } from "@/services/word-service"
-import { getWords } from "@/lib/api"
+import { Word, getWords, PaginatedResponse } from "@/services/word-service"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, Search } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Pagination } from "@/components/ui/pagination"
 import { useNavigate } from "@tanstack/react-router"
 
 export function WordsPage() {
   const [page, setPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Only update search if term is not empty and at least 2 chars
+      if (searchTerm === "" || searchTerm.length >= 2) {
+        setDebouncedSearch(searchTerm)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
   const navigate = useNavigate({ from: "/words" })
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["words", page],
-    queryFn: () => getWords(page),
-    keepPreviousData: true // Keep previous data while fetching new data
+  const { data, isLoading, error } = useQuery<PaginatedResponse<Word>>({
+    queryKey: ["words", page, debouncedSearch],
+    queryFn: () => getWords(page, debouncedSearch),
+    placeholderData: 'keepPrevious' // Keep previous data while fetching new data
   })
 
   const words = data?.items ?? []
   const totalPages = data?.pagination?.total_pages ?? 1
 
-  // Filter words based on search term
-  const filteredWords = searchTerm
-    ? words.filter(
-        (word) =>
-          word.italian.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          word.english.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : words
+  const filteredWords = words
 
   return (
     <div className="space-y-8">
@@ -59,7 +68,13 @@ export function WordsPage() {
         />
       </div>
 
-      {isLoading ? (
+      {error ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-red-600">
+            Error loading words. Please try again.
+          </p>
+        </div>
+      ) : isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(9)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -85,7 +100,7 @@ export function WordsPage() {
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredWords.map((word) => (
-              <Link key={word.italian} to={`/words/${word.id}`}>
+              <Link key={word.id} to={`/words/${word.id}`}>
                 <Card className="hover:shadow-md transition-shadow hover:border-primary cursor-pointer">
                   <CardHeader>
                     <CardTitle className="text-xl font-bold text-primary">

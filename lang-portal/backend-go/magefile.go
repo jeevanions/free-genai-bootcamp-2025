@@ -4,15 +4,14 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
 	"github.com/jeevanions/lang-portal/backend-go/internal/db/seeder"
-	_ "modernc.org/sqlite"
 )
 
 const (
@@ -104,8 +103,8 @@ func (DB) Seed() error {
 	// Ensure migrations are up to date
 	mg.SerialDeps(DB.Migrate)
 
-	// Open database connection
-	db, err := sql.Open("sqlite", dbFile)
+	// Initialize database repository
+	db, err := repository.NewDB(dbFile)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}

@@ -5,6 +5,7 @@ import { WordsPage } from './pages/words';
 import { WordDetailsPage } from './pages/word-details';
 import { StudyActivitiesPage } from './pages/study-activities';
 import { GroupsPage } from './pages/groups';
+import { GroupDetailsPage } from './pages/group-details';
 import { StudySessionsPage } from './pages/study-sessions';
 import { RootLayout } from './components/layout/root-layout';
 import { SettingsPage } from './pages/settings';
@@ -57,6 +58,12 @@ const studySessionsRoute = new Route({
   component: StudySessionsPage,
 });
 
+const groupDetailsRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/groups/$groupId',
+  component: GroupDetailsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   dashboardRoute,
   wordsRoute,
@@ -65,6 +72,7 @@ const routeTree = rootRoute.addChildren([
   groupsRoute,
   studySessionsRoute,
   settingsRoute,
+  groupDetailsRoute,
 ]);
 
 export const router = new Router({ routeTree });

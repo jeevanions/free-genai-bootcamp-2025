@@ -60,8 +60,8 @@ func (s *Seeder) SeedFromJSON(seedDir string) error {
 
 	for _, group := range groups {
 		_, err := tx.Exec(
-			"INSERT INTO groups (name, words_count) VALUES (?, ?)",
-			group.Name, group.WordsCount,
+			"INSERT INTO groups (name) VALUES (?)",
+			group.Name,
 		)
 		if err != nil {
 			return fmt.Errorf("failed to insert group %s: %w", group.Name, err)

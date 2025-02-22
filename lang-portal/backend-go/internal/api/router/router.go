@@ -3,6 +3,8 @@ package router
 import (
 	"net/http"
 
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/seeder"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -14,7 +16,7 @@ import (
 )
 
 // Setup initializes the router with all routes and middleware
-func Setup(db *repository.SQLiteRepository) *gin.Engine {
+func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 	r := gin.Default()
 
 	// Configure CORS
@@ -35,7 +37,12 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 
 	// Initialize services and handlers
 	dashboardService := services.NewDashboardService(db)
+	settingsService := services.NewSettingsService(db, seeder)
+	studySessionService := services.NewStudySessionService(db)
+
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
+	settingsHandler := handlers.NewSettingsHandler(settingsService)
+	studySessionHandler := handlers.NewStudySessionHandler(studySessionService)
 
 	studyActivityService := services.NewStudyActivityService(db)
 	studyActivityHandler := handlers.NewStudyActivityHandler(studyActivityService)
@@ -72,6 +79,13 @@ func Setup(db *repository.SQLiteRepository) *gin.Engine {
 			words.GET("", wordHandler.GetWords)
 			words.GET("/:id", wordHandler.GetWordByID)
 		}
+
+		// Settings routes
+		api.POST("/reset_history", settingsHandler.ResetHistory)
+		api.POST("/full_reset", settingsHandler.FullReset)
+
+		// Study Session routes
+		api.GET("/study_sessions", studySessionHandler.GetAllStudySessions)
 
 		// Group routes
 		groups := api.Group("/groups")

@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jeevanions/lang-portal/backend-go/internal/db/seeder"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -38,8 +40,11 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize seeder
+	seeder := seeder.New(db)
+
 	// Initialize router
-	r := router.Setup(db)
+	r := router.Setup(db, seeder)
 
 	// Initialize HTTP server
 	srv := &http.Server{

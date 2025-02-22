@@ -82,6 +82,32 @@
                 }
             }
         },
+        "/api/full_reset": {
+            "post": {
+                "description": "Drops all tables and recreates them with seed data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Full system reset",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/groups": {
             "get": {
                 "description": "Returns a paginated list of groups",
@@ -240,6 +266,32 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.GroupWordsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reset_history": {
+            "post": {
+                "description": "Deletes all study sessions and word review items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Reset study history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -413,6 +465,45 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.LaunchStudyActivityResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/study_sessions": {
+            "get": {
+                "description": "Returns a paginated list of all study sessions with activity name, group name, and review items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_sessions"
+                ],
+                "summary": "Get all study sessions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StudySessionListResponse"
                         }
                     }
                 }
@@ -696,6 +787,46 @@
                 }
             }
         },
+        "models.StudySessionDetailResponse": {
+            "type": "object",
+            "properties": {
+                "activity_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "review_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WordReviewItem"
+                    }
+                },
+                "stats": {
+                    "$ref": "#/definitions/models.StudySessionStats"
+                }
+            }
+        },
+        "models.StudySessionListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StudySessionDetailResponse"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/models.PaginationResponse"
+                }
+            }
+        },
         "models.StudySessionResponse": {
             "type": "object",
             "properties": {
@@ -718,6 +849,26 @@
                     "type": "integer"
                 },
                 "words_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.StudySessionStats": {
+            "type": "object",
+            "properties": {
+                "average_time": {
+                    "type": "number"
+                },
+                "correct_words": {
+                    "type": "integer"
+                },
+                "success_rate": {
+                    "type": "number"
+                },
+                "total_duration": {
+                    "type": "number"
+                },
+                "total_words": {
                     "type": "integer"
                 }
             }
@@ -763,12 +914,30 @@
                     "type": "string"
                 },
                 "parts": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "wrong_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.WordReviewItem": {
+            "type": "object",
+            "properties": {
+                "correct": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "study_session_id": {
+                    "type": "integer"
+                },
+                "word_id": {
                     "type": "integer"
                 }
             }

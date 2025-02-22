@@ -17,6 +17,6 @@ export const getDashboardQuickStats = async () => {
 };
 
 export const getDashboardStudyProgress = async () => {
-    const response = await fetch(getApiUrl('/api/dashboard/study_progress'));
+    const response = await fetch(getApiUrl('/dashboard/study_progress'));
     return response.json();
 };

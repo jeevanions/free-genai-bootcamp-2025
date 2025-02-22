@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getStudySessions } from "@/lib/api"
+import { getStudySessions } from "@/services/study-session-service"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"

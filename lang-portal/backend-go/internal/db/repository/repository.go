@@ -31,12 +31,26 @@ type Repository interface {
 	GetGroupWords(groupID int64, limit, offset int) (*models.GroupWordsResponse, error)
 	GetGroupStudySessions(groupID int64, limit, offset int) (*models.GroupStudySessionsResponse, error)
 
+	// Study Sessions
+	GetAllStudySessions(limit, offset int) ([]models.StudySession, error)
+	GetTotalStudySessions() (int, error)
+
+	// Close the database connection
+	// Settings
+	ResetHistory() error
+	DropAllTables() error
+	CreateTables() error
+
 	// Close the database connection
 	Close() error
 }
 
 type SQLiteRepository struct {
 	db *sql.DB
+}
+
+func (r *SQLiteRepository) DB() *sql.DB {
+	return r.db
 }
 
 func NewDB(dbPath string) (*SQLiteRepository, error) {

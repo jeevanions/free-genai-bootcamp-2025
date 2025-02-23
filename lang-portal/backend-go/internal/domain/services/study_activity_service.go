@@ -23,31 +23,7 @@ func NewStudyActivityService(repo repository.Repository) StudyActivityServiceInt
 }
 
 func (s *StudyActivityService) GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error) {
-	activities, err := s.repo.GetStudyActivities(limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	response := &models.StudyActivityListResponse{
-		Items: make([]models.StudyActivityResponse, 0, len(activities)),
-		Pagination: models.PaginationResponse{
-			CurrentPage: offset/limit + 1,
-			ItemsPerPage: limit,
-		},
-	}
-
-	for _, activity := range activities {
-		response.Items = append(response.Items, models.StudyActivityResponse{
-			ID:           activity.ID,
-			Name:         activity.Name,
-			ThumbnailURL: activity.ThumbnailURL,
-			Description:  activity.Description,
-			LaunchURL:    activity.LaunchURL,
-			CreatedAt:    activity.CreatedAt,
-		})
-	}
-
-	return response, nil
+	return s.repo.GetStudyActivities(limit, offset)
 }
 
 func (s *StudyActivityService) GetStudyActivity(id int64) (*models.StudyActivityResponse, error) {

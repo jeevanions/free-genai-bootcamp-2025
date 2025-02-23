@@ -21,6 +21,7 @@ type StudyActivity struct {
 	ThumbnailUrl sql.NullString `json:"thumbnail_url"`
 	Description  sql.NullString `json:"description"`
 	CreatedAt    sql.NullTime   `json:"created_at"`
+	LaunchUrl    sql.NullString `json:"launch_url"`
 }
 
 type StudySession struct {
@@ -31,11 +32,13 @@ type StudySession struct {
 }
 
 type Word struct {
-	ID        int64        `json:"id"`
-	Italian   string       `json:"italian"`
-	English   string       `json:"english"`
-	Parts     interface{}  `json:"parts"`
-	CreatedAt sql.NullTime `json:"created_at"`
+	ID           int64         `json:"id"`
+	Italian      string        `json:"italian"`
+	English      string        `json:"english"`
+	Parts        interface{}   `json:"parts"`
+	CreatedAt    sql.NullTime  `json:"created_at"`
+	CorrectCount sql.NullInt64 `json:"correct_count"`
+	WrongCount   sql.NullInt64 `json:"wrong_count"`
 }
 
 type WordReviewItem struct {

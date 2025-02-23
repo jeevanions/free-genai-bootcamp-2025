@@ -781,6 +781,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "launch_url": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

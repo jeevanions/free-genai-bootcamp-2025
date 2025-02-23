@@ -88,32 +88,47 @@ Our database will be a single sqlite database called `words.db` that will be in 
 
 We have the following tables:
 - words - stored vocabulary words
-  - id integer
-  - italian string
-  - english string
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - italian string NOT NULL
+  - english string NOT NULL
   - parts json
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+
 - words_groups - join table for words and groups many-to-many
-  - id integer
-  - word_id integer
-  - group_id integer
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - word_id integer NOT NULL REFERENCES words(id) ON DELETE CASCADE
+  - group_id integer NOT NULL REFERENCES groups(id) ON DELETE CASCADE
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+  - Indexes: word_id, group_id
+
 - groups - thematic groups of words
-  - id integer
-  - name string
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - name string NOT NULL
+  - words_count integer DEFAULT 0  # Counter cache for optimization
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+
 - study_sessions - records of study sessions grouping word_review_items
-  - id integer
-  - group_id integer
-  - created_at datetime
-  - study_activity_id integer
-- study_activities - a specific study activity, linking a study session to group
-  - id integer
-  - study_session_id integer
-  - group_id integer
-  - created_at datetime
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - group_id integer NOT NULL REFERENCES groups(id) ON DELETE CASCADE
+  - study_activity_id integer NOT NULL REFERENCES study_activities(id) ON DELETE CASCADE
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+  - Indexes: group_id
+
+- study_activities - a specific study activity that can be launched with a group
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - name string NOT NULL
+  - thumbnail_url string
+  - launch_url string
+  - description string
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+
 - word_review_items - a record of word practice, determining if the word was correct or not
-  - word_id integer
-  - study_session_id integer
-  - correct boolean
-  - created_at datetime
+  - id integer PRIMARY KEY AUTOINCREMENT
+  - word_id integer NOT NULL REFERENCES words(id) ON DELETE CASCADE
+  - study_session_id integer NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE
+  - correct boolean NOT NULL
+  - created_at datetime DEFAULT CURRENT_TIMESTAMP
+  - Indexes: word_id, study_session_id
 
 ### Relationships
 
@@ -127,11 +142,13 @@ We have the following tables:
 
 ### Design Notes
 
-* All tables use auto-incrementing primary keys
-* Timestamps are automatically set on creation where applicable
-* Foreign key constraints maintain referential integrity
+* All tables use auto-incrementing primary keys (INTEGER PRIMARY KEY AUTOINCREMENT)
+* Timestamps are automatically set on creation using DEFAULT CURRENT_TIMESTAMP
+* Foreign key constraints with ON DELETE CASCADE maintain referential integrity
 * JSON storage for word parts allows flexible component storage
 * Counter cache on groups.words_count optimizes word counting queries
+* Performance optimized with indexes on frequently queried foreign keys
+* NOT NULL constraints on required fields ensure data integrity
 
 
 ## 4. API Endpoints
@@ -186,7 +203,8 @@ Returns quick overview statistics.
   "id": 1,
   "name": "Vocabulary Quiz",
   "thumbnail_url": "https://example.com/thumbnail.jpg",
-  "description": "Practice your vocabulary with flashcards"
+  "description": "Practice your vocabulary with flashcards",
+  "launch_url": "https://example.com/quiz/launch"
 }
 ```
 
@@ -257,7 +275,7 @@ Launches a new study activity session for a specific group.
 {
   "items": [
     {
-      "japanese": "こんにちは",
+      "italian": "こんにちは",
       "romaji": "konnichiwa",
       "english": "hello",
       "correct_count": 5,
@@ -277,20 +295,14 @@ Launches a new study activity session for a specific group.
 #### JSON Response
 ```json
 {
-  "japanese": "こんにちは",
-  "romaji": "konnichiwa",
-  "english": "hello",
-  "stats": {
-    "correct_count": 5,
-    "wrong_count": 2
-  },
-  "groups": [
-    {
-      "id": 1,
-      "name": "Basic Greetings"
+      "italian": "sorella",
+      "english": "sister",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sorelle"
+      }
     }
-  ]
-}
 ```
 
 ### GET /api/groups

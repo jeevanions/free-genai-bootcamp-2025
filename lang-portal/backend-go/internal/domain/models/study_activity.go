@@ -7,6 +7,7 @@ type StudyActivityResponse struct {
 	Name         string    `json:"name"`
 	ThumbnailURL string    `json:"thumbnail_url"`
 	Description  string    `json:"description"`
+	LaunchURL    *string   `json:"launch_url,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 }
 

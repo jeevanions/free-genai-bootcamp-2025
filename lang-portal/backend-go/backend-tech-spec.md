@@ -114,6 +114,8 @@ We have the following tables:
   - created_at datetime DEFAULT CURRENT_TIMESTAMP
   - Indexes: group_id
 
+Note: While the initial design considered separate start_time and end_time fields, the implementation uses created_at to track when the session started, as the current prototype focuses on simple session tracking without duration.
+
 - study_activities - a specific study activity that can be launched with a group
   - id integer PRIMARY KEY AUTOINCREMENT
   - name string NOT NULL
@@ -454,6 +456,14 @@ Launches a new study activity session for a specific group.
 ```
 
 ### POST /api/reset_history
+Resets all study history data while preserving word and group data. This includes:
+- Deleting all study sessions
+- Deleting all word review items
+- Resetting word correct/wrong counts
+
+#### Description
+Use this endpoint when you want to clear study progress but keep the vocabulary and group structure intact.
+
 #### JSON Response
 ```json
 {
@@ -463,6 +473,17 @@ Launches a new study activity session for a specific group.
 ```
 
 ### POST /api/full_reset
+Performs a complete system reset, including:
+- Dropping all tables
+- Recreating database schema
+- Reseeding initial data
+
+#### Description
+Use this endpoint with caution as it will completely reset the system to its initial state. This is useful for:
+- Development and testing
+- Resetting a demo environment
+- Troubleshooting data issues
+
 #### JSON Response
 ```json
 {
@@ -496,56 +517,84 @@ Launches a new study activity session for a specific group.
 ```
 ## 5. Mage build tasks
 
-List of tasks required to build and test the backend application
+List of tasks required to build and test the backend application. The implementation provides the following tasks:
 
-### Initialize Database
+### Database Tasks
 
-This taks will initialize the sqllite database called `words.db` in the root of the project.
+#### db:migrate
+Runs database migrations using the goose migration tool. Goose provides versioned migrations with up/down capabilities.
 
-### Migrate databse
+#### db:reset
+Resets the database by dropping all tables and removing the database file.
 
-Task will run a series of migration sql files on the dtabase.
+#### db:seed
+Seeds the database using the Go-based seeder package with JSON files from the `seeds` folder.
 
-Migration live in the `migrations` folder. The migration files will be run in order of their file name. The file names should look like this
+#### db:status
+Checks and displays the current status of database migrations.
 
+### Development Tasks
+
+#### dev
+Starts the application in development mode with hot reload.
+
+#### run
+Runs the application in normal mode.
+
+#### install
+Installs project dependencies.
+
+#### all
+Runs a complete build cycle including tests and linting.
+
+#### build
+Builds the application binary.
+
+#### clean
+Cleans build artifacts and temporary files.
+
+### Testing and Quality Tasks
+
+#### test
+Runs the test suite.
+
+#### coverage
+Runs tests with coverage reporting.
+
+#### lint
+Runs the Go linter to ensure code quality.
+
+### Code Generation Tasks
+
+#### generate
+Runs code generation tools.
+
+#### swagger
+Generates Swagger/OpenAPI documentation from code annotations.
+
+### Task Execution Examples
+
+```bash
+# Database tasks
+mage db:migrate    # Run migrations
+mage db:status     # Check migration status
+mage db:reset      # Reset database
+mage db:seed       # Seed data
+
+# Development tasks
+mage dev          # Start development server
+mage build        # Build application
+
+# Testing tasks
+mage test         # Run tests
+mage coverage     # Run tests with coverage
+mage lint         # Run linter
+
+# Documentation
+mage swagger      # Generate API docs
 ```
-0001_init.sql
-0002_create_words_table.sql
-```
 
-### Seed data
-
-This will import a json files and transform them into target data of our database.
-
-All Seed files live in the `seeds` folder.
-
-### Reset
-
-Resets the database by removing the database file
-
-### ResetAndSeed
-
-Resets the database and runs the seed data
-
-### TestDB 
-
-Initializes the test database with test data
-
-### UnitTest
-
-Runs unit tests
-
-### Tidy
-
-Runs go tidy command 
-
-### Lint
-
-Runs go lint command
-
-### Docs
-
-Updates swagger docs
+All tasks are designed to be composable and can be run individually or as part of a larger build process using the `all` task.
 
 ## 5. Implementation Details
 

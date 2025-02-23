@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
@@ -29,16 +28,13 @@ func NewDashboardHandler(service services.DashboardServiceInterface) *DashboardH
 func (h *DashboardHandler) GetLastStudySession(c *gin.Context) {
 	session, err := h.service.GetLastStudySession()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get last study session")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	if session == nil {
-		c.JSON(http.StatusOK, models.DashboardLastStudySession{})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No study sessions found"})
 		return
 	}
-
 	c.JSON(http.StatusOK, session)
 }
 

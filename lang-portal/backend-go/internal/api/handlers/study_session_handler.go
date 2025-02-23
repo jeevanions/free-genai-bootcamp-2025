@@ -5,9 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
-	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/services"
 )
 
@@ -27,9 +25,8 @@ type StudySessionHandler struct {
 // @Success 200 {object} models.StudySessionWordsResponse
 // @Router /api/study_sessions/{id}/words [get]
 func (h *StudySessionHandler) GetStudySessionWords(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	sessionID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Error().Err(err).Msg("Invalid study session ID")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid study session ID"})
 		return
 	}
@@ -37,13 +34,15 @@ func (h *StudySessionHandler) GetStudySessionWords(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
-	words, err := h.service.GetStudySessionWords(id, limit, offset)
+	words, err := h.service.GetStudySessionWords(sessionID, limit, offset)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get study session words")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
-
+	if words == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No words found for this session"})
+		return
+	}
 	c.JSON(http.StatusOK, words)
 }
 
@@ -62,16 +61,14 @@ func NewStudySessionHandler(service services.StudySessionServiceInterface) *Stud
 // @Success 200 {object} models.StudySessionListResponse
 // @Router /api/study_sessions [get]
 func (h *StudySessionHandler) GetAllStudySessions(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	sessions, err := h.service.GetAllStudySessions(limit, offset)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get study sessions")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
-
 	c.JSON(http.StatusOK, sessions)
 }
 
@@ -87,33 +84,30 @@ func (h *StudySessionHandler) GetAllStudySessions(c *gin.Context) {
 // @Success 200 {object} models.WordReviewResponse
 // @Router /api/study_sessions/{id}/words/{word_id}/review [post]
 func (h *StudySessionHandler) ReviewWord(c *gin.Context) {
-	sessionID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	sessionID, err := strconv.ParseInt(c.Param("sessionID"), 10, 64)
 	if err != nil {
-		log.Error().Err(err).Msg("Invalid study session ID")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid study session ID"})
 		return
 	}
 
-	wordID, err := strconv.ParseInt(c.Param("word_id"), 10, 64)
+	wordID, err := strconv.ParseInt(c.Param("wordID"), 10, 64)
 	if err != nil {
-		log.Error().Err(err).Msg("Invalid word ID")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid word ID"})
 		return
 	}
 
-	var req models.WordReviewRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload")
+	var review struct {
+		IsCorrect bool `json:"isCorrect"`
+	}
+	if err := c.BindJSON(&review); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	resp, err := h.service.ReviewWord(sessionID, wordID, req.Correct)
+	response, err := h.service.ReviewWord(sessionID, wordID, review.IsCorrect)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to review word")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
-
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, response)
 }

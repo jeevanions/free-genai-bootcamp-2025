@@ -8,6 +8,7 @@ import (
 type WordServiceInterface interface {
 	GetWords(limit, offset int) (*models.WordListResponse, error)
 	GetWordByID(id int64) (*models.WordResponse, error)
+	ImportWords(groupID int64, words []string) (*models.ImportWordsResponse, error)
 }
 
 type WordService struct {
@@ -24,4 +25,21 @@ func (s *WordService) GetWords(limit, offset int) (*models.WordListResponse, err
 
 func (s *WordService) GetWordByID(id int64) (*models.WordResponse, error) {
 	return s.repo.GetWordByID(id)
+}
+
+func (s *WordService) ImportWords(groupID int64, words []string) (*models.ImportWordsResponse, error) {
+	importedCount := 0
+	for _, word := range words {
+		// Create a basic word response
+		wordResp := &models.WordResponse{
+			Italian: word,
+			English: "", // You might want to add translation logic here
+		}
+		_, err := s.repo.CreateWord(wordResp)
+		if err != nil {
+			continue
+		}
+		importedCount++
+	}
+	return &models.ImportWordsResponse{ImportedCount: importedCount}, nil
 }

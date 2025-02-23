@@ -69,8 +69,8 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 				{
 					ID:           1,
 					Name:         "Vocabulary Quiz",
-					ThumbnailURL: "https://example.com/thumbnail.jpg",
-					Description:  "Practice your vocabulary with flashcards",
+					ThumbnailURL: strPtr("https://example.com/thumbnail.jpg"),
+					Description:  strPtr("Practice your vocabulary with flashcards"),
 					LaunchURL:    strPtr("https://example.com/quiz/launch"),
 					CreatedAt:    time.Now(),
 				},
@@ -148,8 +148,8 @@ func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 		expectedActivity := &models.StudyActivityResponse{
 			ID:           1,
 			Name:         "Vocabulary Quiz",
-			ThumbnailURL: "https://example.com/thumbnail.jpg",
-			Description:  "Practice your vocabulary with flashcards",
+			ThumbnailURL: strPtr("https://example.com/thumbnail.jpg"),
+			Description:  strPtr("Practice your vocabulary with flashcards"),
 			CreatedAt:    time.Now(),
 		}
 		mockService.On("GetStudyActivity", int64(1)).Return(expectedActivity, nil).Once()

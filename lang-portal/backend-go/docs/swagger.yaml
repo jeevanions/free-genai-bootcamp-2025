@@ -1,5 +1,41 @@
 basePath: /
 definitions:
+  handlers.ErrorResponse:
+    properties:
+      error:
+        description: |-
+          Error message
+          required: true
+        example: Invalid request format
+        type: string
+    type: object
+  models.AddWordsToGroupRequest:
+    properties:
+      words:
+        description: |-
+          List of words to add to the group
+          required: true
+        items:
+          $ref: '#/definitions/models.WordResponse'
+        type: array
+    required:
+    - words
+    type: object
+  models.AddWordsToGroupResponse:
+    properties:
+      success:
+        description: |-
+          Whether the operation was successful
+          required: true
+        example: true
+        type: boolean
+      words_added:
+        description: |-
+          Number of words successfully added to the group
+          required: true
+        example: 5
+        type: integer
+    type: object
   models.DashboardLastStudySession:
     properties:
       created_at:
@@ -30,6 +66,27 @@ definitions:
         type: integer
       total_words_studied:
         type: integer
+    type: object
+  models.GenerateWordsRequest:
+    properties:
+      category:
+        description: |-
+          The thematic category for word generation (e.g., "family members", "food", etc.)
+          required: true
+        example: family members
+        type: string
+    required:
+    - category
+    type: object
+  models.GenerateWordsResponse:
+    properties:
+      words:
+        description: |-
+          List of generated Italian words with translations and grammatical details
+          required: true
+        items:
+          $ref: '#/definitions/models.WordResponse'
+        type: array
     type: object
   models.GroupDetailResponse:
     properties:
@@ -80,6 +137,20 @@ definitions:
         type: array
       pagination:
         $ref: '#/definitions/models.PaginationResponse'
+    type: object
+  models.ImportWordsRequest:
+    properties:
+      group_id:
+        type: integer
+      words:
+        items:
+          type: string
+        type: array
+    type: object
+  models.ImportWordsResponse:
+    properties:
+      imported_count:
+        type: integer
     type: object
   models.LaunchStudyActivityRequest:
     properties:
@@ -218,17 +289,40 @@ definitions:
   models.WordResponse:
     properties:
       correct_count:
+        description: |-
+          Number of times the word was correctly answered
+          required: true
+        example: 5
         type: integer
       english:
+        description: |-
+          The English translation
+          required: true
+        example: sister
         type: string
       id:
+        description: |-
+          The unique identifier of the word
+          required: true
+        example: 1
         type: integer
       italian:
+        description: |-
+          The Italian word
+          required: true
+        example: sorella
         type: string
       parts:
         additionalProperties: true
+        description: |-
+          Grammatical details like type, gender, plural form
+          required: true
         type: object
       wrong_count:
+        description: |-
+          Number of times the word was incorrectly answered
+          required: true
+        example: 2
         type: integer
     type: object
   models.WordReviewItem:
@@ -353,6 +447,30 @@ paths:
       summary: Get all groups
       tags:
       - groups
+    post:
+      consumes:
+      - application/json
+      description: Creates a new group for organizing vocabulary words
+      parameters:
+      - description: Name of the thematic group
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Create a new thematic group
+      tags:
+      - groups
   /api/groups/{id}:
     get:
       consumes:
@@ -434,6 +552,44 @@ paths:
           schema:
             $ref: '#/definitions/models.GroupWordsResponse'
       summary: Get words in a group
+      tags:
+      - groups
+    post:
+      consumes:
+      - application/json
+      description: Adds new words to an existing group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Words to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddWordsToGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddWordsToGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Add words to a group
       tags:
       - groups
   /api/reset_history:
@@ -711,6 +867,67 @@ paths:
           schema:
             $ref: '#/definitions/models.WordResponse'
       summary: Get word by ID
+      tags:
+      - words
+  /api/words/import:
+    post:
+      consumes:
+      - application/json
+      description: Imports a list of words and associates them with a specified group
+      parameters:
+      - description: Words import request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ImportWordsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ImportWordsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Import words into a group
+      tags:
+      - words
+  /api/words/llm/generate-words:
+    post:
+      consumes:
+      - application/json
+      description: Uses LLM to generate Italian words with translations and grammatical
+        details for a given thematic category
+      parameters:
+      - description: Category for word generation
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.GenerateWordsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GenerateWordsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Generate Italian words for a thematic category
       tags:
       - words
 schemes:

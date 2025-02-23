@@ -10,6 +10,7 @@ type GroupServiceInterface interface {
 	GetGroupByID(id int64) (*models.GroupDetailResponse, error)
 	GetGroupWords(groupID int64, limit, offset int) (*models.GroupWordsResponse, error)
 	GetGroupStudySessions(groupID int64, limit, offset int) (*models.GroupStudySessionsResponse, error)
+	CreateGroup(name string) (*models.GroupResponse, error)
 }
 
 type GroupService struct {
@@ -34,4 +35,15 @@ func (s *GroupService) GetGroupWords(groupID int64, limit, offset int) (*models.
 
 func (s *GroupService) GetGroupStudySessions(groupID int64, limit, offset int) (*models.GroupStudySessionsResponse, error) {
 	return s.repo.GetGroupStudySessions(groupID, limit, offset)
+}
+
+func (s *GroupService) CreateGroup(name string) (*models.GroupResponse, error) {
+	id, err := s.repo.CreateGroup(name)
+	if err != nil {
+		return nil, err
+	}
+	return &models.GroupResponse{
+		ID:   id,
+		Name: name,
+	}, nil
 }

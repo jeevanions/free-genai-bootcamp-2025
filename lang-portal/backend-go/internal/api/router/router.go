@@ -50,6 +50,9 @@ func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 	wordService := services.NewWordService(db)
 	wordHandler := handlers.NewWordHandler(wordService)
 
+	llmService := services.NewLLMService(db)
+	llmHandler := handlers.NewLLMHandler(llmService)
+
 	groupService := services.NewGroupService(db)
 	groupHandler := handlers.NewGroupHandler(groupService)
 
@@ -78,6 +81,13 @@ func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 		{
 			words.GET("", wordHandler.GetWords)
 			words.GET("/:id", wordHandler.GetWordByID)
+			words.POST("/import", wordHandler.ImportWords)
+			
+			// LLM routes under words
+			llm := words.Group("/llm")
+			{
+				llm.POST("/generate-words", llmHandler.GenerateWords)
+			}
 		}
 
 		// Settings routes
@@ -95,6 +105,9 @@ func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 		// Group routes
 		groups := api.Group("/groups")
 		{
+			groups.POST("", groupHandler.CreateGroup)
+			groups.POST("/:id/words", llmHandler.CreateThematicGroup)
+
 			groups.GET("", groupHandler.GetGroups)
 			groups.GET("/:id", groupHandler.GetGroupByID)
 			groups.GET("/:id/words", groupHandler.GetGroupWords)

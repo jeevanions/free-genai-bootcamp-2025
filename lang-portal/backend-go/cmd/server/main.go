@@ -1,3 +1,6 @@
+//go:build !exclude_swagger
+// +build !exclude_swagger
+
 package main
 
 import (
@@ -14,10 +17,10 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	_ "github.com/jeevanions/lang-portal/backend-go/docs" // Import swagger docs
 	"github.com/jeevanions/lang-portal/backend-go/internal/api/router"
 	"github.com/jeevanions/lang-portal/backend-go/internal/config"
 	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
-	_ "github.com/jeevanions/lang-portal/backend-go/docs" // Import swagger docs
 )
 
 // @title Italian Language Learning Portal API

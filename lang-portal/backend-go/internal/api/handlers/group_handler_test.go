@@ -50,6 +50,14 @@ func (m *MockGroupService) GetGroupStudySessions(groupID int64, limit, offset in
 	return args.Get(0).(*models.GroupStudySessionsResponse), args.Error(1)
 }
 
+func (m *MockGroupService) CreateGroup(name string) (*models.GroupResponse, error) {
+	args := m.Called(name)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.GroupResponse), args.Error(1)
+}
+
 func TestGroupHandler_GetGroups(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

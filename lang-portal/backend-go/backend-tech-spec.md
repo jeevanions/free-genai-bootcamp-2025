@@ -277,8 +277,7 @@ Launches a new study activity session for a specific group.
 {
   "items": [
     {
-      "italian": "こんにちは",
-      "romaji": "konnichiwa",
+      "italian": "ciao",     
       "english": "hello",
       "correct_count": 5,
       "wrong_count": 2
@@ -304,7 +303,7 @@ Launches a new study activity session for a specific group.
         "gender": "feminine",
         "plural": "sorelle"
       }
-    }
+}
 ```
 
 ### GET /api/groups
@@ -391,6 +390,72 @@ Launches a new study activity session for a specific group.
     "total_items": 5,
     "items_per_page": 100
   }
+}
+```
+
+### POST /api/words/llm/generate-words
+
+Generates Italian words for a given thematic category using LLM.
+
+#### Request Body
+```json
+{
+  "category": "family members"
+}
+```
+
+#### JSON Response
+```json
+{
+  "words": [
+    {
+      "italian": "sorella",
+      "english": "sister",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sorelle"
+      }
+    },
+    {
+      "italian": "fratello",
+      "english": "brother",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "fratelli"
+      }
+    }
+  ]
+}
+```
+
+### POST /api/groups/{id}/words
+
+Adds new words to an existing group. This endpoint can be used to add LLM-generated words to a thematic group.
+
+#### Request Body
+```json
+{
+  "words": [
+    {
+      "italian": "sorella",
+      "english": "sister",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sorelle"
+      }
+    }
+  ]
+}
+```
+
+#### JSON Response
+```json
+{
+  "success": true,
+  "words_added": 1
 }
 ```
 
@@ -513,6 +578,53 @@ Use this endpoint with caution as it will completely reset the system to its ini
   "study_session_id": 123,
   "correct": true,
   "created_at": "2025-02-08T17:33:07-05:00"
+}
+```
+
+### POST /api/groups
+
+Creates a new thematic group.
+
+#### Request Params
+- name (string) - The name of the thematic group
+
+#### JSON Response
+```json
+{
+  "id": 123,
+  "name": "Family Members",
+  "words_count": 0
+}
+```
+
+### POST /api/words/import
+
+Imports a list of words and associates them with a group.
+
+#### Request Body
+```json
+{
+  "group_id": 123,
+  "words": [
+    {
+      "italian": "sorella",
+      "english": "sister",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sorelle"
+      }
+    }
+  ]
+}
+```
+
+#### JSON Response
+```json
+{
+  "success": true,
+  "words_added": 1,
+  "group_id": 123
 }
 ```
 ## 5. Mage build tasks

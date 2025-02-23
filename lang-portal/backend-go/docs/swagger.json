@@ -145,6 +145,42 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new group for organizing vocabulary words",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Create a new thematic group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the thematic group",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/groups/{id}": {
@@ -266,6 +302,63 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.GroupWordsResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds new words to an existing group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Add words to a group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Words to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddWordsToGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AddWordsToGroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -642,6 +735,98 @@
                 }
             }
         },
+        "/api/words/import": {
+            "post": {
+                "description": "Imports a list of words and associates them with a specified group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "words"
+                ],
+                "summary": "Import words into a group",
+                "parameters": [
+                    {
+                        "description": "Words import request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ImportWordsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ImportWordsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/words/llm/generate-words": {
+            "post": {
+                "description": "Uses LLM to generate Italian words with translations and grammatical details for a given thematic category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "words"
+                ],
+                "summary": "Generate Italian words for a thematic category",
+                "parameters": [
+                    {
+                        "description": "Category for word generation",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GenerateWordsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenerateWordsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/words/{id}": {
             "get": {
                 "description": "Returns details about a specific word",
@@ -676,6 +861,46 @@
         }
     },
     "definitions": {
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Error message\nrequired: true",
+                    "type": "string",
+                    "example": "Invalid request format"
+                }
+            }
+        },
+        "models.AddWordsToGroupRequest": {
+            "type": "object",
+            "required": [
+                "words"
+            ],
+            "properties": {
+                "words": {
+                    "description": "List of words to add to the group\nrequired: true",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WordResponse"
+                    }
+                }
+            }
+        },
+        "models.AddWordsToGroupResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "description": "Whether the operation was successful\nrequired: true",
+                    "type": "boolean",
+                    "example": true
+                },
+                "words_added": {
+                    "description": "Number of words successfully added to the group\nrequired: true",
+                    "type": "integer",
+                    "example": 5
+                }
+            }
+        },
         "models.DashboardLastStudySession": {
             "type": "object",
             "properties": {
@@ -721,6 +946,31 @@
                 },
                 "total_words_studied": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.GenerateWordsRequest": {
+            "type": "object",
+            "required": [
+                "category"
+            ],
+            "properties": {
+                "category": {
+                    "description": "The thematic category for word generation (e.g., \"family members\", \"food\", etc.)\nrequired: true",
+                    "type": "string",
+                    "example": "family members"
+                }
+            }
+        },
+        "models.GenerateWordsResponse": {
+            "type": "object",
+            "properties": {
+                "words": {
+                    "description": "List of generated Italian words with translations and grammatical details\nrequired: true",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WordResponse"
+                    }
                 }
             }
         },
@@ -799,6 +1049,28 @@
                 },
                 "pagination": {
                     "$ref": "#/definitions/models.PaginationResponse"
+                }
+            }
+        },
+        "models.ImportWordsRequest": {
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "integer"
+                },
+                "words": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.ImportWordsResponse": {
+            "type": "object",
+            "properties": {
+                "imported_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -1013,23 +1285,34 @@
             "type": "object",
             "properties": {
                 "correct_count": {
-                    "type": "integer"
+                    "description": "Number of times the word was correctly answered\nrequired: true",
+                    "type": "integer",
+                    "example": 5
                 },
                 "english": {
-                    "type": "string"
+                    "description": "The English translation\nrequired: true",
+                    "type": "string",
+                    "example": "sister"
                 },
                 "id": {
-                    "type": "integer"
+                    "description": "The unique identifier of the word\nrequired: true",
+                    "type": "integer",
+                    "example": 1
                 },
                 "italian": {
-                    "type": "string"
+                    "description": "The Italian word\nrequired: true",
+                    "type": "string",
+                    "example": "sorella"
                 },
                 "parts": {
+                    "description": "Grammatical details like type, gender, plural form\nrequired: true",
                     "type": "object",
                     "additionalProperties": true
                 },
                 "wrong_count": {
-                    "type": "integer"
+                    "description": "Number of times the word was incorrectly answered\nrequired: true",
+                    "type": "integer",
+                    "example": 2
                 }
             }
         },

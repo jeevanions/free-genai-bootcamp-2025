@@ -10,6 +10,16 @@ import (
 )
 
 type Repository interface {
+	// Transaction support
+	BeginTx() (*sql.Tx, error)
+
+	// LLM-related operations
+	GetGroupIDByName(name string) (int64, error)
+	CreateGroup(name string) (int64, error)
+	CreateWord(word *models.WordResponse) (int64, error)
+	AddWordToGroup(wordID, groupID int64) error
+	UpdateGroupWordsCount(groupID int64) error
+
 	// Dashboard queries
 	GetLastStudySession() (*models.DashboardLastStudySession, error)
 	GetStudyProgress() (*models.DashboardStudyProgress, error)

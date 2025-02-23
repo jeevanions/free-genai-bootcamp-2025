@@ -12,7 +12,7 @@ type StudyActivityResponse struct {
 }
 
 type StudyActivityListResponse struct {
-	Items      []StudyActivityResponse `json:"items"`
+	Items      []StudyActivityResponse `json:"items,omitempty"`
 	Pagination PaginationResponse     `json:"pagination"`
 }
 

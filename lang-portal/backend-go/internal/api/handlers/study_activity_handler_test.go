@@ -59,10 +59,12 @@ func (m *MockStudyActivityService) GetStudyActivitySessions(activityID int64) (*
 func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 	// Setup
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudyActivityService)
-	handler := NewStudyActivityHandler(mockService)
 
 	t.Run("successful retrieval", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
+
 		// Arrange
 		expectedActivities := &models.StudyActivityListResponse{
 			Items: []models.StudyActivityResponse{
@@ -105,6 +107,9 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 	})
 
 	t.Run("empty list", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		emptyResponse := &models.StudyActivityListResponse{
 			Items: []models.StudyActivityResponse{},
@@ -116,7 +121,7 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 			},
 		}
 
-		mockService.On("GetStudyActivities", 100, 0).Return(emptyResponse, nil).Once()
+		mockService.On("GetStudyActivities", 100, 0).Return(emptyResponse, nil)
 
 		// Create request
 		w := httptest.NewRecorder()
@@ -140,10 +145,11 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 	// Setup
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudyActivityService)
-	handler := NewStudyActivityHandler(mockService)
 
 	t.Run("successful retrieval", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		expectedActivity := &models.StudyActivityResponse{
 			ID:           1,
@@ -174,6 +180,9 @@ func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 	})
 
 	t.Run("activity not found", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		mockService.On("GetStudyActivity", int64(999)).Return(nil, nil).Once()
 
@@ -190,6 +199,10 @@ func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
+
 		// Arrange
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -200,16 +213,18 @@ func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 }
 
 func TestStudyActivityHandler_LaunchStudyActivity(t *testing.T) {
 	// Setup
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudyActivityService)
-	handler := NewStudyActivityHandler(mockService)
 
 	t.Run("successful launch", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		expectedResponse := &models.LaunchStudyActivityResponse{
 			StudySessionID:  456,
@@ -243,9 +258,13 @@ func TestStudyActivityHandler_LaunchStudyActivity(t *testing.T) {
 		assert.Equal(t, expectedResponse.StudySessionID, response.StudySessionID)
 		assert.Equal(t, expectedResponse.StudyActivityID, response.StudyActivityID)
 		assert.Equal(t, expectedResponse.GroupID, response.GroupID)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("invalid activity ID", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Create request
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -257,9 +276,13 @@ func TestStudyActivityHandler_LaunchStudyActivity(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("invalid request body", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Create request
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -272,16 +295,18 @@ func TestStudyActivityHandler_LaunchStudyActivity(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 }
 
 func TestStudyActivityHandler_GetStudyActivitySessions(t *testing.T) {
 	// Setup
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudyActivityService)
-	handler := NewStudyActivityHandler(mockService)
 
 	t.Run("successful retrieval", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		expectedSessions := &models.StudySessionsListResponse{
 			Items: []models.StudySessionResponse{
@@ -318,6 +343,9 @@ func TestStudyActivityHandler_GetStudyActivitySessions(t *testing.T) {
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -328,9 +356,13 @@ func TestStudyActivityHandler_GetStudyActivitySessions(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudyActivityService)
+		handler := NewStudyActivityHandler(mockService)
 		// Arrange
 		mockService.On("GetStudyActivitySessions", int64(1)).Return(nil, assert.AnError).Once()
 

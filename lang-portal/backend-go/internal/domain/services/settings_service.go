@@ -42,3 +42,5 @@ func (s *SettingsService) FullReset() error {
 
 	return s.seeder.SeedFromJSON("internal/db/seeds")
 }
+
+

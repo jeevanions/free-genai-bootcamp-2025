@@ -28,10 +28,11 @@ func (m *MockSettingsService) FullReset() error {
 
 func TestSettingsHandler_ResetHistory(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockSettingsService)
-	handler := NewSettingsHandler(mockService)
 
 	t.Run("successful reset", func(t *testing.T) {
+		// Setup
+		mockService := new(MockSettingsService)
+		handler := NewSettingsHandler(mockService)
 		mockService.On("ResetHistory").Return(nil)
 
 		w := httptest.NewRecorder()
@@ -50,6 +51,9 @@ func TestSettingsHandler_ResetHistory(t *testing.T) {
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		// Setup
+		mockService := new(MockSettingsService)
+		handler := NewSettingsHandler(mockService)
 		mockService.On("ResetHistory").Return(errors.New("service error")).Once()
 
 		w := httptest.NewRecorder()
@@ -70,10 +74,11 @@ func TestSettingsHandler_ResetHistory(t *testing.T) {
 
 func TestSettingsHandler_FullReset(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockSettingsService)
-	handler := NewSettingsHandler(mockService)
 
 	t.Run("successful reset", func(t *testing.T) {
+		// Setup
+		mockService := new(MockSettingsService)
+		handler := NewSettingsHandler(mockService)
 		mockService.On("FullReset").Return(nil)
 
 		w := httptest.NewRecorder()
@@ -92,6 +97,9 @@ func TestSettingsHandler_FullReset(t *testing.T) {
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		// Setup
+		mockService := new(MockSettingsService)
+		handler := NewSettingsHandler(mockService)
 		mockService.On("FullReset").Return(errors.New("service error")).Once()
 
 		w := httptest.NewRecorder()

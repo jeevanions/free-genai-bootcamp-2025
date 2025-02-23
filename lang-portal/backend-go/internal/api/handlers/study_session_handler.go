@@ -61,7 +61,7 @@ func NewStudySessionHandler(service services.StudySessionServiceInterface) *Stud
 // @Success 200 {object} models.StudySessionListResponse
 // @Router /api/study_sessions [get]
 func (h *StudySessionHandler) GetAllStudySessions(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	sessions, err := h.service.GetAllStudySessions(limit, offset)

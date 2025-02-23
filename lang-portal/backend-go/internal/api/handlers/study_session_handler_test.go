@@ -45,10 +45,11 @@ func (m *MockStudySessionService) ReviewWord(sessionID, wordID int64, correct bo
 
 func TestStudySessionHandler_GetStudySessionWords(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudySessionService)
-	handler := NewStudySessionHandler(mockService)
 
 	t.Run("successful retrieval", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		// Arrange
 		expectedResponse := &models.StudySessionWordsResponse{
 			Items: []*models.WordResponse{
@@ -88,6 +89,10 @@ func TestStudySessionHandler_GetStudySessionWords(t *testing.T) {
 	})
 
 	t.Run("invalid session ID", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
+		
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Params = []gin.Param{{Key: "id", Value: "invalid"}}
@@ -96,9 +101,13 @@ func TestStudySessionHandler_GetStudySessionWords(t *testing.T) {
 		handler.GetStudySessionWords(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		mockService.On("GetStudySessionWords", int64(1), 100, 0).Return(nil, errors.New("service error")).Once()
 
 		w := httptest.NewRecorder()
@@ -119,10 +128,10 @@ func TestStudySessionHandler_GetStudySessionWords(t *testing.T) {
 
 func TestStudySessionHandler_GetAllStudySessions(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudySessionService)
-	handler := NewStudySessionHandler(mockService)
 
 	t.Run("successful retrieval", func(t *testing.T) {
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		expectedResponse := &models.StudySessionListResponse{
 			Items: []models.StudySessionDetailResponse{
 				{
@@ -162,6 +171,8 @@ func TestStudySessionHandler_GetAllStudySessions(t *testing.T) {
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		mockService.On("GetAllStudySessions", 100, 0).Return(nil, errors.New("service error")).Once()
 
 		w := httptest.NewRecorder()
@@ -181,10 +192,11 @@ func TestStudySessionHandler_GetAllStudySessions(t *testing.T) {
 
 func TestStudySessionHandler_ReviewWord(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockStudySessionService)
-	handler := NewStudySessionHandler(mockService)
 
 	t.Run("successful review", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		expectedResponse := &models.WordReviewResponse{
 			Success: true,
 			WordID:  1,
@@ -217,6 +229,9 @@ func TestStudySessionHandler_ReviewWord(t *testing.T) {
 	})
 
 	t.Run("invalid session ID", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Params = []gin.Param{
@@ -228,9 +243,13 @@ func TestStudySessionHandler_ReviewWord(t *testing.T) {
 		handler.ReviewWord(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("invalid word ID", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Params = []gin.Param{
@@ -242,9 +261,13 @@ func TestStudySessionHandler_ReviewWord(t *testing.T) {
 		handler.ReviewWord(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("invalid request body", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Params = []gin.Param{
@@ -257,9 +280,13 @@ func TestStudySessionHandler_ReviewWord(t *testing.T) {
 		handler.ReviewWord(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		// Setup
+		mockService := new(MockStudySessionService)
+		handler := NewStudySessionHandler(mockService)
 		mockService.On("ReviewWord", int64(1), int64(1), true).Return(nil, errors.New("service error")).Once()
 
 		reqBody := models.WordReviewRequest{Correct: true}

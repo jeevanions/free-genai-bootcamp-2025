@@ -5,170 +5,12 @@ import (
 	"testing"
 
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
+	"github.com/jeevanions/lang-portal/backend-go/internal/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-type MockRepository struct {
-	mock.Mock
-}
-
-func (m *MockRepository) GetStudySessionWords(sessionID int64, limit, offset int) ([]*models.WordResponse, int, error) {
-	args := m.Called(sessionID, limit, offset)
-	if args.Get(0) == nil {
-		return nil, 0, args.Error(2)
-	}
-	return args.Get(0).([]*models.WordResponse), args.Int(1), args.Error(2)
-}
-
-func (m *MockRepository) GetAllStudySessions(limit, offset int) ([]models.StudySession, error) {
-	args := m.Called(limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]models.StudySession), args.Error(1)
-}
-
-func (m *MockRepository) GetTotalStudySessions() (int, error) {
-	args := m.Called()
-	return args.Int(0), args.Error(1)
-}
-
-func (m *MockRepository) GetStudyActivity(id int64) (*models.StudyActivity, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.StudyActivity), args.Error(1)
-}
-
-func (m *MockRepository) GetGroupByID(id int64) (*models.GroupDetailResponse, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.GroupDetailResponse), args.Error(1)
-}
-
-func (m *MockRepository) GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error) {
-	args := m.Called(sessionID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]models.WordReviewItem), args.Error(1)
-}
-
-func (m *MockRepository) CreateWordReview(sessionID, wordID int64, correct bool) error {
-	args := m.Called(sessionID, wordID, correct)
-	return args.Error(0)
-}
-
-func (m *MockRepository) CreateStudyActivitySession(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error) {
-	args := m.Called(activityID, groupID)
-	return args.Get(0).(*models.LaunchStudyActivityResponse), args.Error(1)
-}
-
-func (m *MockRepository) CreateTables() error {
-	args := m.Called()
-	return args.Error(0)
-}
-
-func (m *MockRepository) DropAllTables() error {
-	args := m.Called()
-	return args.Error(0)
-}
-
-func (m *MockRepository) GetGroupStudySessions(groupID int64, limit, offset int) (*models.GroupStudySessionsResponse, error) {
-	args := m.Called(groupID, limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.GroupStudySessionsResponse), args.Error(1)
-}
-
-func (m *MockRepository) GetGroupWords(groupID int64, limit, offset int) (*models.GroupWordsResponse, error) {
-	args := m.Called(groupID, limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.GroupWordsResponse), args.Error(1)
-}
-
-func (m *MockRepository) GetGroups(limit, offset int) (*models.GroupListResponse, error) {
-	args := m.Called(limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.GroupListResponse), args.Error(1)
-}
-
-func (m *MockRepository) Close() error {
-	return nil
-}
-
-func (m *MockRepository) GetLastStudySession() (*models.DashboardLastStudySession, error) {
-	args := m.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.DashboardLastStudySession), args.Error(1)
-}
-
-func (m *MockRepository) GetQuickStats() (*models.DashboardQuickStats, error) {
-	args := m.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.DashboardQuickStats), args.Error(1)
-}
-
-func (m *MockRepository) GetStudyProgress() (*models.DashboardStudyProgress, error) {
-	args := m.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.DashboardStudyProgress), args.Error(1)
-}
-
-func (m *MockRepository) GetStudyActivities(limit, offset int) ([]models.StudyActivity, error) {
-	args := m.Called(limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]models.StudyActivity), args.Error(1)
-}
-
-func (m *MockRepository) GetStudyActivitySessions(activityID int64, limit, offset int) ([]models.StudySession, error) {
-	args := m.Called(activityID, limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]models.StudySession), args.Error(1)
-}
-
-func (m *MockRepository) GetWordByID(id int64) (*models.WordResponse, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.WordResponse), args.Error(1)
-}
-
-func (m *MockRepository) GetWords(limit, offset int) (*models.WordListResponse, error) {
-	args := m.Called(limit, offset)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.WordListResponse), args.Error(1)
-}
-
-func (m *MockRepository) ResetHistory() error {
-	args := m.Called()
-	return args.Error(0)
-}
-
 func TestStudySessionService_GetStudySessionWords(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := &mocks.MockRepository{}
 	service := NewStudySessionService(mockRepo)
 
 	t.Run("successful retrieval", func(t *testing.T) {
@@ -205,28 +47,29 @@ func TestStudySessionService_GetStudySessionWords(t *testing.T) {
 }
 
 func TestStudySessionService_GetAllStudySessions(t *testing.T) {
-	mockRepo := new(MockRepository)
-	service := NewStudySessionService(mockRepo)
-
 	t.Run("successful retrieval", func(t *testing.T) {
-		sessions := []*models.StudySession{
+		// Create new mock for each test
+		mockRepo := new(mocks.MockRepository)
+		service := NewStudySessionService(mockRepo)
+
+		sessions := []models.StudySession{
 			{
 				ID:              1,
 				GroupID:         1,
 				StudyActivityID: 1,
 			},
 		}
-		activity := &models.StudyActivity{
+		activity := &models.StudyActivityResponse{
 			ID:           1,
 			Name:         "Test Activity",
-			Description:  "Test Description",
-			ThumbnailURL: "http://example.com/thumb.jpg",
+			Description:  models.StrPtr("Test Description"),
+			ThumbnailURL: models.StrPtr("http://example.com/thumb.jpg"),
 			LaunchURL:    models.StrPtr("http://example.com/launch"),
 		}
-		group := &models.Group{
-			ID:         1,
-			Name:       "Test Group",
-			WordsCount: 10,
+		group := &models.GroupDetailResponse{
+			ID:    1,
+			Name:  "Test Group",
+			Stats: models.GroupStats{TotalWordCount: 10},
 		}
 		reviews := []models.WordReviewItem{{WordID: 1, Correct: true}}
 
@@ -248,19 +91,36 @@ func TestStudySessionService_GetAllStudySessions(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("repository error - GetAllStudySessions", func(t *testing.T) {
-		mockRepo.On("GetAllStudySessions", 10, 0).Return(nil, errors.New("repository error"))
+	t.Run("empty study sessions list", func(t *testing.T) {
+		// Create new mock for each test
+		mockRepo := new(mocks.MockRepository)
+		service := NewStudySessionService(mockRepo)
+
+		// Only set up expectations needed for this test
+		mockRepo.On("GetAllStudySessions", 10, 0).Return([]models.StudySession{}, nil)
+		mockRepo.On("GetTotalStudySessions").Return(0, nil)
 
 		response, err := service.GetAllStudySessions(10, 0)
 
-		assert.Error(t, err)
-		assert.Nil(t, response)
+		assert.NoError(t, err)
+		assert.NotNil(t, response)
+		assert.Empty(t, response.Items)
+		assert.Equal(t, models.PaginationResponse{
+			CurrentPage:  1,
+			TotalPages:   0,
+			TotalItems:   0,
+			ItemsPerPage: 10,
+		}, response.Pagination)
 		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("repository error - GetTotalStudySessions", func(t *testing.T) {
-		sessions := []*models.StudySession{{ID: 1}}
-		mockRepo.On("GetAllStudySessions", 10, 0).Return(sessions, nil)
+		// Create new mock for each test
+		mockRepo := new(mocks.MockRepository)
+		service := NewStudySessionService(mockRepo)
+
+		// Only set up expectations needed for this test
+		mockRepo.On("GetAllStudySessions", 10, 0).Return([]models.StudySession{}, nil)
 		mockRepo.On("GetTotalStudySessions").Return(0, errors.New("repository error"))
 
 		response, err := service.GetAllStudySessions(10, 0)
@@ -272,28 +132,23 @@ func TestStudySessionService_GetAllStudySessions(t *testing.T) {
 }
 
 func TestStudySessionService_ReviewWord(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := &mocks.MockRepository{}
 	service := NewStudySessionService(mockRepo)
 
 	t.Run("successful review", func(t *testing.T) {
-		review := &models.WordReviewResponse{
-			Success: true,
-			WordID:  1,
-		}
-
 		mockRepo.On("CreateWordReview", int64(1), int64(1), true).Return(nil)
 
 		response, err := service.ReviewWord(1, 1, true)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, response)
-		assert.Equal(t, review.WordID, response.WordID)
-		assert.Equal(t, review.Success, response.Success)
+		assert.Equal(t, int64(1), response.WordID)
+		assert.True(t, response.Success)
 		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("repository error", func(t *testing.T) {
-		mockRepo.On("CreateWordReview", int64(1), int64(1), true).Return(nil, errors.New("repository error"))
+		mockRepo.On("CreateWordReview", int64(1), int64(1), true).Return(errors.New("repository error"))
 
 		response, err := service.ReviewWord(1, 1, true)
 

@@ -557,6 +557,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/study_sessions/{id}/words/{word_id}/review": {
+            "post": {
+                "description": "Records whether a word was correctly or incorrectly reviewed in a study session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_sessions"
+                ],
+                "summary": "Review a word in a study session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Word ID",
+                        "name": "word_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Review request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WordReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.WordReviewResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/words": {
             "get": {
                 "description": "Returns a paginated list of words",
@@ -1001,6 +1049,28 @@ const docTemplate = `{
                 },
                 "study_session_id": {
                     "type": "integer"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.WordReviewRequest": {
+            "type": "object",
+            "required": [
+                "correct"
+            ],
+            "properties": {
+                "correct": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.WordReviewResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 },
                 "word_id": {
                     "type": "integer"

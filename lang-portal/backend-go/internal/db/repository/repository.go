@@ -36,6 +36,8 @@ type Repository interface {
 	GetAllStudySessions(limit, offset int) ([]models.StudySession, error)
 	GetTotalStudySessions() (int, error)
 	GetStudySessionWords(sessionID int64, limit, offset int) ([]*models.WordResponse, int, error)
+	// Create a word review
+	CreateWordReview(sessionID, wordID int64, correct bool) error
 
 	// Close the database connection
 	// Settings
@@ -322,4 +324,14 @@ func (r *SQLiteRepository) GetWordReviewsBySessionID(sessionID int64) ([]models.
 	return reviews, rows.Err()
 }
 
+// CreateWordReview creates a new word review in a study session
+func (r *SQLiteRepository) CreateWordReview(sessionID, wordID int64, correct bool) error {
+	query := `
+		INSERT INTO word_review_items (word_id, study_session_id, correct, created_at)
+		VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+	`
+
+	_, err := r.db.Exec(query, wordID, sessionID, correct)
+	return err
+}
 

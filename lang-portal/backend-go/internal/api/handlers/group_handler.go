@@ -138,3 +138,29 @@ func (h *GroupHandler) GetGroupStudySessions(c *gin.Context) {
 
 	c.JSON(http.StatusOK, sessions)
 }
+
+// CreateGroup godoc
+// @Summary Create a new thematic group
+// @Description Creates a new group for organizing vocabulary words
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param name query string true "Name of the thematic group"
+// @Success 200 {object} models.GroupResponse
+// @Failure 400 {object} handlers.ErrorResponse
+// @Router /api/groups [post]
+func (h *GroupHandler) CreateGroup(c *gin.Context) {
+	name := c.Query("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "group name is required"})
+		return
+	}
+
+	group, err := h.service.CreateGroup(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, group)
+}

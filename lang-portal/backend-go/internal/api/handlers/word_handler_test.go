@@ -34,6 +34,14 @@ func (m *MockWordService) GetWordByID(id int64) (*models.WordResponse, error) {
 	return args.Get(0).(*models.WordResponse), args.Error(1)
 }
 
+func (m *MockWordService) ImportWords(groupID int64, words []string) (*models.ImportWordsResponse, error) {
+	args := m.Called(groupID, words)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.ImportWordsResponse), args.Error(1)
+}
+
 func TestWordHandler_GetWords(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -125,15 +133,15 @@ func TestWordHandler_GetWordByID(t *testing.T) {
 			wordID: "1",
 			mockSetup: func(m *MockWordService) {
 				m.On("GetWordByID", int64(1)).Return(&models.WordResponse{
-					ID:       1,
-					Italian:  "ciao",
+					ID:      1,
+					Italian: "ciao",
 					English: "hello",
 				}, nil)
 			},
 			wantStatus: http.StatusOK,
 			wantBody: &models.WordResponse{
-				ID:       1,
-				Italian:  "ciao",
+				ID:      1,
+				Italian: "ciao",
 				English: "hello",
 			},
 		},
@@ -144,7 +152,7 @@ func TestWordHandler_GetWordByID(t *testing.T) {
 				m.On("GetWordByID", int64(999)).Return(nil, nil)
 			},
 			wantStatus: http.StatusOK,
-			wantBody: &models.WordResponse{},
+			wantBody:   &models.WordResponse{},
 		},
 		{
 			name:   "invalid id",

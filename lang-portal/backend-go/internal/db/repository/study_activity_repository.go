@@ -9,7 +9,7 @@ import (
 
 func (r *SQLiteRepository) GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error) {
 	query := `
-		SELECT id, name, thumbnail_url, description, created_at
+		SELECT id, name, thumbnail_url, description, created_at, launch_url
 		FROM study_activities
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
@@ -24,13 +24,14 @@ func (r *SQLiteRepository) GetStudyActivities(limit, offset int) (*models.StudyA
 	var activities []models.StudyActivityResponse
 	for rows.Next() {
 		var activity models.StudyActivityResponse
-		var thumbnailURL, description sql.NullString
+		var thumbnailURL, description, launchURL sql.NullString
 		err := rows.Scan(
 			&activity.ID,
 			&activity.Name,
 			&thumbnailURL,
 			&description,
 			&activity.CreatedAt,
+			&launchURL,
 		)
 		if err != nil {
 			return nil, err
@@ -42,6 +43,10 @@ func (r *SQLiteRepository) GetStudyActivities(limit, offset int) (*models.StudyA
 		if description.Valid {
 			desc := description.String
 			activity.Description = &desc
+		}
+		if launchURL.Valid {
+			url := launchURL.String
+			activity.LaunchURL = &url
 		}
 		activities = append(activities, activity)
 	}
@@ -111,7 +116,7 @@ func (r *SQLiteRepository) CreateStudyActivitySession(activityID, groupID int64)
 	return &models.LaunchStudyActivityResponse{
 		StudySessionID:  sessionID,
 		StudyActivityID: activityID,
-		GroupID:        groupID,
-		CreatedAt:      time.Now(),
+		GroupID:         groupID,
+		CreatedAt:       time.Now(),
 	}, nil
 }

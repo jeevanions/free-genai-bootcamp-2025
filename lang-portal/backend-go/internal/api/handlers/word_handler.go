@@ -74,3 +74,30 @@ func (h *WordHandler) GetWordByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, word)
 }
+
+// ImportWords godoc
+// @Summary Import words into a group
+// @Description Imports a list of words and associates them with a specified group
+// @Tags words
+// @Accept json
+// @Produce json
+// @Param request body models.ImportWordsRequest true "Words import request"
+// @Success 200 {object} models.ImportWordsResponse
+// @Failure 400 {object} handlers.ErrorResponse
+// @Failure 404 {object} handlers.ErrorResponse
+// @Router /api/words/import [post]
+func (h *WordHandler) ImportWords(c *gin.Context) {
+	var req models.ImportWordsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid request format"})
+		return
+	}
+
+	result, err := h.service.ImportWords(req.GroupID, req.Words)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}

@@ -1,14 +1,15 @@
 package repository
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 )
 
-func (r *SQLiteRepository) GetStudyActivities(limit, offset int) ([]models.StudyActivity, error) {
+func (r *SQLiteRepository) GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error) {
 	query := `
-		SELECT id, name, thumbnail_url, description, launch_url, created_at
+		SELECT id, name, thumbnail_url, description, created_at
 		FROM study_activities
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
@@ -20,19 +21,27 @@ func (r *SQLiteRepository) GetStudyActivities(limit, offset int) ([]models.Study
 	}
 	defer rows.Close()
 
-	var activities []models.StudyActivity
+	var activities []models.StudyActivityResponse
 	for rows.Next() {
-		var activity models.StudyActivity
+		var activity models.StudyActivityResponse
+		var thumbnailURL, description sql.NullString
 		err := rows.Scan(
 			&activity.ID,
 			&activity.Name,
-			&activity.ThumbnailURL,
-			&activity.Description,
-			&activity.LaunchURL,
+			&thumbnailURL,
+			&description,
 			&activity.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
+		}
+		if thumbnailURL.Valid {
+			url := thumbnailURL.String
+			activity.ThumbnailURL = &url
+		}
+		if description.Valid {
+			desc := description.String
+			activity.Description = &desc
 		}
 		activities = append(activities, activity)
 	}
@@ -41,7 +50,21 @@ func (r *SQLiteRepository) GetStudyActivities(limit, offset int) ([]models.Study
 		return nil, err
 	}
 
-	return activities, nil
+	// Get total count for pagination
+	var total int
+	if err := r.db.QueryRow("SELECT COUNT(*) FROM study_activities").Scan(&total); err != nil {
+		return nil, err
+	}
+
+	return &models.StudyActivityListResponse{
+		Items: activities,
+		Pagination: models.PaginationResponse{
+			CurrentPage:  offset/limit + 1,
+			TotalPages:   (total + limit - 1) / limit,
+			TotalItems:   total,
+			ItemsPerPage: limit,
+		},
+	}, nil
 }
 
 func (r *SQLiteRepository) CreateStudyActivitySession(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error) {

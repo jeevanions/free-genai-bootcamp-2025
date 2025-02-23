@@ -5,8 +5,8 @@ import "time"
 type StudyActivityResponse struct {
 	ID           int64     `json:"id"`
 	Name         string    `json:"name"`
-	ThumbnailURL string    `json:"thumbnail_url"`
-	Description  string    `json:"description"`
+	ThumbnailURL *string   `json:"thumbnail_url,omitempty"`
+	Description  *string   `json:"description,omitempty"`
 	LaunchURL    *string   `json:"launch_url,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 }

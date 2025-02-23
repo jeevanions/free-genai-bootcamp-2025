@@ -16,8 +16,8 @@ type Repository interface {
 	GetQuickStats() (*models.DashboardQuickStats, error)
 
 	// Study activities
-	GetStudyActivities(limit, offset int) ([]models.StudyActivity, error)
-	GetStudyActivity(id int64) (*models.StudyActivity, error)
+	GetStudyActivities(limit, offset int) (*models.StudyActivityListResponse, error)
+	GetStudyActivity(id int64) (*models.StudyActivityResponse, error)
 	GetStudyActivitySessions(activityID int64, limit, offset int) ([]models.StudySession, error)
 	CreateStudyActivitySession(activityID, groupID int64) (*models.LaunchStudyActivityResponse, error)
 	GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error)
@@ -165,26 +165,36 @@ func (r *SQLiteRepository) GetQuickStats() (*models.DashboardQuickStats, error) 
 	return &stats, nil
 }
 
-func (r *SQLiteRepository) GetStudyActivity(id int64) (*models.StudyActivity, error) {
+func (r *SQLiteRepository) GetStudyActivity(id int64) (*models.StudyActivityResponse, error) {
 	query := `
 		SELECT id, name, thumbnail_url, description, created_at
 		FROM study_activities
 		WHERE id = ?
 	`
 
-	var activity models.StudyActivity
+	var activity models.StudyActivityResponse
+	var thumbnailURL, description sql.NullString
 	err := r.db.QueryRow(query, id).Scan(
 		&activity.ID,
 		&activity.Name,
-		&activity.ThumbnailURL,
-		&activity.Description,
+		&thumbnailURL,
+		&description,
 		&activity.CreatedAt,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
+	}
+
+	if thumbnailURL.Valid {
+		url := thumbnailURL.String
+		activity.ThumbnailURL = &url
+	}
+	if description.Valid {
+		desc := description.String
+		activity.Description = &desc
 	}
 
 	return &activity, nil

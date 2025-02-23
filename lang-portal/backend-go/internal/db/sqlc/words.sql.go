@@ -15,7 +15,7 @@ INSERT INTO words (
 ) VALUES (
   ?, ?, ?
 )
-RETURNING id, italian, english, parts, created_at
+RETURNING id, italian, english, parts, created_at, correct_count, wrong_count
 `
 
 type CreateWordParams struct {
@@ -33,6 +33,8 @@ func (q *Queries) CreateWord(ctx context.Context, arg CreateWordParams) (Word, e
 		&i.English,
 		&i.Parts,
 		&i.CreatedAt,
+		&i.CorrectCount,
+		&i.WrongCount,
 	)
 	return i, err
 }
@@ -48,7 +50,7 @@ func (q *Queries) DeleteWord(ctx context.Context, id int64) error {
 }
 
 const getWord = `-- name: GetWord :one
-SELECT id, italian, english, parts, created_at FROM words
+SELECT id, italian, english, parts, created_at, correct_count, wrong_count FROM words
 WHERE id = ? LIMIT 1
 `
 
@@ -61,12 +63,14 @@ func (q *Queries) GetWord(ctx context.Context, id int64) (Word, error) {
 		&i.English,
 		&i.Parts,
 		&i.CreatedAt,
+		&i.CorrectCount,
+		&i.WrongCount,
 	)
 	return i, err
 }
 
 const listWords = `-- name: ListWords :many
-SELECT id, italian, english, parts, created_at FROM words
+SELECT id, italian, english, parts, created_at, correct_count, wrong_count FROM words
 ORDER BY id
 `
 
@@ -85,6 +89,8 @@ func (q *Queries) ListWords(ctx context.Context) ([]Word, error) {
 			&i.English,
 			&i.Parts,
 			&i.CreatedAt,
+			&i.CorrectCount,
+			&i.WrongCount,
 		); err != nil {
 			return nil, err
 		}
@@ -103,7 +109,7 @@ const updateWord = `-- name: UpdateWord :one
 UPDATE words
 SET italian = ?, english = ?, parts = ?
 WHERE id = ?
-RETURNING id, italian, english, parts, created_at
+RETURNING id, italian, english, parts, created_at, correct_count, wrong_count
 `
 
 type UpdateWordParams struct {
@@ -127,6 +133,8 @@ func (q *Queries) UpdateWord(ctx context.Context, arg UpdateWordParams) (Word, e
 		&i.English,
 		&i.Parts,
 		&i.CreatedAt,
+		&i.CorrectCount,
+		&i.WrongCount,
 	)
 	return i, err
 }

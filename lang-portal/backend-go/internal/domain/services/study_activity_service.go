@@ -42,6 +42,7 @@ func (s *StudyActivityService) GetStudyActivities(limit, offset int) (*models.St
 			Name:         activity.Name,
 			ThumbnailURL: activity.ThumbnailURL,
 			Description:  activity.Description,
+			LaunchURL:    activity.LaunchURL,
 			CreatedAt:    activity.CreatedAt,
 		})
 	}

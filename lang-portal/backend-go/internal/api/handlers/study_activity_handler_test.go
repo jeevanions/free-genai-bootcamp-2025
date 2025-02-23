@@ -16,6 +16,10 @@ import (
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
 )
 
+func strPtr(s string) *string {
+	return &s
+}
+
 type MockStudyActivityService struct {
 	mock.Mock
 }
@@ -67,6 +71,7 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 					Name:         "Vocabulary Quiz",
 					ThumbnailURL: "https://example.com/thumbnail.jpg",
 					Description:  "Practice your vocabulary with flashcards",
+					LaunchURL:    strPtr("https://example.com/quiz/launch"),
 					CreatedAt:    time.Now(),
 				},
 			},

@@ -8,7 +8,7 @@ import (
 
 func (r *SQLiteRepository) GetStudyActivities(limit, offset int) ([]models.StudyActivity, error) {
 	query := `
-		SELECT id, name, thumbnail_url, description, created_at
+		SELECT id, name, thumbnail_url, description, launch_url, created_at
 		FROM study_activities
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
@@ -28,6 +28,7 @@ func (r *SQLiteRepository) GetStudyActivities(limit, offset int) ([]models.Study
 			&activity.Name,
 			&activity.ThumbnailURL,
 			&activity.Description,
+			&activity.LaunchURL,
 			&activity.CreatedAt,
 		)
 		if err != nil {

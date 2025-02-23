@@ -48,7 +48,7 @@ func (q *Queries) GetSessionStats(ctx context.Context, studySessionID int64) (Ge
 }
 
 const getStudyActivityByID = `-- name: GetStudyActivityByID :one
-SELECT id, name, thumbnail_url, description, created_at FROM study_activities
+SELECT id, name, thumbnail_url, description, created_at, launch_url FROM study_activities
 WHERE id = ? LIMIT 1
 `
 
@@ -61,6 +61,7 @@ func (q *Queries) GetStudyActivityByID(ctx context.Context, id int64) (StudyActi
 		&i.ThumbnailUrl,
 		&i.Description,
 		&i.CreatedAt,
+		&i.LaunchUrl,
 	)
 	return i, err
 }

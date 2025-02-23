@@ -38,10 +38,11 @@ type WordGroup struct {
 }
 
 type StudyActivity struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	ThumbnailURL string `json:"thumbnail_url"`
-	Description  string `json:"description"`
+	ID           int64   `json:"id"`
+	Name         string  `json:"name"`
+	ThumbnailURL string  `json:"thumbnail_url"`
+	Description  string  `json:"description"`
+	LaunchURL    *string `json:"launch_url,omitempty"`
 }
 
 func (s *Seeder) SeedFromJSON(seedDir string) error {
@@ -108,8 +109,8 @@ func (s *Seeder) SeedFromJSON(seedDir string) error {
 
 	for _, activity := range activities {
 		_, err := tx.Exec(
-			"INSERT INTO study_activities (name, thumbnail_url, description) VALUES (?, ?, ?)",
-			activity.Name, activity.ThumbnailURL, activity.Description,
+			"INSERT INTO study_activities (name, thumbnail_url, description, launch_url) VALUES (?, ?, ?, ?)",
+			activity.Name, activity.ThumbnailURL, activity.Description, activity.LaunchURL,
 		)
 		if err != nil {
 			return fmt.Errorf("failed to insert study activity %s: %w", activity.Name, err)

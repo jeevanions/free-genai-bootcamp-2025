@@ -17,6 +17,12 @@ type StudySessionListResponse struct {
 	Pagination PaginationResponse     `json:"pagination"`
 }
 
+// StudySessionWordsResponse represents a paginated list of words reviewed in a study session
+type StudySessionWordsResponse struct {
+	Items      []*WordResponse     `json:"items"`
+	Pagination PaginationResponse `json:"pagination"`
+}
+
 // StudySessionDetailResponse represents a detailed study session response
 type StudySessionDetailResponse struct {
 	ID            int64            `json:"id"`

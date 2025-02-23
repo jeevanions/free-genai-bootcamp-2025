@@ -10,12 +10,119 @@
       }
     },
     {
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"]
+      }
+    },
+    {
+      "italian": "buonasera",
+      "english": "good evening",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"]
+      }
+    },
+    {
+      "italian": "arrivederci",
+      "english": "goodbye",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["farewell"]
+      }
+    },
+    {
+      "italian": "per favore",
+      "english": "please",
+      "parts": {
+        "type": "interjection",
+        "usage": ["courtesy"]
+      }
+    },
+    {
       "italian": "grazie",
       "english": "thank you",
       "parts": {
         "type": "interjection",
         "formal": true,
         "usage": ["gratitude"]
+      }
+    },
+    {
+      "italian": "prego",
+      "english": "you're welcome",
+      "parts": {
+        "type": "interjection",
+        "usage": ["courtesy"]
+      }
+    },
+    {
+      "italian": "uno",
+      "english": "one",
+      "parts": {
+        "type": "number",
+        "value": 1
+      }
+    },
+    {
+      "italian": "due",
+      "english": "two",
+      "parts": {
+        "type": "number",
+        "value": 2
+      }
+    },
+    {
+      "italian": "tre",
+      "english": "three",
+      "parts": {
+        "type": "number",
+        "value": 3
+      }
+    },
+    {
+      "italian": "quattro",
+      "english": "four",
+      "parts": {
+        "type": "number",
+        "value": 4
+      }
+    },
+    {
+      "italian": "cinque",
+      "english": "five",
+      "parts": {
+        "type": "number",
+        "value": 5
+      }
+    },
+    {
+      "italian": "sei",
+      "english": "six",
+      "parts": {
+        "type": "number",
+        "value": 6
+      }
+    },
+    {
+      "italian": "sette",
+      "english": "seven",
+      "parts": {
+        "type": "number",
+        "value": 7
+      }
+    },
+    {
+      "italian": "otto",
+      "english": "eight",
+      "parts": {
+        "type": "number",
+        "value": 8
       }
     },
     {
@@ -28,12 +135,175 @@
       }
     },
     {
+      "italian": "lunedì",
+      "english": "Monday",
+      "parts": {
+        "type": "noun",
+        "category": "days"
+      }
+    },
+    {
+      "italian": "martedì",
+      "english": "Tuesday",
+      "parts": {
+        "type": "noun",
+        "category": "days"
+      }
+    },
+    {
+      "italian": "mercoledì",
+      "english": "Wednesday",
+      "parts": {
+        "type": "noun",
+        "category": "days"
+      }
+    },
+    {
+      "italian": "giovedì",
+      "english": "Thursday",
+      "parts": {
+        "type": "noun",
+        "category": "days"
+      }
+    },
+    {
+      "italian": "venerdì",
+      "english": "Friday",
+      "parts": {
+        "type": "noun",
+        "category": "days"
+      }
+    },
+    {
+      "italian": "gennaio",
+      "english": "January",
+      "parts": {
+        "type": "noun",
+        "category": "months"
+      }
+    },
+    {
+      "italian": "febbraio",
+      "english": "February",
+      "parts": {
+        "type": "noun",
+        "category": "months"
+      }
+    },
+    {
+      "italian": "marzo",
+      "english": "March",
+      "parts": {
+        "type": "noun",
+        "category": "months"
+      }
+    },
+    {
+      "italian": "essere",
+      "english": "to be",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-ere",
+        "irregular": true
+      }
+    },
+    {
+      "italian": "avere",
+      "english": "to have",
+      "parts": {
+        "type": "verb",
+        "conjugation": "-ere",
+        "irregular": true
+      }
+    },
+    {
       "italian": "casa",
       "english": "house",
       "parts": {
         "type": "noun",
         "gender": "feminine",
         "plural": "case"
+      }
+    },
+    {
+      "italian": "tavolo",
+      "english": "table",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "tavoli"
+      }
+    },
+    {
+      "italian": "sedia",
+      "english": "chair",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "sedie"
+      }
+    },
+    {
+      "italian": "letto",
+      "english": "bed",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "letti"
+      }
+    },
+    {
+      "italian": "cucina",
+      "english": "kitchen",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "cucine"
+      }
+    },
+    {
+      "italian": "bagno",
+      "english": "bathroom",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "bagni"
+      }
+    },
+    {
+      "italian": "finestra",
+      "english": "window",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "finestre"
+      }
+    },
+    {
+      "italian": "porta",
+      "english": "door",
+      "parts": {
+        "type": "noun",
+        "gender": "feminine",
+        "plural": "porte"
+      }
+    },
+    {
+      "italian": "muro",
+      "english": "wall",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "muri"
+      }
+    },
+    {
+      "italian": "pavimento",
+      "english": "floor",
+      "parts": {
+        "type": "noun",
+        "gender": "masculine",
+        "plural": "pavimenti"
       }
     },
     {

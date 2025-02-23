@@ -344,17 +344,26 @@ Launches a new study activity session for a specific group.
 {
   "items": [
     {
-      "japanese": "こんにちは",
-      "romaji": "konnichiwa",
+      "id": 1,
+      "italian": "ciao",
       "english": "hello",
-      "correct_count": 5,
-      "wrong_count": 2
+      "parts": null,
+      "correct_count": 0,
+      "wrong_count": 0
+    },
+    {
+      "id": 2,
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": null,
+      "correct_count": 0,
+      "wrong_count": 0
     }
   ],
   "pagination": {
     "current_page": 1,
     "total_pages": 1,
-    "total_items": 20,
+    "total_items": 7,
     "items_per_page": 100
   }
 }
@@ -427,11 +436,12 @@ Launches a new study activity session for a specific group.
 {
   "items": [
     {
-      "japanese": "こんにちは",
-      "romaji": "konnichiwa",
-      "english": "hello",
-      "correct_count": 5,
-      "wrong_count": 2
+      "id": 123,
+      "activity_name": "Vocabulary Quiz",
+      "group_name": "Basic Greetings",
+      "start_time": "2025-02-08T17:20:23-05:00",
+      "end_time": "2025-02-08T17:30:23-05:00",
+      "review_items_count": 20
     }
   ],
   "pagination": {

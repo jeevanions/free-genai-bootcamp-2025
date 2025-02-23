@@ -511,6 +511,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/study_sessions/{id}/words": {
+            "get": {
+                "description": "Returns a paginated list of words reviewed in a specific study session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study_sessions"
+                ],
+                "summary": "Get words for a study session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StudySessionWordsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/words": {
             "get": {
                 "description": "Returns a paginated list of words",
@@ -875,6 +921,20 @@ const docTemplate = `{
                 },
                 "total_words": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.StudySessionWordsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WordResponse"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/models.PaginationResponse"
                 }
             }
         },

@@ -95,6 +95,10 @@ func TestDashboardHandler_GetLastStudySession(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusNotFound, w.Code)
+		var response gin.H
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "No study sessions found", response["error"])
 		mockService.AssertExpectations(t)
 	})
 }

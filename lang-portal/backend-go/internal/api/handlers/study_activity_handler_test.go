@@ -110,13 +110,13 @@ func TestStudyActivityHandler_GetStudyActivities(t *testing.T) {
 			Items: []models.StudyActivityResponse{},
 			Pagination: models.PaginationResponse{
 				CurrentPage:  1,
-				TotalPages:   1,
+				TotalPages:   0,
 				TotalItems:   0,
 				ItemsPerPage: 100,
 			},
 		}
 
-		mockService.On("GetStudyActivities", 100, 0).Return(emptyResponse, nil)
+		mockService.On("GetStudyActivities", 100, 0).Return(emptyResponse, nil).Once()
 
 		// Create request
 		w := httptest.NewRecorder()
@@ -163,13 +163,13 @@ func TestStudyActivityHandler_GetStudyActivity(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.StudyActivityResponse
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedActivity.ID, response.ID)
 		assert.Equal(t, expectedActivity.Name, response.Name)
-		
+
 		mockService.AssertExpectations(t)
 	})
 
@@ -214,8 +214,8 @@ func TestStudyActivityHandler_LaunchStudyActivity(t *testing.T) {
 		expectedResponse := &models.LaunchStudyActivityResponse{
 			StudySessionID:  456,
 			StudyActivityID: 789,
-			GroupID:        123,
-			CreatedAt:      time.Now(),
+			GroupID:         123,
+			CreatedAt:       time.Now(),
 		}
 
 		mockService.On("LaunchStudyActivity", int64(1), int64(123)).Return(expectedResponse, nil)
@@ -307,13 +307,13 @@ func TestStudyActivityHandler_GetStudyActivitySessions(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		var response models.StudySessionsListResponse
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Len(t, response.Items, 1)
 		assert.Equal(t, expectedSessions.Items[0].ID, response.Items[0].ID)
-		
+
 		mockService.AssertExpectations(t)
 	})
 

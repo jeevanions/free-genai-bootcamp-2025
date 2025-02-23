@@ -2,8 +2,11 @@ package services
 
 import (
 	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
-	"github.com/jeevanions/lang-portal/backend-go/internal/db/seeder"
 )
+
+type Seeder interface {
+	SeedFromJSON(seedDir string) error
+}
 
 type SettingsServiceInterface interface {
 	ResetHistory() error
@@ -12,10 +15,10 @@ type SettingsServiceInterface interface {
 
 type SettingsService struct {
 	repo   repository.Repository
-	seeder *seeder.Seeder
+	seeder Seeder
 }
 
-func NewSettingsService(repo repository.Repository, seeder *seeder.Seeder) *SettingsService {
+func NewSettingsService(repo repository.Repository, seeder Seeder) *SettingsService {
 	return &SettingsService{
 		repo:   repo,
 		seeder: seeder,

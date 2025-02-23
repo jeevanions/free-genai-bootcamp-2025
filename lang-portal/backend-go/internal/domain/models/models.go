@@ -44,4 +44,7 @@ type WordReviewItem struct {
 	CreatedAt      time.Time `json:"created_at"`
 }
 
-
+// StrPtr helper creates string pointer
+func StrPtr(s string) *string {
+	return &s
+}

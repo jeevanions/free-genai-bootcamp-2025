@@ -190,6 +190,15 @@ definitions:
       total_words:
         type: integer
     type: object
+  models.StudySessionWordsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.WordResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/models.PaginationResponse'
+    type: object
   models.StudySessionsListResponse:
     properties:
       items:
@@ -576,6 +585,38 @@ paths:
           schema:
             $ref: '#/definitions/models.StudySessionListResponse'
       summary: Get all study sessions
+      tags:
+      - study_sessions
+  /api/study_sessions/{id}/words:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of words reviewed in a specific study
+        session
+      parameters:
+      - description: Study Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 100
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StudySessionWordsResponse'
+      summary: Get words for a study session
       tags:
       - study_sessions
   /api/words:

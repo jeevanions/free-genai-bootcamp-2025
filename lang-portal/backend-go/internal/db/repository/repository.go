@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
@@ -34,6 +35,7 @@ type Repository interface {
 	// Study Sessions
 	GetAllStudySessions(limit, offset int) ([]models.StudySession, error)
 	GetTotalStudySessions() (int, error)
+	GetStudySessionWords(sessionID int64, limit, offset int) ([]*models.WordResponse, int, error)
 
 	// Close the database connection
 	// Settings
@@ -217,6 +219,75 @@ func (r *SQLiteRepository) GetStudyActivitySessions(activityID int64, limit, off
 	}
 
 	return sessions, rows.Err()
+}
+
+func (r *SQLiteRepository) GetStudySessionWords(sessionID int64, limit, offset int) ([]*models.WordResponse, int, error) {
+	query := `
+		SELECT DISTINCT
+			w.id,
+			w.italian,
+			w.english,
+			w.parts,
+			COUNT(CASE WHEN wri.correct = 1 THEN 1 END) as correct_count,
+			COUNT(CASE WHEN wri.correct = 0 THEN 1 END) as wrong_count
+		FROM words w
+		JOIN word_review_items wri ON w.id = wri.word_id
+		WHERE wri.study_session_id = ?
+		GROUP BY w.id
+		ORDER BY w.id
+		LIMIT ? OFFSET ?
+	`
+
+	rows, err := r.db.Query(query, sessionID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	words := []*models.WordResponse{}
+
+	for rows.Next() {
+		var word models.WordResponse
+		var partsJSON []byte
+		err := rows.Scan(
+			&word.ID,
+			&word.Italian,
+			&word.English,
+			&partsJSON,
+			&word.CorrectCount,
+			&word.WrongCount,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		if partsJSON != nil {
+			var parts map[string]interface{}
+			err = json.Unmarshal(partsJSON, &parts)
+			if err != nil {
+				return nil, 0, err
+			}
+			word.Parts = parts
+		}
+
+		words = append(words, &word)
+	}
+
+	// Get total count
+	countQuery := `
+		SELECT COUNT(DISTINCT w.id)
+		FROM words w
+		JOIN word_review_items wri ON w.id = wri.word_id
+		WHERE wri.study_session_id = ?
+	`
+
+	var total int
+	err = r.db.QueryRow(countQuery, sessionID).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return words, total, nil
 }
 
 func (r *SQLiteRepository) GetWordReviewsBySessionID(sessionID int64) ([]models.WordReviewItem, error) {

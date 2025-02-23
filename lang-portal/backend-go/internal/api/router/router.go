@@ -85,7 +85,11 @@ func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 		api.POST("/full_reset", settingsHandler.FullReset)
 
 		// Study Session routes
-		api.GET("/study_sessions", studySessionHandler.GetAllStudySessions)
+		studySessions := api.Group("/study_sessions")
+		{
+			studySessions.GET("", studySessionHandler.GetAllStudySessions)
+			studySessions.GET("/:id/words", studySessionHandler.GetStudySessionWords)
+		}
 
 		// Group routes
 		groups := api.Group("/groups")

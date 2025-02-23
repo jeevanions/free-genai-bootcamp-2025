@@ -7,6 +7,26 @@ import (
 
 type StudySessionServiceInterface interface {
 	GetAllStudySessions(limit, offset int) (*models.StudySessionListResponse, error)
+	GetStudySessionWords(sessionID int64, limit, offset int) (*models.StudySessionWordsResponse, error)
+}
+
+// GetStudySessionWords returns a paginated list of words reviewed in a study session
+func (s *StudySessionService) GetStudySessionWords(sessionID int64, limit, offset int) (*models.StudySessionWordsResponse, error) {
+	words, total, err := s.repo.GetStudySessionWords(sessionID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := (total + limit - 1) / limit
+	return &models.StudySessionWordsResponse{
+		Items: words,
+		Pagination: models.PaginationResponse{
+			CurrentPage:   (offset / limit) + 1,
+			TotalPages:    totalPages,
+			TotalItems:    total,
+			ItemsPerPage:  limit,
+		},
+	}, nil
 }
 
 type StudySessionService struct {

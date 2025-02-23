@@ -8,6 +8,15 @@ import (
 type StudySessionServiceInterface interface {
 	GetAllStudySessions(limit, offset int) (*models.StudySessionListResponse, error)
 	GetStudySessionWords(sessionID int64, limit, offset int) (*models.StudySessionWordsResponse, error)
+	ReviewWord(sessionID, wordID int64, correct bool) (*models.WordReviewResponse, error)
+}
+
+type StudySessionService struct {
+	repo repository.Repository
+}
+
+func NewStudySessionService(repo repository.Repository) *StudySessionService {
+	return &StudySessionService{repo: repo}
 }
 
 // GetStudySessionWords returns a paginated list of words reviewed in a study session
@@ -29,14 +38,6 @@ func (s *StudySessionService) GetStudySessionWords(sessionID int64, limit, offse
 	}, nil
 }
 
-type StudySessionService struct {
-	repo repository.Repository
-}
-
-func NewStudySessionService(repo repository.Repository) *StudySessionService {
-	return &StudySessionService{repo: repo}
-}
-
 func (s *StudySessionService) GetAllStudySessions(limit, offset int) (*models.StudySessionListResponse, error) {
 	// Get study sessions
 	sessions, err := s.repo.GetAllStudySessions(limit, offset)
@@ -50,18 +51,19 @@ func (s *StudySessionService) GetAllStudySessions(limit, offset int) (*models.St
 		return nil, err
 	}
 
-	// Create response with detailed information
+	// Build response with pagination
+	totalPages := (total + limit - 1) / limit
 	response := &models.StudySessionListResponse{
-		Items: make([]models.StudySessionDetailResponse, 0, len(sessions)),
+		Items: []models.StudySessionDetailResponse{},
 		Pagination: models.PaginationResponse{
 			CurrentPage:  (offset / limit) + 1,
-			TotalPages:   (total + limit - 1) / limit,
+			TotalPages:   totalPages,
 			TotalItems:   total,
 			ItemsPerPage: limit,
 		},
 	}
 
-	// Populate detailed information for each session
+	// Process each study session
 	for _, session := range sessions {
 		// Get activity details
 		activity, err := s.repo.GetStudyActivity(session.StudyActivityID)
@@ -109,4 +111,18 @@ func (s *StudySessionService) GetAllStudySessions(limit, offset int) (*models.St
 	}
 
 	return response, nil
+}
+
+// ReviewWord records a word review in a study session
+func (s *StudySessionService) ReviewWord(sessionID, wordID int64, correct bool) (*models.WordReviewResponse, error) {
+	// Create the word review
+	err := s.repo.CreateWordReview(sessionID, wordID, correct)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.WordReviewResponse{
+		Success: true,
+		WordID:  wordID,
+	}, nil
 }

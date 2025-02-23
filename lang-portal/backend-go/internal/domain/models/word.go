@@ -14,4 +14,14 @@ type WordListResponse struct {
 	Pagination PaginationResponse `json:"pagination"`
 }
 
+// WordReviewRequest represents a request to review a word in a study session
+type WordReviewRequest struct {
+	Correct bool `json:"correct" binding:"required"`
+}
+
+// WordReviewResponse represents a response to a word review request
+type WordReviewResponse struct {
+	Success bool  `json:"success"`
+	WordID  int64 `json:"word_id"`
+}
 

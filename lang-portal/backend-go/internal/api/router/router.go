@@ -89,6 +89,7 @@ func Setup(db *repository.SQLiteRepository, seeder *seeder.Seeder) *gin.Engine {
 		{
 			studySessions.GET("", studySessionHandler.GetAllStudySessions)
 			studySessions.GET("/:id/words", studySessionHandler.GetStudySessionWords)
+			studySessions.POST("/:id/words/:word_id/review", studySessionHandler.ReviewWord)
 		}
 
 		// Group routes

@@ -40,8 +40,8 @@ type WordReviewResponse struct {
 }
 
 type ImportWordsRequest struct {
-	GroupID int64    `json:"group_id"`
-	Words   []string `json:"words"`
+	GroupID int64          `json:"group_id" binding:"required" example:"123"`
+	Words   []WordResponse `json:"words" binding:"required,dive"`
 }
 
 type ImportWordsResponse struct {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jeevanions/lang-portal/backend-go/internal/db/repository"
 	"github.com/jeevanions/lang-portal/backend-go/internal/domain/models"
@@ -45,16 +46,19 @@ func (s *LLMService) GenerateWords(category string) (*models.GenerateWordsRespon
 	  * Plural form for nouns
 	  * Any irregular forms or important notes
 	
-	Format as JSON array with this structure:
-	{
-		"italian": "word",
-		"english": "translation",
-		"parts": {
-			"type": "noun/verb/adjective",
-			"gender": "masculine/feminine",
-			"plural": "plural_form"
+	Format the response as a JSON array of objects. Each object should have this exact structure:
+	[
+		{
+			"italian": "word",
+			"english": "translation",
+			"parts": {
+				"type": "noun/verb/adjective",
+				"gender": "masculine/feminine",
+				"plural": "plural_form"
+			}
 		}
-	}`, category)
+	]
+	Do not include any explanations or additional text, only return the JSON array.`, category)
 
 	// Groq API request configuration
 	reqBody := map[string]interface{}{
@@ -114,13 +118,45 @@ func (s *LLMService) GenerateWords(category string) (*models.GenerateWordsRespon
 		return nil, fmt.Errorf("invalid content format")
 	}
 
-	// Parse the JSON content
+	// Clean and parse the JSON content
+	content = cleanJSONString(content)
+
 	var words []models.WordResponse
 	if err := json.Unmarshal([]byte(content), &words); err != nil {
-		return nil, fmt.Errorf("failed to parse generated words: %v", err)
+		// Try to extract JSON array if content contains additional text
+		if jsonStart := strings.Index(content, "["); jsonStart != -1 {
+			if jsonEnd := strings.LastIndex(content, "]"); jsonEnd != -1 && jsonEnd > jsonStart {
+				content = content[jsonStart : jsonEnd+1]
+				if err := json.Unmarshal([]byte(content), &words); err != nil {
+					return nil, fmt.Errorf("failed to parse extracted JSON array: %v", err)
+				}
+			}
+		}
+		if len(words) == 0 {
+			return nil, fmt.Errorf("failed to parse generated words: %v", err)
+		}
 	}
 
 	return &models.GenerateWordsResponse{Words: words}, nil
+}
+
+// cleanJSONString removes common issues in LLM-generated JSON
+func cleanJSONString(s string) string {
+	// Remove any markdown code block markers
+	s = strings.ReplaceAll(s, "```json", "")
+	s = strings.ReplaceAll(s, "```", "")
+
+	// Remove any explanatory text before the first '['
+	if idx := strings.Index(s, "["); idx != -1 {
+		s = s[idx:]
+	}
+
+	// Remove any text after the last ']'
+	if idx := strings.LastIndex(s, "]"); idx != -1 {
+		s = s[:idx+1]
+	}
+
+	return strings.TrimSpace(s)
 }
 
 func (s *LLMService) GetGroupByID(id int64) (*models.GroupResponse, error) {

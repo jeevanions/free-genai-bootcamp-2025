@@ -1,5 +1,5 @@
 import React from 'react';
-import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import type { Group } from '../types/api';
 
 interface CategorySelectProps {
@@ -24,7 +24,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
   }));
 
   return (
-    <Select
+    <CreatableSelect
       className="w-full"
       options={options}
       isLoading={isLoading}
@@ -38,6 +38,10 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
       isClearable
       placeholder="Select or create a category..."
       formatCreateLabel={(inputValue) => `Create category "${inputValue}"`}
+      isSearchable
+      noOptionsMessage={({ inputValue }) => 
+        inputValue ? `Press enter to create "${inputValue}"` : 'No categories found'
+      }
     />
   );
 };

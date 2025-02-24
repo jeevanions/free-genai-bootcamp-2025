@@ -14,7 +14,7 @@ export const getGroups = async (): Promise<GroupsResponse> => {
 };
 
 export const createGroup = async (name: string): Promise<Group> => {
-  const response = await api.post('/groups', { name });
+  const response = await api.post(`/groups?name=${encodeURIComponent(name)}`);
   return response.data;
 };
 

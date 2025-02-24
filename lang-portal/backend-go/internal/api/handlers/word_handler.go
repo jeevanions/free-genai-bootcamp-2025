@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -77,25 +78,32 @@ func (h *WordHandler) GetWordByID(c *gin.Context) {
 
 // ImportWords godoc
 // @Summary Import words into a group
-// @Description Imports a list of words and associates them with a specified group
+// @Description Imports a list of structured words (with translations and grammatical details) and associates them with a specified group
 // @Tags words
 // @Accept json
 // @Produce json
 // @Param request body models.ImportWordsRequest true "Words import request"
 // @Success 200 {object} models.ImportWordsResponse
-// @Failure 400 {object} handlers.ErrorResponse
-// @Failure 404 {object} handlers.ErrorResponse
+// @Failure 400 {object} handlers.ErrorResponse "Invalid request format"
+// @Failure 404 {object} handlers.ErrorResponse "Group not found"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /api/words/import [post]
 func (h *WordHandler) ImportWords(c *gin.Context) {
 	var req models.ImportWordsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "invalid request format"})
+		log.Error().Err(err).Msg("Invalid request format")
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "Invalid request format: " + err.Error()})
 		return
 	}
 
 	result, err := h.service.ImportWords(req.GroupID, req.Words)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		if strings.Contains(err.Error(), "group not found") {
+			c.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+			return
+		}
+		log.Error().Err(err).Msg("Failed to import words")
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to import words"})
 		return
 	}
 

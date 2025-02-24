@@ -393,6 +393,40 @@ Launches a new study activity session for a specific group.
 }
 ```
 
+### POST /api/words/import
+
+Imports a list of structured words with translations and grammatical details into a specified group.
+
+#### Request Body
+```json
+{
+  "group_id": 123,
+  "words": [
+    {
+      "italian": "buongiorno",
+      "english": "good morning",
+      "parts": {
+        "type": "interjection",
+        "formal": true,
+        "usage": ["greeting"]
+      }
+    }
+  ]
+}
+```
+
+#### JSON Response
+```json
+{
+  "imported_count": 1
+}
+```
+
+#### Error Responses
+- 400: Invalid request format
+- 404: Group not found
+- 500: Internal server error
+
 ### POST /api/words/llm/generate-words
 
 Generates Italian words for a given thematic category using LLM.

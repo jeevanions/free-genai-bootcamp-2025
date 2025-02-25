@@ -77,3 +77,19 @@ curl -X POST \
 
 # To Test Embedding Service
 
+
+
+
+
+# Setup Needed to run the chat app
+
+export MEGA_SERVICE_PORT=8000
+export EMBEDDING_SERVICE_HOST_IP="${HOST_IP}"
+export EMBEDDING_SERVICE_PORT=8007
+export LLM_SERVICE_HOST_IP="${HOST_IP}"
+export LLM_SERVICE_PORT=8008
+export RETRIEVER_SERVICE_HOST_IP="${HOST_IP}"
+export RETRIEVER__SERVICE_PORT=8006
+export RERANKER_SERVICE_HOST_IP="${HOST_IP}"
+export RERANKER_SERVICE_PORT=8005
+

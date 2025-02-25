@@ -31,7 +31,7 @@ export LLM_ENDPOINT_PORT=8008
 export TEXTGEN_PORT=9000
 export host_ip=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 export LLM_ENDPOINT="http://${host_ip}:${LLM_ENDPOINT_PORT}"
-export LLM_MODEL_ID="llama2"
+export LLM_MODEL_ID="llama3"
 export service_name="textgen-service-ollama"
 ```
 

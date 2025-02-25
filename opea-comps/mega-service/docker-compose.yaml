@@ -1,0 +1,118 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  qdrant-vector-db:
+    image: qdrant/qdrant
+    container_name: qdrant-vector-db
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "6334:6334"
+    healthcheck:
+      #test: curl -s http://${QDRANT_HOST}:6334/healthz | grep -q 'healthz check passed' || exit 1 # TODO, This is the real healthcheck, but not work
+      test: ["CMD-SHELL", "sleep 10 && exit 0"]
+      interval: 1s
+      timeout: 15s
+      retries: 1
+    environment:
+      - no_proxy=${no_proxy}
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - host_ip=${QDRANT_HOST}
+
+  tei-embedding-service:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+    container_name: tei-embedding-service
+    entrypoint: /bin/sh -c "apt-get update && apt-get install -y curl && text-embeddings-router --json-output --model-id ${EMBEDDING_MODEL_ID} --auto-truncate"
+    ports:
+      - "${EMBEDDING_SERVICE_PORT:-12000}:80"
+    volumes:
+      - "./data:/data"
+    shm_size: 1g
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      host_ip: ${HOST_IP}
+      HF_TOKEN: ${HF_TOKEN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${HOST_IP}:${EMBEDDING_SERVICE_PORT}/health"]
+      interval: 10s
+      timeout: 6s
+      retries: 48
+
+  # Dataprep MicroService
+  dataprep-qdrant:
+    image: ${REGISTRY:-opea}/dataprep:${TAG:-latest}
+    container_name: dataprep-qdrant-server
+    depends_on:
+      qdrant-vector-db:
+        condition: service_healthy
+      tei-embedding-service:
+        condition: service_healthy
+    ports:
+      - "${DATAPREP_MICROSERVICE_PORT:-11107}:5000"
+    ipc: host
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      DATAPREP_COMPONENT_NAME: "OPEA_DATAPREP_QDRANT"
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      COLLECTION_NAME: ${COLLECTION_NAME}
+      TEI_EMBEDDING_ENDPOINT: ${EMBEDDING_SERVICE_ENDPOINT}
+      HUGGINGFACEHUB_API_TOKEN: ${HF_TOKEN}
+    restart: unless-stopped
+
+  retriever:
+    image: ${REGISTRY:-opea}/retriever:${TAG:-latest}
+    container_name: retriever-qdrant-server
+    depends_on:
+      - qdrant-vector-db
+    ports:
+      - "${RETRIEVER_PORT:-6045}:7000"
+    ipc: host
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      QDRANT_HOST: ${HOST_IP}
+      QDRANT_PORT: ${QDRANT_PORT}
+      INDEX_NAME: ${INDEX_NAME}
+      TEI_EMBEDDING_ENDPOINT: ${EMBEDDING_SERVICE_ENDPOINT}
+      LOGFLAG: ${LOGFLAG}
+      RETRIEVER_COMPONENT_NAME: "OPEA_RETRIEVER_QDRANT"
+    restart: unless-stopped
+  tei-reranking-service:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+    container_name: tei-reranking-server
+    ports:
+      - "${RERANKER_PORT:-6041}:80"
+    volumes:
+      - "./data:/data"
+    shm_size: 1g
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      HUGGINGFACEHUB_API_TOKEN: ${HF_TOKEN}
+      HF_HUB_DISABLE_PROGRESS_BARS: 1
+      HF_HUB_ENABLE_HF_TRANSFER: 0
+    command: --model-id ${RERANK_MODEL_ID} --auto-truncate
+
+  ollama-server:
+    image: ollama/ollama
+    container_name: ollama-server
+    ports:
+      - ${LLM_ENDPOINT_PORT:-8008}:11434
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      LLM_MODEL_ID: ${LLM_MODEL_ID}
+      host_ip: ${host_ip}
+
+networks:
+  default:
+    driver: bridge

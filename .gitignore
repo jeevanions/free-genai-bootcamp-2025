@@ -17,6 +17,8 @@ parts/
 sdist/
 var/
 venv/
+**/.venv/
+**/venv/
 .env
 *.log
 .coverage
@@ -48,4 +50,5 @@ yarn-error.log*
 **/*.drawio
 opea-comps/.keys
 
-**/.env
+/opea-comps/mega-service/data/**
+

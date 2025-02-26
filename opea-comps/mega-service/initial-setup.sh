@@ -54,7 +54,8 @@ export DATAPREP_MICROSERVICE_PORT=8009
 export QDRANT_HOST="${HOST_IP}"
 export EMBEDDING_SERVICE_ENDPOINT="http://${HOST_IP}:${EMBEDDING_SERVICE_PORT}"
 export LLM_SERVICE_ENDPOINT="${HOST_IP}:${LLM_SERVICE_PORT}"
-export VECTORDB_QDRANT_SERVICE_ENDPOINT="${host_ip}:${VECTORDB_QDRANT_SERVICE_PORT}"
+export VECTORDB_QDRANT_SERVICE_ENDPOINT="${HOST_IP}:${VECTORDB_QDRANT_SERVICE_PORT}"
+export DATAPREP_SERVICE_ENDPOINT="${HOST_IP}:${DATAPREP_MICROSERVICE_PORT}"
 
 
 # Disable open telemetry for now
@@ -84,10 +85,10 @@ curl http://${LLM_SERVICE_ENDPOINT}/v1/chat/completions \
 
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
-    -F "files=@./file1.txt" \
+    -F "files=@./EthicalAI.pdf" \
     -F "chunk_size=1500" \
     -F "chunk_overlap=100" \
-    http://${VECTORDB_QDRANT_SERVICE_ENDPOINT}/v1/dataprep/ingest
+    http://${DATAPREP_SERVICE_ENDPOINT}/v1/dataprep/ingest
 
 # To Test Embedding Service
 

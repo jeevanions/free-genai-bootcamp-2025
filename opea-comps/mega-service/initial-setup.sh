@@ -29,7 +29,7 @@ export HOST_IP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ 
 export HOST_IP=$(ipconfig getifaddr en0)
 
 # Set secrets & keys for external services
-export HF_TOKEN=<hf token>
+export HF_TOKEN=<hf_token>
 
 # Modles to be used
 export EMBEDDING_MODEL_ID="BAAI/bge-large-en-v1.5"
@@ -52,10 +52,11 @@ export DATAPREP_MICROSERVICE_PORT=8009
 
 # Service Endpoints
 export QDRANT_HOST="${HOST_IP}"
-export EMBEDDING_SERVICE_ENDPOINT="http://${HOST_IP}:${EMBEDDING_SERVICE_PORT}"
+export EMBEDDING_SERVICE_ENDPOINT="${HOST_IP}:${EMBEDDING_SERVICE_PORT}"
 export LLM_SERVICE_ENDPOINT="${HOST_IP}:${LLM_SERVICE_PORT}"
 export VECTORDB_QDRANT_SERVICE_ENDPOINT="${HOST_IP}:${VECTORDB_QDRANT_SERVICE_PORT}"
 export DATAPREP_SERVICE_ENDPOINT="${HOST_IP}:${DATAPREP_MICROSERVICE_PORT}"
+export RETRIEVER_SERVICE_ENDPOINT="${HOST_IP}:${RETRIEVER_PORT}"
 
 
 # Disable open telemetry for now
@@ -92,8 +93,19 @@ curl -X POST \
 
 # To Test Embedding Service
 
+curl -X POST \
+-H 'Content-Type: application/json' \
+-d '{"input":"What is Deep Learning?"}' \
+http://${EMBEDDING_SERVICE_ENDPOINT}/v1/embeddings
 
 
+# To Test retriver
+export test_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
+
+curl http://${RETRIEVER_SERVICE_ENDPOINT}/v1/retrieval \
+-X POST \
+-d "{\"text\":\"Define responsible AI?\",\"embedding\":${test_embedding}}" \
+-H 'Content-Type: application/json'
 
 
 # Setup Needed to run the chat app
@@ -108,3 +120,9 @@ export RETRIEVER__SERVICE_PORT=8006
 export RERANKER_SERVICE_HOST_IP="${HOST_IP}"
 export RERANKER_SERVICE_PORT=8005
 
+
+   curl http://${HOST_IP}:${MEGA_SERVICE_PORT}/v1/chatqna \
+       -H "Content-Type: application/json" \
+       -d '{
+           "messages": "What is the revenue of Nike in 2023?"
+       }'

@@ -1,15 +1,25 @@
 # Run these commands manually in the sequence provided
 
-apt-get update
+sudo apt-get update
+sudo apt-get install tesseract-ocr -y
+sudo apt-get install libtesseract-dev -y
+sudo apt-get install poppler-utils -y
+sudo apt install python3-pip
+sudo apt install python3.12-venv
 
 wget https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/main/ChatQnA/docker_compose/install_docker.sh
 chmod +x install_docker.sh
 ./install_docker.sh
 
+sudo apt  install docker-compose
+
+python3 -m venv .venv
+
+cd .venv/bin
+source activate
+cd ../..
+
 pip install -r requirements.txt
-apt-get install tesseract-ocr -y
-apt-get install libtesseract-dev -y
-apt-get install poppler-utils -y
 
 
 # For ubuntu
@@ -19,7 +29,7 @@ export HOST_IP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ 
 export HOST_IP=$(ipconfig getifaddr en0)
 
 # Set secrets & keys for external services
-export HF_TOKEN=<Hugging face token>
+export HF_TOKEN=<hf token>
 
 # Modles to be used
 export EMBEDDING_MODEL_ID="BAAI/bge-large-en-v1.5"
@@ -49,6 +59,10 @@ export VECTORDB_QDRANT_SERVICE_ENDPOINT="${host_ip}:${VECTORDB_QDRANT_SERVICE_PO
 
 # Disable open telemetry for now
 export OTEL_SDK_DISABLED=true
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
 
 
 docker-compose up -d 

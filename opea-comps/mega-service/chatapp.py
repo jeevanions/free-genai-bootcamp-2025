@@ -1,6 +1,6 @@
 import json
 import os
-import re
+from dotenv import load_dotenv
 
 from comps import MegaServiceEndpoint, MicroService, ServiceOrchestrator, ServiceRoleType, ServiceType
 from comps.cores.mega.utils import handle_message
@@ -90,7 +90,7 @@ def align_outputs(self, data, cur_node, inputs, runtime_graph, llm_parameters_di
         else:
             # Handle normal case
             assert isinstance(data.get("data"), list), f"Expected list from embedding service, got {type(data)}: {data}"
-            next_data = {"text": inputs["input"], "embedding": data.get("data")[0]}
+            next_data = {"text": inputs["input"], "embedding": data.get("data")[0].get("embedding")}
     elif self.services[cur_node].service_type == ServiceType.RETRIEVER:
 
         print(f"Retriever service response: {data.values()}")
@@ -310,9 +310,11 @@ class ChatWithPdfService:
         self.service.start()
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    chat_with_pdf = ChatWithPdfService(host=os.getenv("HOST_IP"), port=MEGA_SERVICE_PORT)
-    chat_with_pdf.add_remote_service()
+load_dotenv(".env")
 
-    chat_with_pdf.start()
+chat_with_pdf = ChatWithPdfService(host=os.getenv("HOST_IP"), port=MEGA_SERVICE_PORT)
+chat_with_pdf.add_remote_service()
+
+chat_with_pdf.start()

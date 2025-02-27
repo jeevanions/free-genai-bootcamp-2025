@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Chat App",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/mega-service/chatapp.py",
+            "console": "integratedTerminal",
+            "envFile": "/home/azureuser/free-genai-bootcamp-2025/opea-comps/.env",
+            "justMyCode": true
+        }
+    ]
+}

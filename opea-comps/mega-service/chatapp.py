@@ -68,7 +68,7 @@ def align_inputs(self, inputs, cur_node, runtime_graph, llm_parameters_dict, **k
     elif self.services[cur_node].service_type == ServiceType.RETRIEVER:
         # prepare the retriever params
         retriever_parameters = kwargs.get("retriever_parameters", None)
-        if retriever_parameters:
+        if (retriever_parameters):
             inputs.update(retriever_parameters.model_dump())
     elif self.services[cur_node].service_type == ServiceType.LLM:
         # Debug the inputs coming in
@@ -126,44 +126,92 @@ def align_outputs(self, data, cur_node, inputs, runtime_graph, llm_parameters_di
             assert isinstance(data.get("data"), list), f"Expected list from embedding service, got {type(data)}: {data}"
             next_data = {"text": inputs["input"], "embedding": data.get("data")[0].get("embedding")}
     elif self.services[cur_node].service_type == ServiceType.RETRIEVER:
-
-        print(f"Retriever service response: {data.values()}")
-        print(f"Available attributes in data: {data.__dict__ if hasattr(data, '__dict__') else vars(data) if hasattr(data, '__slots__') else dir(data)}")
-       
-        docs = [doc["text"] for doc in data.get("retrieved_docs")]
-
-        with_rerank = runtime_graph.downstream(cur_node)[0].startswith("rerank")
-        if with_rerank and docs:
-            # forward to rerank
-            # prepare inputs for rerank
-            next_data["query"] = data["initial_query"]
-            next_data["texts"] = [doc["text"] for doc in data["retrieved_docs"]]
-        else:
-            # forward to llm
-            if not docs and with_rerank:
-                # delete the rerank from retriever -> rerank -> llm
-                for ds in reversed(runtime_graph.downstream(cur_node)):
+        # Print detailed information about retriever response structure for debugging
+        print(f"Retriever response type: {type(data)}")
+        print(f"Retriever response structure: {dir(data) if hasattr(data, '__dir__') else 'No dir method'}")
+        print(f"Retriever response representation: {repr(data)}")
+        
+        # Safely check if we got an error response
+        if isinstance(data, dict) and "error" in data:
+            print(f"Retriever service error: {data['error']}")
+            next_data["inputs"] = f"The system encountered an error retrieving relevant information. Here's the original question: {inputs.get('text', 'No question provided')}"
+            
+            # Skip reranker if it's in the pipeline
+            if len(runtime_graph.downstream(cur_node)) > 0 and runtime_graph.downstream(cur_node)[0].startswith("rerank"):
+                for ds in runtime_graph.downstream(cur_node):
                     for nds in runtime_graph.downstream(ds):
                         runtime_graph.add_edge(cur_node, nds)
                     runtime_graph.delete_node_if_exists(ds)
-
-            # handle template
-            # if user provides template, then format the prompt with it
-            # otherwise, use the default template
-            prompt = data["initial_query"]
+                
+            return next_data
+        
+        # Safely extract retrieved docs
+        retrieved_docs = []
+        initial_query = ""
+        
+        # Handle different response structures
+        if hasattr(data, "retrieved_docs"):
+            retrieved_docs = data.retrieved_docs
+            initial_query = data.initial_query if hasattr(data, "initial_query") else inputs.get("text", "")
+        elif isinstance(data, dict):
+            retrieved_docs = data.get("retrieved_docs", [])
+            initial_query = data.get("initial_query", inputs.get("text", ""))
+        
+        print(f"Retrieved docs count: {len(retrieved_docs)}")
+        
+        # Extract document text safely
+        docs = []
+        for doc in retrieved_docs:
+            if isinstance(doc, str):
+                docs.append(doc)
+            elif isinstance(doc, dict) and "text" in doc:
+                docs.append(doc["text"])
+            elif hasattr(doc, "text"):
+                docs.append(doc.text)
+            elif hasattr(doc, "page_content"):
+                docs.append(doc.page_content)
+        
+        print(f"Extracted document texts: {len(docs)}")
+        
+        # Handle empty results
+        if not docs:
+            print("No documents returned from retriever")
+            next_data["inputs"] = f"I don't have specific information about that in my knowledge base. Here's what I know about: {inputs.get('text', 'your question')}"
+            
+            # Skip reranker if it's in the pipeline
+            if len(runtime_graph.downstream(cur_node)) > 0 and runtime_graph.downstream(cur_node)[0].startswith("rerank"):
+                for ds in runtime_graph.downstream(cur_node):
+                    for nds in runtime_graph.downstream(ds):
+                        runtime_graph.add_edge(cur_node, nds)
+                    runtime_graph.delete_node_if_exists(ds)
+                
+            return next_data
+        
+        with_rerank = False
+        if len(runtime_graph.downstream(cur_node)) > 0:
+            with_rerank = runtime_graph.downstream(cur_node)[0].startswith("rerank")
+            
+        if with_rerank and docs:
+            # Prepare for reranking
+            next_data["query"] = initial_query
+            next_data["texts"] = docs
+        else:
+            # Skip reranking, prepare prompt for LLM
+            # Handle template generation with docs
+            prompt = initial_query
             chat_template = llm_parameters_dict["chat_template"]
             if chat_template:
                 prompt_template = PromptTemplate.from_template(chat_template)
                 input_variables = prompt_template.input_variables
                 if sorted(input_variables) == ["context", "question"]:
-                    prompt = prompt_template.format(question=data["initial_query"], context="\n".join(docs))
+                    prompt = prompt_template.format(question=initial_query, context="\n".join(docs))
                 elif input_variables == ["question"]:
-                    prompt = prompt_template.format(question=data["initial_query"])
+                    prompt = prompt_template.format(question=initial_query)
                 else:
                     print(f"{prompt_template} not used, we only support 2 input variables ['question', 'context']")
-                    prompt = ChatTemplate.generate_rag_prompt(data["initial_query"], docs)
+                    prompt = ChatTemplate.generate_rag_prompt(initial_query, docs)
             else:
-                prompt = ChatTemplate.generate_rag_prompt(data["initial_query"], docs)
+                prompt = ChatTemplate.generate_rag_prompt(initial_query, docs)
 
             next_data["inputs"] = prompt
 
@@ -272,7 +320,7 @@ class ChatWithPdfService:
             name="rerank",
             host=RERANK_SERVER_HOST_IP,
             port=RERANK_SERVER_PORT,
-            endpoint="/rerank",
+            endpoint="/v1/reranking",
             use_remote_service=True,
             service_type=ServiceType.RERANK,
         )
@@ -322,7 +370,7 @@ class ChatWithPdfService:
             frequency_penalty=chat_request.frequency_penalty if chat_request.frequency_penalty else 0.0,
             presence_penalty=chat_request.presence_penalty if chat_request.presence_penalty else 0.0,
             repetition_penalty=chat_request.repetition_penalty if chat_request.repetition_penalty else 1.03,
-            stream=stream_opt,
+            stream=True,  # Force stream to True for testing
             chat_template=chat_request.chat_template if chat_request.chat_template else None,
         )
         retriever_parameters = RetrieverParms(

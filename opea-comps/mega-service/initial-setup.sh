@@ -32,7 +32,9 @@ export HOST_IP=$(ipconfig getifaddr en0)
 export HF_TOKEN=<hf_token>
 
 # Modles to be used
-export EMBEDDING_MODEL_ID="BAAI/bge-large-en-v1.5"
+export EMBEDDING_MODEL_ID="BAAI/bge-base-en-v1.5"
+export EMBEDDING_DIMENSION=768
+export QDRANT_EMBED_DIMENSION=768
 export LLM_MODEL_ID="llama3"
 export RERANK_MODEL_ID="BAAI/bge-reranker-base"
 
@@ -40,6 +42,7 @@ export RERANK_MODEL_ID="BAAI/bge-reranker-base"
 
 export COLLECTION_NAME="PDF_COLLECTION"
 export INDEX_NAME="PDF_INDEX"
+export QDRANT_INDEX_NAME="PDF_COLLECTION"
 
 # Service Ports
 export QDRANT_PORT=6333
@@ -111,7 +114,7 @@ curl http://${RETRIEVER_SERVICE_ENDPOINT}/v1/retrieval \
 
 # Setup Needed to run the chat app
 
-export MEGA_SERVICE_PORT=8000
+export MEGA_SERVICE_PORT=8888
 export EMBEDDING_SERVICE_HOST_IP="${HOST_IP}"
 export EMBEDDING_SERVICE_PORT=8007
 export LLM_SERVICE_HOST_IP="${HOST_IP}"
@@ -122,8 +125,8 @@ export RERANKER_SERVICE_HOST_IP="${HOST_IP}"
 export RERANKER_SERVICE_PORT=8005
 
 
-   curl http://${HOST_IP}:${MEGA_SERVICE_PORT}/v1/chatqna \
-       -H "Content-Type: application/json" \
-       -d '{
-           "messages": "What is responsible AI?"
-       }'
+curl http://${HOST_IP}:${MEGA_SERVICE_PORT}/v1/chatqna \
+    -H "Content-Type: application/json" \
+    -d '{
+        "messages": "What is responsible AI?"
+    }'

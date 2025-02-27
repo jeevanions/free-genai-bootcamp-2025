@@ -1,6 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
+import requests  # Add this import for direct debugging calls
 
 from comps import MegaServiceEndpoint, MicroService, ServiceOrchestrator, ServiceRoleType, ServiceType
 from comps.cores.mega.utils import handle_message
@@ -32,12 +33,13 @@ If you don't know the answer to a question, please don't share false information
 """
         return template.format(context=context_str, question=question)
 
+load_dotenv(".env")
+
 
 MEGA_SERVICE_PORT = int(os.getenv("MEGA_SERVICE_PORT", 8888))
 GUARDRAIL_SERVICE_HOST_IP = os.getenv("GUARDRAIL_SERVICE_HOST_IP", "0.0.0.0")
 GUARDRAIL_SERVICE_PORT = int(os.getenv("GUARDRAIL_SERVICE_PORT", 80))
 
-# Fix environment variable names to match initial-setup.sh
 EMBEDDING_SERVER_HOST_IP = os.getenv("EMBEDDING_SERVICE_HOST_IP", "0.0.0.0")
 EMBEDDING_SERVER_PORT = int(os.getenv("EMBEDDING_SERVICE_PORT", 8007))
 
@@ -50,7 +52,13 @@ RERANK_SERVER_PORT = int(os.getenv("RERANKER_SERVICE_PORT", 8005))
 LLM_SERVER_HOST_IP = os.getenv("LLM_SERVICE_HOST_IP", "0.0.0.0")
 LLM_SERVER_PORT = int(os.getenv("LLM_SERVICE_PORT", 8008))
 
-LLM_MODEL = os.getenv("LLM_MODEL_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
+LLM_MODEL = os.getenv("LLM_MODEL_ID", "llama3")
+
+QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
+QDRANT_EMBED_DIMENSION = os.getenv("QDRANT_EMBED_DIMENSION", 768)
+QDRANT_INDEX_NAME = os.getenv("QDRANT_INDEX_NAME", "rag_qdrant")
+print(f"QDRANT_HOST: {QDRANT_HOST}, QDRANT_PORT: {QDRANT_PORT}, QDRANT_EMBED_DIMENSION: {QDRANT_EMBED_DIMENSION}, QDRANT_INDEX_NAME: {QDRANT_INDEX_NAME}")
 
 
 def align_inputs(self, inputs, cur_node, runtime_graph, llm_parameters_dict, **kwargs):
@@ -63,6 +71,9 @@ def align_inputs(self, inputs, cur_node, runtime_graph, llm_parameters_dict, **k
         if retriever_parameters:
             inputs.update(retriever_parameters.model_dump())
     elif self.services[cur_node].service_type == ServiceType.LLM:
+        # Debug the inputs coming in
+        print(f"LLM inputs before transformation: {inputs}")
+        
         # convert TGI/vLLM to unified OpenAI /v1/chat/completions format
         next_inputs = {}
         next_inputs["model"] = LLM_MODEL
@@ -70,10 +81,33 @@ def align_inputs(self, inputs, cur_node, runtime_graph, llm_parameters_dict, **k
         next_inputs["max_tokens"] = llm_parameters_dict["max_tokens"]
         next_inputs["top_p"] = llm_parameters_dict["top_p"]
         next_inputs["stream"] = inputs["stream"]
-        next_inputs["frequency_penalty"] = inputs["frequency_penalty"]
-        # next_inputs["presence_penalty"] = inputs["presence_penalty"]
-        # next_inputs["repetition_penalty"] = inputs["repetition_penalty"]
-        next_inputs["temperature"] = inputs["temperature"]
+        
+        # Only include parameters that are actually supported by the LLM API
+        if "frequency_penalty" in inputs:
+            next_inputs["frequency_penalty"] = inputs["frequency_penalty"]
+        if "temperature" in inputs:
+            next_inputs["temperature"] = inputs["temperature"]
+        
+        # Log the final request being sent
+        print(f"LLM request being sent: {json.dumps(next_inputs, indent=2)}")
+        
+        # For debugging - try a direct request to verify the LLM service is working
+        # try:
+        #     direct_url = f"http://{LLM_SERVER_HOST_IP}:{LLM_SERVER_PORT}/v1/chat/completions"
+        #     print(f"Making direct test request to: {direct_url}")
+        #     direct_response = requests.post(
+        #         direct_url,
+        #         json=next_inputs,
+        #         timeout=5
+        #     )
+        #     print(f"Direct LLM test response status: {direct_response.status_code}")
+        #     if direct_response.status_code == 200:
+        #         print(f"Direct response sample: {direct_response.text[:100]}...")
+        #     else:
+        #         print(f"Error response: {direct_response.text}")
+        # except Exception as e:
+        #     print(f"Direct test request failed: {str(e)}")
+        
         inputs = next_inputs
     return inputs
 
@@ -96,7 +130,7 @@ def align_outputs(self, data, cur_node, inputs, runtime_graph, llm_parameters_di
         print(f"Retriever service response: {data.values()}")
         print(f"Available attributes in data: {data.__dict__ if hasattr(data, '__dict__') else vars(data) if hasattr(data, '__slots__') else dir(data)}")
        
-        docs = [doc["text"] for doc in data.get["retrieved_docs"]]
+        docs = [doc["text"] for doc in data.get("retrieved_docs")]
 
         with_rerank = runtime_graph.downstream(cur_node)[0].startswith("rerank")
         if with_rerank and docs:
@@ -171,12 +205,17 @@ def align_outputs(self, data, cur_node, inputs, runtime_graph, llm_parameters_di
 
 
 def align_generator(self, gen, **kwargs):
-    # openai reaponse format
-    # b'data:{"id":"","object":"text_completion","created":1725530204,"model":"meta-llama/Meta-Llama-3-8B-Instruct","system_fingerprint":"2.0.1-native","choices":[{"index":0,"delta":{"role":"assistant","content":"?"},"logprobs":null,"finish_reason":null}]}\n\n'
+    print("Starting align_generator with stream response")
     for line in gen:
         line = line.decode("utf-8")
+        print(f"Raw stream line: {line}")
+        
         start = line.find("{")
         end = line.rfind("}") + 1
+
+        if start == -1 or end == 0:
+            print("No valid JSON found in line, skipping")
+            continue
 
         json_str = line[start:end]
         try:
@@ -186,9 +225,16 @@ def align_generator(self, gen, **kwargs):
                 json_data["choices"][0]["finish_reason"] != "eos_token"
                 and "content" in json_data["choices"][0]["delta"]
             ):
-                yield f"data: {repr(json_data['choices'][0]['delta']['content'].encode('utf-8'))}\n\n"
+                content = json_data["choices"][0]["delta"]["content"]
+                print(f"Yielding content: {content}")
+                # Format as proper SSE with JSON payload
+                response = json.dumps({"content": content})
+                yield f"data: {response}\n\n"
         except Exception as e:
-            yield f"data: {repr(json_str.encode('utf-8'))}\n\n"
+            print(f"Error processing JSON: {str(e)}")
+            # Properly format as SSE
+            yield f"data: {json.dumps({'content': json_str})}\n\n"
+    print("Stream complete, sending DONE marker")
     yield "data: [DONE]\n\n"
 
 
@@ -231,6 +277,9 @@ class ChatWithPdfService:
             service_type=ServiceType.RERANK,
         )
 
+        # Print the LLM service configuration for debugging
+        print(f"LLM service configured at: http://{LLM_SERVER_HOST_IP}:{LLM_SERVER_PORT}/v1/chat/completions")
+        
         llm = MicroService(
             name="llm",
             host=LLM_SERVER_HOST_IP,
@@ -246,9 +295,25 @@ class ChatWithPdfService:
 
     async def handle_request(self, request: Request):
         data = await request.json()
+        print(f"Received request: {data}")
+        
+        # Set stream explicitly to True
         stream_opt = data.get("stream", True)
+        
+        # Fix message format if it's not properly structured
+        if "messages" in data and isinstance(data["messages"], str):
+            print("Converting string message to proper format")
+            data["messages"] = [{"role": "user", "content": data["messages"]}]
+        
+        # Ensure data is valid before proceeding
+        if not data.get("messages"):
+            return {"error": "No messages provided in request"}
+        
         chat_request = ChatCompletionRequest.model_validate(data)
         prompt = handle_message(chat_request.messages)
+        print(f"Processed prompt: {prompt}")
+        
+        # Ensure streaming is explicitly enabled
         parameters = LLMParams(
             max_tokens=chat_request.max_tokens if chat_request.max_tokens else 1024,
             top_k=chat_request.top_k if chat_request.top_k else 10,
@@ -272,13 +337,16 @@ class ChatWithPdfService:
             top_n=chat_request.top_n if chat_request.top_n else 1,
         )
         result_dict, runtime_graph = await self.megaservice.schedule(
-            initial_inputs={"text": prompt},
+            initial_inputs={"text": prompt, "stream": True},  # Explicitly set stream here as well
             llm_parameters=parameters,
             retriever_parameters=retriever_parameters,
             reranker_parameters=reranker_parameters,
         )
+        
         for node, response in result_dict.items():
+            print(f"Node {node} response type: {type(response)}")
             if isinstance(response, StreamingResponse):
+                print("Returning StreamingResponse")
                 return response
         last_node = runtime_graph.all_leaves()[-1]
         response = result_dict[last_node]["text"]
@@ -312,7 +380,7 @@ class ChatWithPdfService:
 
 # if __name__ == "__main__":
 
-load_dotenv(".env")
+# load_dotenv(".env")
 
 chat_with_pdf = ChatWithPdfService(host=os.getenv("HOST_IP"), port=MEGA_SERVICE_PORT)
 chat_with_pdf.add_remote_service()

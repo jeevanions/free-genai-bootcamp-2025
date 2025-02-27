@@ -60,6 +60,7 @@ export LLM_SERVICE_ENDPOINT="${HOST_IP}:${LLM_SERVICE_PORT}"
 export VECTORDB_QDRANT_SERVICE_ENDPOINT="${HOST_IP}:${VECTORDB_QDRANT_SERVICE_PORT}"
 export DATAPREP_SERVICE_ENDPOINT="${HOST_IP}:${DATAPREP_MICROSERVICE_PORT}"
 export RETRIEVER_SERVICE_ENDPOINT="${HOST_IP}:${RETRIEVER_PORT}"
+export RERANKER_SERVICE_ENDPOINT="${HOST_IP}:${RERANKER_PORT}"
 
 export TAG=1.2 # Latest update to the Dataprep is broken
 
@@ -86,7 +87,9 @@ curl http://${LLM_SERVICE_ENDPOINT}/v1/chat/completions \
       "max_tokens": 100
     }'
 
-# To test Qudrant using microservice
+
+
+# To Inject Qdrant using microservice
 
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
@@ -94,6 +97,10 @@ curl -X POST \
     -F "chunk_size=1500" \
     -F "chunk_overlap=100" \
     http://${DATAPREP_SERVICE_ENDPOINT}/v1/dataprep/ingest
+
+# To Test the Qdrant via microservice
+
+
 
 # To Test Embedding Service
 
@@ -108,9 +115,20 @@ export test_embedding=$(python3 -c "import random; embedding = [random.uniform(-
 
 curl http://${RETRIEVER_SERVICE_ENDPOINT}/v1/retrieval \
 -X POST \
--d "{\"text\":\"Define responsible AI?\",\"embedding\":${test_embedding}}" \
+-d "{\"text\":\"What is Inductive Biases?\",\"embedding\":${test_embedding}}" \
 -H 'Content-Type: application/json'
 
+
+curl http://${RETRIEVER_SERVICE_ENDPOINT}/v1/health_check \
+  -X GET \
+  -H 'Content-Type: application/json'
+
+# To Test reranker
+
+curl http://${RERANKER_SERVICE_ENDPOINT}/v1/reranking \
+-X POST \
+-d '{"initial_query":"What is Deep Learning?", "retrieved_docs": [{"text":"Deep Learning is not..."}, {"text":"Deep learning is..."}]}' \
+-H 'Content-Type: application/json'
 
 # Setup Needed to run the chat app
 
@@ -128,5 +146,16 @@ export RERANKER_SERVICE_PORT=8005
 curl http://${HOST_IP}:${MEGA_SERVICE_PORT}/v1/chatqna \
     -H "Content-Type: application/json" \
     -d '{
-        "messages": "What is responsible AI?"
+        "messages": "What is Inductive Biases?"
     }'
+
+
+
+# To Run retriver from locally
+
+export QDRANT_HOST=${your_qdrant_host_ip}
+export QDRANT_PORT=6333
+export EMBED_DIMENSION=${your_embedding_dimension}
+export INDEX_NAME=${your_index_name}
+export TEI_EMBEDDING_ENDPOINT="http://${your_ip}:6060"
+export RETRIEVER_COMPONENT_NAME="OPEA_RETRIEVER_QDRANT"

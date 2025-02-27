@@ -58,6 +58,7 @@ export VECTORDB_QDRANT_SERVICE_ENDPOINT="${HOST_IP}:${VECTORDB_QDRANT_SERVICE_PO
 export DATAPREP_SERVICE_ENDPOINT="${HOST_IP}:${DATAPREP_MICROSERVICE_PORT}"
 export RETRIEVER_SERVICE_ENDPOINT="${HOST_IP}:${RETRIEVER_PORT}"
 
+export TAG=1.2 # Latest update to the Dataprep is broken
 
 # Disable open telemetry for now
 export OTEL_SDK_DISABLED=true
@@ -124,5 +125,5 @@ export RERANKER_SERVICE_PORT=8005
    curl http://${HOST_IP}:${MEGA_SERVICE_PORT}/v1/chatqna \
        -H "Content-Type: application/json" \
        -d '{
-           "messages": "What is the revenue of Nike in 2023?"
+           "messages": "What is responsible AI?"
        }'

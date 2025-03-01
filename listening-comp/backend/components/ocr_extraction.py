@@ -2,10 +2,14 @@ import gradio as gr
 import os
 import re
 import cv2
-import pytesseract
-import subprocess
+import requests
+import json
+import traceback
 from PIL import Image
 import numpy as np
+
+# Tesseract service URL - change to your Docker container address
+TESSERACT_SERVICE_URL = os.getenv("TESSERACT_SERVICE_URL", "http://localhost:8000")
 
 def extract_video_id(url):
     """
@@ -18,139 +22,70 @@ def extract_video_id(url):
         return match.group(1)
     return None
 
-def download_youtube_video(url):
-    """
-    Download YouTube video using yt-dlp if not already downloaded
-    """
-    video_id = extract_video_id(url)
-    if not video_id:
-        return {"success": False, "message": "Invalid YouTube URL"}
-    
-    output_path = f"output/transcript-vid/{video_id}.mp4"
-    
-    # Check if video already exists
-    if os.path.exists(output_path):
-        return {"success": True, "message": "Video already downloaded", "path": output_path, "video_id": video_id}
-    
-    try:
-        # Create command to download video
-        command = [
-            "yt-dlp",
-            "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "-o", output_path,
-            url
-        ]
-        
-        # Execute the command
-        subprocess.run(command, check=True)
-        
-        return {"success": True, "message": "Video downloaded successfully", "path": output_path, "video_id": video_id}
-    except subprocess.CalledProcessError as e:
-        return {"success": False, "message": f"Error downloading video: {str(e)}"}
-    except Exception as e:
-        return {"success": False, "message": f"Unexpected error: {str(e)}"}
-
-def extract_frames(video_path, frame_interval=1):
-    """
-    Extract frames from video at specified intervals
-    """
-    try:
-        # Open the video file
-        video = cv2.VideoCapture(video_path)
-        
-        # Get video properties
-        fps = video.get(cv2.CAP_PROP_FPS)
-        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        
-        # Calculate frame extraction interval
-        frame_step = int(fps * frame_interval)
-        
-        frames = []
-        frame_count = 0
-        
-        while True:
-            ret, frame = video.read()
-            
-            if not ret:
-                break
-            
-            # Extract frame at specified interval
-            if frame_count % frame_step == 0:
-                frames.append(frame)
-            
-            frame_count += 1
-        
-        video.release()
-        
-        return {"success": True, "message": f"Extracted {len(frames)} frames", "frames": frames}
-    except Exception as e:
-        return {"success": False, "message": f"Error extracting frames: {str(e)}"}
-
-def perform_ocr(frames, language="ita"):
-    """
-    Perform OCR on extracted frames
-    """
-    try:
-        # Configure pytesseract language
-        config = f"-l {language} --oem 1 --psm 3"
-        
-        all_text = ""
-        
-        for i, frame in enumerate(frames):
-            # Convert frame to grayscale
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
-            # Apply thresholding to enhance text
-            _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
-            
-            # Perform OCR
-            text = pytesseract.image_to_string(thresh, config=config)
-            
-            # Add non-empty text to results
-            if text.strip():
-                all_text += f"[Frame {i}] {text}\n"
-        
-        return {"success": True, "message": "OCR completed successfully", "text": all_text}
-    except Exception as e:
-        return {"success": False, "message": f"Error performing OCR: {str(e)}"}
-
 def process_video_for_ocr(url, frame_interval=1, language="ita"):
     """
-    Process YouTube video for OCR extraction
+    Process YouTube video for OCR extraction by calling the Tesseract service
     """
-    # First download the video
-    download_result = download_youtube_video(url)
-    
-    if not download_result["success"]:
-        return download_result["message"], ""
-    
-    # Extract frames from the video
-    frames_result = extract_frames(download_result["path"], frame_interval)
-    
-    if not frames_result["success"]:
-        return frames_result["message"], ""
-    
-    # Perform OCR on the extracted frames
-    ocr_result = perform_ocr(frames_result["frames"], language)
-    
-    if not ocr_result["success"]:
-        return ocr_result["message"], ""
-    
-    # Save the OCR text to a file
-    video_id = download_result["video_id"]
-    output_path = f"output/transcript-ocr/{video_id}_ocr.txt"
-    
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(ocr_result["text"])
-    
-    return f"OCR completed and saved to {output_path}", ocr_result["text"]
+    try:
+        print(f"Processing video: {url}")
+        print(f"Connecting to Tesseract service at: {TESSERACT_SERVICE_URL}")
+        
+        # Check if service is available
+        try:
+            response = requests.get(f"{TESSERACT_SERVICE_URL}/version")
+            if response.status_code == 200:
+                data = response.json()
+                print(f"Tesseract Service is running. Version: {data.get('version', 'unknown')}")
+            else:
+                return f"Tesseract Service not available: Status code {response.status_code}", ""
+        except requests.RequestException as e:
+            return f"Could not connect to Tesseract service: {str(e)}", ""
+        
+        # Call the OCR service for YouTube video processing
+        payload = {
+            "url": url,
+            "frame_interval": float(frame_interval),
+            "language": language
+        }
+        
+        print(f"Sending request to Tesseract service with parameters: {payload}")
+        response = requests.post(
+            f"{TESSERACT_SERVICE_URL}/ocr/youtube",
+            json=payload
+        )
+        
+        if response.status_code != 200:
+            return f"Error from Tesseract service: Status code {response.status_code}", ""
+        
+        result = response.json()
+        
+        if not result.get("success", False):
+            return result.get("message", "Unknown error"), ""
+        
+        # Save a local copy of the OCR text
+        video_id = extract_video_id(url)
+        if video_id:
+            os.makedirs("output/transcript-ocr", exist_ok=True)
+            output_path = f"output/transcript-ocr/{video_id}_ocr.txt"
+            
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(result.get("text", ""))
+            
+            print(f"Saved local copy of OCR results to {output_path}")
+        
+        return result.get("message", "OCR completed"), result.get("text", "")
+    except Exception as e:
+        error_msg = f"Error in process_video_for_ocr: {str(e)}"
+        print(error_msg)
+        print(traceback.format_exc())
+        return error_msg, ""
 
 def create_ocr_interface(parent):
     """
-    Creates the OCR extraction interface
+    Creates the OCR extraction interface using the Tesseract Docker service
     """
     with parent:
-        gr.Markdown("### OCR Extraction using OpenCV and Tesseract")
+        gr.Markdown("### OCR Extraction using Tesseract Docker Service")
         gr.Markdown("Enter a YouTube URL to extract text from video frames using OCR.")
         
         with gr.Row():
@@ -189,11 +124,43 @@ def create_ocr_interface(parent):
                 max_lines=30,
             )
         
+        # Debug output
+        with gr.Accordion("Debug Information", open=False):
+            debug_info = gr.Textbox(
+                label="Processing Log",
+                value="Debug information will appear here during processing",
+                lines=10
+            )
+        
         # Set up event handlers
+        def process_with_debug(url, interval, language):
+            try:
+                # Redirect print output to capture logs
+                import io
+                import sys
+                old_stdout = sys.stdout
+                new_stdout = io.StringIO()
+                sys.stdout = new_stdout
+                
+                # Process the video
+                status, transcript = process_video_for_ocr(url, interval, language)
+                
+                # Get the captured output
+                sys.stdout = old_stdout
+                debug_text = new_stdout.getvalue()
+                
+                return status, transcript, debug_text
+            except Exception as e:
+                sys.stdout = old_stdout
+                error_details = traceback.format_exc()
+                print(f"Error in UI handler: {str(e)}")
+                print(f"Full error details: {error_details}")
+                return f"Error: {str(e)}", "", error_details
+        
         process_btn.click(
-            process_video_for_ocr,
+            process_with_debug,
             inputs=[url_input, frame_interval, language_input],
-            outputs=[status_output, ocr_output],
+            outputs=[status_output, ocr_output, debug_info],
         )
         
         return ocr_output

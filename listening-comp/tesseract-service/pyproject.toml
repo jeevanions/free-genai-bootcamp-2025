@@ -1,0 +1,19 @@
+[project]
+name = "tesseract-service"
+version = "0.1.0"
+description = "Tesseract OCR Service"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.1",
+    "python-multipart>=0.0.7",
+    "pytesseract>=0.3.10",
+    "opencv-python>=4.7.0",
+    "numpy>=1.24.0",
+    "pillow>=10.0.0",
+    "yt-dlp>=2023.3.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

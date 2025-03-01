@@ -26,25 +26,26 @@ try:
         
         # Initialize Azure OpenAI client
         print("Initializing Azure OpenAI client...")
-        # Use a hardcoded API version if the environment variable is not set
-        api_version = os.getenv("OPENAI_API_VERSION") or "2023-05-15"
-        print(f"Using API version: {api_version}")
-        
+        # Ensure the Azure endpoint has the https:// prefix
+        azure_endpoint = os.getenv("OPENAI_API_BASE")
+        if azure_endpoint and not azure_endpoint.startswith("https://"):
+            azure_endpoint = f"https://{azure_endpoint}"
+            print(f"Added https:// prefix to endpoint: {azure_endpoint}")
+            
         client = AzureOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"),
-            api_version=api_version,
-            azure_endpoint=os.getenv("OPENAI_API_BASE"),
+            api_version=os.getenv("OPENAI_API_VERSION"),
+            azure_endpoint=azure_endpoint,
         )
         
         # Test the client with a simple completion to verify it works
         try:
             print(f"Testing connection with deployment name: {os.getenv('OPENAI_API_DEPLOYMENT_NAME')}")
-            # In Azure OpenAI, the deployment name is used directly as the model name
             deployment_name = os.getenv("OPENAI_API_DEPLOYMENT_NAME")
-            print(f"Using deployment name as model: {deployment_name}")
             
+            # FIXED: Use correct path for Azure OpenAI API
             test_response = client.chat.completions.create(
-                model=deployment_name,  # Use deployment name directly
+                model=deployment_name,
                 messages=[{"role": "user", "content": "Hello, this is a test."}],
                 max_tokens=10
             )
@@ -53,6 +54,15 @@ try:
         except Exception as api_error:
             print(f"Error testing API connection: {str(api_error)}")
             print(f"Full error details: {traceback.format_exc()}")
+            
+            # Check if this is a deployment name issue
+            if "Resource not found" in str(api_error):
+                print("\nPOSSIBLE FIX: The deployment name may be incorrect.")
+                print("Please verify in your Azure OpenAI Studio that:")
+                print(f"1. The deployment name '{deployment_name}' exists exactly as specified")
+                print("2. Your Azure OpenAI resource has the correct permissions")
+                print("3. Your API key has access to this specific deployment")
+            
             USE_MOCK = True
     else:
         missing_vars = []
@@ -129,70 +139,22 @@ def create_chat_interface(parent):
                         for msg in chat_history:
                             messages.append({"role": msg["role"], "content": msg["content"]})
                         
-                        # Get deployment name and API version
+                        print(f"Sending request to Azure OpenAI with deployment: {os.getenv('OPENAI_API_DEPLOYMENT_NAME')}")
+                        # Call the OpenAI API
                         deployment_name = os.getenv("OPENAI_API_DEPLOYMENT_NAME")
-                        api_version = os.getenv("OPENAI_API_VERSION") or "2023-05-15"  # Use hardcoded version if not set
                         
-                        print(f"Sending request to Azure OpenAI with deployment: {deployment_name} and API version: {api_version}")
+                        # FIXED: Make sure we're sending the correct message format
+                        # The previous code had a logic error - it was excluding the current user message
+                        response = client.chat.completions.create(
+                            model=deployment_name,
+                            messages=messages,  # Include all messages including the current one
+                            temperature=0.7,
+                            max_tokens=800,
+                        )
                         
-                        # Try using the SDK first
-                        try:
-                            response = client.chat.completions.create(
-                                model=deployment_name,
-                                messages=messages[:-1],  # Exclude the user message we just added
-                                temperature=0.7,
-                                max_tokens=800,
-                            )
-                            
-                            # Extract the response text
-                            bot_message = response.choices[0].message.content
-                            print("Successfully received response from Azure OpenAI")
-                        except Exception as sdk_error:
-                            print(f"SDK approach failed: {sdk_error}")
-                            
-                            # Try direct REST API calls as fallback
-                            import requests
-                            
-                            api_base = os.getenv("OPENAI_API_BASE")
-                            api_key = os.getenv("OPENAI_API_KEY")
-                            
-                            # Try multiple endpoint formats
-                            endpoints = [
-                                f"{api_base}/openai/deployments/{deployment_name}/chat/completions?api-version={api_version}",
-                                f"{api_base}/deployments/{deployment_name}/chat/completions?api-version={api_version}"
-                            ]
-                            
-                            headers = {
-                                "Content-Type": "application/json",
-                                "api-key": api_key,
-                            }
-                            
-                            payload = {
-                                "messages": messages[:-1],  # Exclude the user message we just added
-                                "temperature": 0.7,
-                                "max_tokens": 800,
-                            }
-                            
-                            success = False
-                            for i, url in enumerate(endpoints):
-                                print(f"Trying endpoint format {i+1}: {url}")
-                                try:
-                                    response = requests.post(url, headers=headers, json=payload, timeout=10)
-                                    
-                                    if response.status_code == 200:
-                                        print(f"Direct API call succeeded with endpoint format {i+1}!")
-                                        result = response.json()
-                                        bot_message = result['choices'][0]['message']['content']
-                                        success = True
-                                        break
-                                    else:
-                                        print(f"Endpoint format {i+1} failed with status code: {response.status_code}")
-                                        print(response.text)
-                                except Exception as e:
-                                    print(f"Error with endpoint format {i+1}: {e}")
-                            
-                            if not success:
-                                raise Exception("All direct API call attempts failed.")
+                        # Extract the response text
+                        bot_message = response.choices[0].message.content
+                        print("Successfully received response from Azure OpenAI")
                     except Exception as api_error:
                         import traceback
                         print(f"Error calling Azure OpenAI API: {str(api_error)}")

@@ -26,6 +26,10 @@ GREEN = "#008C45"
 WHITE = "#F4F5F0"
 RED = "#CD212A"
 
+# Function to change tabs
+def change_tab(n):
+    return gr.Tabs(selected=n)
+
 # Create the Gradio app with Italian-themed styling
 with gr.Blocks(
     css="""
@@ -63,6 +67,9 @@ with gr.Blocks(
     with gr.Row(elem_id="app-header"):
         gr.HTML("<h1>🇮🇹 Italian Language Learning Platform 🇮🇹</h1>")
     
+    # Add a hidden state variable to track active tab
+    active_tab = gr.State(value=0)
+    
     # Main layout with sidebar and content area
     with gr.Row():
         # Sidebar for navigation
@@ -79,36 +86,54 @@ with gr.Blocks(
         
         # Main content area with tabs
         with gr.Column(scale=4):
-            with gr.Tabs() as tabs:
-                chat_tab = gr.Tab("Chat with GPT-4")
-                create_chat_interface(chat_tab)
-                
-                yt_transcript_tab = gr.Tab("YouTube Transcript")
-                create_youtube_transcript_interface(yt_transcript_tab)
-                
-                whisper_tab = gr.Tab("Whisper Transcript")
-                create_whisper_transcript_interface(whisper_tab)
-                
-                ocr_tab = gr.Tab("OCR Extraction")
-                create_ocr_interface(ocr_tab)
-                
-                rag_tab = gr.Tab("RAG Implementation")
-                create_rag_interface(rag_tab)
-                
-                learning_tab = gr.Tab("Interactive Learning")
-                create_interactive_learning_interface(learning_tab)
+            tabs = gr.Tabs() 
+            with tabs:
+                with gr.TabItem("Chat with GPT-4", id=0):
+                    create_chat_interface(gr.Group())
+                    
+                with gr.TabItem("YouTube Transcript", id=1):
+                    create_youtube_transcript_interface(gr.Group())
+                    
+                with gr.TabItem("Whisper Transcript", id=2):
+                    create_whisper_transcript_interface(gr.Group())
+                    
+                with gr.TabItem("OCR Extraction", id=3):
+                    create_ocr_interface(gr.Group())
+                    
+                with gr.TabItem("RAG Implementation", id=4):
+                    create_rag_interface(gr.Group())
+                    
+                with gr.TabItem("Interactive Learning", id=5):
+                    create_interactive_learning_interface(gr.Group())
     
     # Footer
     with gr.Row(elem_classes="footer"):
         gr.Markdown("© 2025 Italian Language Learning Platform. All rights reserved.")
     
-    # Set up navigation button click events
-    chat_btn.click(lambda: gr.Tabs.update(selected="Chat with GPT-4"), None, tabs)
-    yt_transcript_btn.click(lambda: gr.Tabs.update(selected="YouTube Transcript"), None, tabs)
-    whisper_btn.click(lambda: gr.Tabs.update(selected="Whisper Transcript"), None, tabs)
-    ocr_btn.click(lambda: gr.Tabs.update(selected="OCR Extraction"), None, tabs)
-    rag_btn.click(lambda: gr.Tabs.update(selected="RAG Implementation"), None, tabs)
-    learning_btn.click(lambda: gr.Tabs.update(selected="Interactive Learning"), None, tabs)
+    # Connect buttons to tab selection function using the example approach
+    chat_btn.click(lambda: 0, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    yt_transcript_btn.click(lambda: 1, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    whisper_btn.click(lambda: 2, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    ocr_btn.click(lambda: 3, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    rag_btn.click(lambda: 4, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    learning_btn.click(lambda: 5, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
 
 # Add API endpoint for the frontend to start the backend
 def start_backend():

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  tesseract-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - tesseract-data:/app/output
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    networks:
+      - app-network
+
+#  listening-comp-app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "7860:7860"
+#    volumes:
+#      - app-data:/app/output
+#    depends_on:
+#      - tesseract-service
+#    environment:
+#      - OCR_SERVICE_URL=http://tesseract-service:8000
+#    networks:
+#      - app-network
+
+volumes:
+  tesseract-data:
+  app-data:
+
+networks:
+  app-network:
+    driver: bridge

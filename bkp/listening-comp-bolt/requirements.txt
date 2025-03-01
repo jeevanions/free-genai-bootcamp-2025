@@ -1,0 +1,13 @@
+gradio==4.19.2
+yt-dlp==2023.11.16
+openai==1.12.0
+python-dotenv==1.0.0
+opencv-python==4.8.1.78
+pytesseract==0.3.10
+youtube-transcript-api==0.6.1
+qdrant-client==1.13.2
+langchain==0.1.4
+langchain-openai==0.0.5
+langchain-community==0.0.13
+whisper==1.1.10
+gtts==2.3.2

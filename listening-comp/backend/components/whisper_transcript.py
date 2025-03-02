@@ -277,53 +277,63 @@ def create_whisper_transcript_interface(parent):
     Creates the Whisper transcript interface
     """
     with parent:
-        gr.Markdown("### Generate Transcript using Whisper")
-        gr.Markdown("Enter a YouTube URL to download the video and generate a transcript using Whisper.")
-        
-        with gr.Row():
-            url_input = gr.Textbox(
-                label="YouTube URL",
-                placeholder="https://www.youtube.com/watch?v=...",
-            )
-        
-        with gr.Row():
-            language_input = gr.Dropdown(
-                label="Language",
-                choices=["it", "en", "fr", "es", "de"],
-                value="it",
-                info="Select the language of the video"
-            )
-            process_btn = gr.Button("Process Video")
-        
-        with gr.Row():
-            status_output = gr.Textbox(label="Status")
-        
-        with gr.Row():
-            transcript_output = gr.TextArea(
-                label="Whisper Transcript",
-                placeholder="Transcript will appear here...",
-                lines=15,
-                max_lines=30,
-            )
-        
-        # Debug output
-        with gr.Accordion("Debug Information", open=True):
-            debug_info = gr.Textbox(
-                label="Error Details",
-                value="Debug information will appear here when errors occur",
-                lines=10
-            )
+        with gr.Group(elem_classes="content-section"):
+            gr.Markdown("### Generate Transcript using Whisper")
+            gr.Markdown("Enter a YouTube URL to download the video and generate a transcript using Whisper.")
+            
+            with gr.Row():
+                url_input = gr.Textbox(
+                    label="YouTube URL",
+                    placeholder="https://www.youtube.com/watch?v=...",
+                )
+            
+            with gr.Row():
+                language_input = gr.Dropdown(
+                    label="Language",
+                    choices=["it", "en", "fr", "es", "de"],
+                    value="it",
+                    info="Select the language of the video"
+                )
+                process_btn = gr.Button("Process Video", elem_classes="sidebar-btn")
+            
+            with gr.Row():
+                status_output = gr.Textbox(label="Status", elem_classes="status-msg")
+            
+            with gr.Row():
+                transcript_output = gr.TextArea(
+                    label="Whisper Transcript",
+                    placeholder="Transcript will appear here...",
+                    lines=15,
+                    max_lines=30,
+                )
+            
+            # Debug output
+            with gr.Accordion("Debug Information", open=False):
+                debug_info = gr.Textbox(
+                    label="Error Details",
+                    value="Debug information will appear here when errors occur",
+                    lines=10
+                )
         
         # Set up event handlers
         def process_with_debug(url, language):
             try:
+                status_output.elem_classes = "status-msg status-info"
                 status, transcript = process_youtube_video(url, language)
                 debug_text = "No errors occurred during processing."
+                
+                # Add success class if successful
+                if "Error" not in status:
+                    status_output.elem_classes = "status-msg status-success"
+                else:
+                    status_output.elem_classes = "status-msg status-error"
+                    
                 return status, transcript, debug_text
             except Exception as e:
                 error_details = traceback.format_exc()
                 print(f"Error in UI handler: {str(e)}")
                 print(f"Full error details: {error_details}")
+                status_output.elem_classes = "status-msg status-error"
                 return f"Error: {str(e)}", "", error_details
         
         process_btn.click(
@@ -333,3 +343,49 @@ def create_whisper_transcript_interface(parent):
         )
         
         return transcript_output
+
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Whisper Transcript Generator CLI")
+    parser.add_argument("--gui", action="store_true", help="Launch the GUI interface")
+    parser.add_argument("--url", type=str, help="YouTube URL to process")
+    parser.add_argument("--language", type=str, default="it", help="Language of the video (default: it)")
+    parser.add_argument("--output", type=str, help="Output path for the transcript file")
+    args = parser.parse_args()
+    
+    if args.gui:
+        # Launch the GUI interface
+        with gr.Blocks() as demo:
+            create_whisper_transcript_interface(gr.Group())
+        demo.launch()
+    elif args.url:
+        # Process the URL from CLI
+        print(f"Processing YouTube URL: {args.url}")
+        try:
+            print(f"Language: {args.language}")
+            print("Downloading and transcribing... This may take a few minutes.")
+            status, transcript = process_youtube_video(args.url, args.language)
+            
+            if "Error" not in status:
+                # Save to specified output path or default
+                import time
+                from pathlib import Path
+                output_path = args.output if args.output else f"output/transcripts/whisper_{int(time.time())}.txt"
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(transcript)
+                    
+                print(f"✅ {status}")
+                print(f"Transcript saved to {output_path}")
+            else:
+                print(f"❌ {status}")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+    else:
+        print("Please specify either --gui to launch the interface or --url to process a YouTube video.")
+        print("Example usage:")
+        print("  python whisper_transcript.py --gui")
+        print("  python whisper_transcript.py --url https://www.youtube.com/watch?v=... --language it --output path/to/output.txt")

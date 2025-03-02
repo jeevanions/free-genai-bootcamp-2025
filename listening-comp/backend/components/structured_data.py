@@ -148,6 +148,7 @@ def generate_structured_data(transcript_text, status_box):
     try:
         # Update status - using value property instead of update method
         status_message = "Generating structured data... This may take a minute."
+        status_box.elem_classes = "status-msg status-info"
         
         # Prepare the prompt
         prompt = f"""Convert the following Italian A1 listening comprehension video transcript and OCR text into structured JSON data. Follow these rules:
@@ -211,18 +212,18 @@ Transcript:
 def create_structured_data_interface(parent):
     """Create the structured data interface"""
     with parent:
-        gr.Markdown("## Generate Structured Data from Transcripts", elem_classes="content-section")
+        gr.Markdown("## Generate Structured Data from Transcripts")
         gr.Markdown("""
         Convert transcripts from YouTube, Whisper, or OCR into structured JSON data for language learning.
         This tool uses Azure OpenAI to analyze the content and organize it into a structured format.
-        """, elem_classes="content-section")
+        """)
         
         # Get available transcripts
         transcripts = get_available_transcripts()
         transcript_options = format_transcript_options(transcripts)
         
         with gr.Row():
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, elem_classes="content-section"):
                 gr.Markdown("### Select Transcript", elem_classes="nav-header")
                 transcript_dropdown = gr.Dropdown(
                     choices=transcript_options,
@@ -230,35 +231,35 @@ def create_structured_data_interface(parent):
                     info="Select a transcript to convert to structured data"
                 )
                 
-                preview_btn = gr.Button("Preview Transcript", variant="secondary")
-                generate_btn = gr.Button("Generate Structured Data", variant="primary")
+                preview_btn = gr.Button("Preview Transcript", elem_classes="sidebar-btn")
+                generate_btn = gr.Button("Generate Structured Data", elem_classes="sidebar-btn")
                 status_box = gr.Textbox(label="Status", interactive=False)
                 
-            with gr.Column(scale=2):
-                with gr.Tabs():
-                    with gr.TabItem("Transcript Preview"):
+            with gr.Column(scale=2, elem_classes="content-section"):
+                with gr.Tabs(elem_classes="content-tabs"):
+                    with gr.TabItem("Transcript Preview", elem_classes="tab-content"):
                         transcript_preview = gr.TextArea(
                             label="Transcript Content",
                             interactive=False,
                             lines=15
                         )
                     
-                    with gr.TabItem("Structured Data (JSON)"):
+                    with gr.TabItem("Structured Data (JSON)", elem_classes="tab-content"):
                         json_output = gr.JSON(label="Structured Data")
                     
-                    with gr.TabItem("Dialogue"):
+                    with gr.TabItem("Dialogue", elem_classes="tab-content"):
                         dialogue_output = gr.Dataframe(
                             headers=["Speaker", "Italian Text", "English Translation", "Timestamp"],
                             label="Dialogue"
                         )
                     
-                    with gr.TabItem("Vocabulary"):
+                    with gr.TabItem("Vocabulary", elem_classes="tab-content"):
                         vocabulary_output = gr.Dataframe(
                             headers=["Term", "Part of Speech", "Translation", "Example"],
                             label="Vocabulary"
                         )
                     
-                    with gr.TabItem("Grammar & Exercises"):
+                    with gr.TabItem("Grammar & Exercises", elem_classes="tab-content"):
                         grammar_output = gr.Dataframe(
                             headers=["Concept", "Explanation", "Examples"],
                             label="Grammar Concepts"
@@ -282,6 +283,7 @@ def create_structured_data_interface(parent):
             
             # Update status message first
             status_box.value = "Generating structured data... This may take a minute."
+            status_box.elem_classes = "status-msg status-info"
             
             # Generate structured data
             json_text, json_data = generate_structured_data(transcript_content, status_box)
@@ -289,8 +291,10 @@ def create_structured_data_interface(parent):
             # Update status message with result
             if json_data:
                 status_box.value = f"✅ Structured data generated successfully"
+                status_box.elem_classes = "status-msg status-success"
             else:
                 status_box.value = f"❌ Error generating structured data"
+                status_box.elem_classes = "status-msg status-error"
             
             if json_data:
                 # Process dialogue
@@ -326,17 +330,19 @@ def create_structured_data_interface(parent):
                         ])
                 
                 # Process exercises
-                exercises_html = "<div class='content-section'>"
+                exercises_html = "<div class='form-group'>"
                 if "exercises" in json_data:
                     for i, exercise in enumerate(json_data["exercises"]):
-                        exercises_html += f"<div style='margin-bottom: 1.5rem;'>"
-                        exercises_html += f"<p><strong>Question {i+1}:</strong> {exercise.get('question', '')}</p>"
-                        exercises_html += "<ul>"
+                        exercises_html += f"<div style='margin-bottom: 1.5rem; padding: 1rem; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #eaeaea;'>"
+                        exercises_html += f"<p style='color: #008C45; font-weight: 600;'><strong>Question {i+1}:</strong> {exercise.get('question', '')}</p>"
+                        exercises_html += "<ul style='list-style-type: none; padding-left: 1rem;'>"
                         for option in exercise.get("options", []):
-                            correct = "✓ " if option == exercise.get("correct_answer", "") else ""
-                            exercises_html += f"<li>{correct}{option}</li>"
+                            if option == exercise.get("correct_answer", ""):
+                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; background-color: rgba(0, 140, 69, 0.1); border-left: 4px solid #008C45; border-radius: 4px;'>✓ {option}</li>"
+                            else:
+                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid #eaeaea; border-radius: 4px;'>{option}</li>"
                         exercises_html += "</ul>"
-                        exercises_html += f"<p><small>Timestamp: {exercise.get('audio_timestamp', '')}</small></p>"
+                        exercises_html += f"<p style='font-size: 0.8rem; color: #666; margin-top: 0.5rem;'><small>Timestamp: {exercise.get('audio_timestamp', '')}</small></p>"
                         exercises_html += "</div>"
                 exercises_html += "</div>"
                 
@@ -351,6 +357,44 @@ def create_structured_data_interface(parent):
         )
 
 if __name__ == "__main__":
-    with gr.Blocks() as demo:
-        create_structured_data_interface(gr.Group())
-    demo.launch()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Structured Data Generator CLI")
+    parser.add_argument("--gui", action="store_true", help="Launch the GUI interface")
+    parser.add_argument("--transcript", type=str, help="Path to transcript file to process")
+    parser.add_argument("--output", type=str, help="Output path for the structured data JSON file")
+    args = parser.parse_args()
+    
+    if args.gui:
+        # Launch the GUI interface
+        with gr.Blocks() as demo:
+            create_structured_data_interface(gr.Group())
+        demo.launch()
+    elif args.transcript:
+        # Process the transcript from CLI
+        print(f"Processing transcript: {args.transcript}")
+        try:
+            with open(args.transcript, 'r', encoding='utf-8') as f:
+                transcript_text = f.read()
+                
+            print("Generating structured data... This may take a minute.")
+            json_text, json_data = generate_structured_data(transcript_text, None)
+            
+            if json_data:
+                # Save to specified output path or default
+                output_path = args.output if args.output else f"output/structured-data/structured_{int(time.time())}.json"
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(json_data, indent=2))
+                    
+                print(f"✅ Structured data generated successfully and saved to {output_path}")
+            else:
+                print(f"❌ Error generating structured data")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+    else:
+        print("Please specify either --gui to launch the interface or --transcript to process a file.")
+        print("Example usage:")
+        print("  python structured_data.py --gui")
+        print("  python structured_data.py --transcript path/to/transcript.txt --output path/to/output.json")

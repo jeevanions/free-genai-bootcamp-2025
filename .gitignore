@@ -24,6 +24,13 @@ venv/
 .coverage
 htmlcov/
 
+# Binary and Database files
+*.db
+**/tmp/main
+**/tmp/*
+*.exe
+*.bin
+
 # Flask
 instance/
 .webassets-cache

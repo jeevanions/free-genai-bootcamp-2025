@@ -222,8 +222,10 @@ def create_rag_interface(parent):
     Creates the RAG implementation interface
     """
     with parent:
-        gr.Markdown("### RAG Implementation with Qdrant")
-        gr.Markdown("Add documents to the vector store and query them using RAG.")
+        # Header for the RAG implementation section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## RAG Implementation with Qdrant")
+            gr.Markdown("Add documents to the vector store and query them using RAG.", elem_classes="chat-description")
         
         # Get available documents
         documents = list_available_documents()
@@ -232,48 +234,50 @@ def create_rag_interface(parent):
         
         with gr.Tabs():
             with gr.Tab("Add Documents"):
-                with gr.Row():
-                    document_dropdown = gr.Dropdown(
-                        label="Select Document",
-                        choices=document_paths,
-                        info="Select a document to add to the vector store"
-                    )
+                with gr.Group():
+                    with gr.Row():
+                        document_dropdown = gr.Dropdown(
+                            label="Select Document",
+                            choices=document_paths,
+                            info="Select a document to add to the vector store"
+                        )
+                        
+                        document_type_dropdown = gr.Dropdown(
+                            label="Document Type",
+                            choices=document_types + ["custom"],
+                            value=document_types[0] if document_types else "custom",
+                            info="Select the type of document"
+                        )
                     
-                    document_type_dropdown = gr.Dropdown(
-                        label="Document Type",
-                        choices=document_types + ["custom"],
-                        value=document_types[0] if document_types else "custom",
-                        info="Select the type of document"
-                    )
-                
-                with gr.Row():
-                    add_btn = gr.Button("Add Document to Vector Store")
-                
-                with gr.Row():
-                    add_status = gr.Textbox(label="Status")
+                    with gr.Row():
+                        add_btn = gr.Button("Add Document to Vector Store", variant="primary", elem_classes="send-btn")
+                    
+                    with gr.Row():
+                        add_status = gr.Textbox(label="Status", elem_classes="status-box")
             
             with gr.Tab("Query Documents"):
-                with gr.Row():
-                    query_input = gr.Textbox(
-                        label="Query",
-                        placeholder="Ask a question about the Italian content...",
-                    )
+                with gr.Group():
+                    with gr.Row():
+                        query_input = gr.Textbox(
+                            label="Query",
+                            placeholder="Ask a question about the Italian content...",
+                        )
+                        
+                        filter_dropdown = gr.Dropdown(
+                            label="Filter by Document Type",
+                            choices=["all"] + document_types,
+                            value="all",
+                            info="Filter results by document type"
+                        )
                     
-                    filter_dropdown = gr.Dropdown(
-                        label="Filter by Document Type",
-                        choices=["all"] + document_types,
-                        value="all",
-                        info="Filter results by document type"
-                    )
-                
-                with gr.Row():
-                    query_btn = gr.Button("Query Vector Store")
-                
-                with gr.Row():
-                    answer_output = gr.Textbox(
-                        label="Answer",
-                        lines=10,
-                    )
+                    with gr.Row():
+                        query_btn = gr.Button("Query Vector Store", variant="primary", elem_classes="send-btn")
+                    
+                    with gr.Row():
+                        answer_output = gr.Textbox(
+                            label="Answer",
+                            lines=10,
+                        )
         
         # Set up event handlers
         add_btn.click(

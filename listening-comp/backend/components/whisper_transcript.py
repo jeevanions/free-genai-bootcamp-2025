@@ -277,14 +277,17 @@ def create_whisper_transcript_interface(parent):
     Creates the Whisper transcript interface
     """
     with parent:
-        with gr.Group(elem_classes="content-section"):
-            gr.Markdown("### Generate Transcript using Whisper")
-            gr.Markdown("Enter a YouTube URL to download the video and generate a transcript using Whisper.")
-            
+        # Header for the Whisper transcript section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## Generate Transcript using Whisper", elem_classes="dark-header")
+            gr.Markdown("Enter a YouTube URL to download the video and generate a transcript using Whisper.", elem_classes="chat-description dark-description")
+        
+        with gr.Group():
             with gr.Row():
                 url_input = gr.Textbox(
                     label="YouTube URL",
                     placeholder="https://www.youtube.com/watch?v=...",
+                    elem_classes="dark-textbox"
                 )
             
             with gr.Row():
@@ -292,12 +295,13 @@ def create_whisper_transcript_interface(parent):
                     label="Language",
                     choices=["it", "en", "fr", "es", "de"],
                     value="it",
-                    info="Select the language of the video"
+                    info="Select the language of the video",
+                    elem_classes="dark-dropdown"
                 )
-                process_btn = gr.Button("Process Video", elem_classes="sidebar-btn")
+                process_btn = gr.Button("Process Video", variant="primary", elem_classes="send-btn")
             
             with gr.Row():
-                status_output = gr.Textbox(label="Status", elem_classes="status-msg")
+                status_output = gr.Textbox(label="Status", elem_classes="status-box dark-textbox")
             
             with gr.Row():
                 transcript_output = gr.TextArea(
@@ -305,6 +309,7 @@ def create_whisper_transcript_interface(parent):
                     placeholder="Transcript will appear here...",
                     lines=15,
                     max_lines=30,
+                    elem_classes="dark-textarea"
                 )
             
             # Debug output
@@ -312,7 +317,8 @@ def create_whisper_transcript_interface(parent):
                 debug_info = gr.Textbox(
                     label="Error Details",
                     value="Debug information will appear here when errors occur",
-                    lines=10
+                    lines=10,
+                    elem_classes="dark-textbox"
                 )
         
         # Set up event handlers

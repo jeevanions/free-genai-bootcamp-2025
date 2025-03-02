@@ -91,13 +91,20 @@ with gr.Blocks(
     
     /* Main content area */
     .main-content-area {
-        background-color: white;
+        background-color: #1e293b;
         border-radius: 10px;
         overflow: hidden;
     }
     
-    /* Hide default tab navigation */
-    .tabs > .tab-nav {
+    .content-section {
+        background-color: #1e293b;
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+    
+    /* Hide default tab navigation only for main tabs */
+    .main-content-area > .tabs > .tab-nav {
         display: none !important;
     }
     
@@ -127,7 +134,7 @@ with gr.Blocks(
     }
     
     .chat-input-container {
-        background-color: white !important;
+        background-color: #1e293b !important;
         padding: 0.5rem !important;
         border-top: 1px solid #e5e7eb;
     }
@@ -150,7 +157,8 @@ with gr.Blocks(
     
     /* Form elements styling */
     input, select, textarea {
-        background-color: white !important;
+        background-color: #1e293b !important;
+        color: white !important;
         border: 1px solid #d1d5db !important;
         border-radius: 0.375rem !important;
     }
@@ -163,6 +171,30 @@ with gr.Blocks(
     /* Tab content styling */
     .tab-content {
         padding: 1.5rem;
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    /* Tab navigation styling */
+    .tabs > .tab-nav {
+        display: flex !important;
+        background-color: #1e293b !important;
+    }
+    
+    .tabs > .tab-nav > button {
+        background-color: #1e293b !important;
+        color: white !important;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .tabs > .tab-nav > button[data-selected="true"] {
+        background-color: #2d3748 !important;
+        border-bottom: 2px solid #008C45 !important;
+    }
+    
+    .content-tabs > .tab-nav {
+        display: flex !important;
+        background-color: #1e293b !important;
     }
     
     /* Gradio component overrides */
@@ -179,29 +211,106 @@ with gr.Blocks(
     }
     
     .dark .gr-input, .dark .gr-textarea, .dark .gr-dropdown {
-        background-color: white !important;
-        color: #111827 !important;
+        background-color: #1e293b !important;
+        color: white !important;
     }
     
     .dark .gr-panel {
-        background-color: white !important;
-        color: #111827 !important;
+        background-color: #1e293b !important;
+        color: white !important;
     }
     
     .dark .gr-box {
-        background-color: white !important;
+        background-color: #1e293b !important;
+        color: white !important;
     }
     
     .dark .gr-form {
-        background-color: white !important;
+        background-color: #1e293b !important;
+        color: white !important;
     }
     
     .dark .gr-padded {
-        background-color: white !important;
+        background-color: #1e293b !important;
+        color: white !important;
     }
     
     .dark .gr-compact {
-        background-color: white !important;
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    /* Custom styling for dark theme components */
+    .dark-header, .dark-description {
+        color: white !important;
+    }
+    
+    .dark-dropdown > .wrap > .wrap, 
+    .dark-dropdown > .wrap > .wrap > select,
+    .dark-dropdown > .wrap > .wrap > div {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-textbox > .wrap > textarea,
+    .dark-textarea > .wrap > textarea {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-json > .wrap > pre,
+    .dark-json > .wrap > div {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-dataframe table {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-dataframe th,
+    .dark-dataframe td {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-html {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-section {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-tabs > .tab-nav {
+        background-color: #1e293b !important;
+    }
+    
+    .dark-tabs > .tab-nav > button {
+        color: white !important;
+        background-color: #1e293b !important;
+    }
+    
+    .dark-tabs > .tab-nav > button[data-selected="true"] {
+        background-color: #2d3748 !important;
+        border-bottom: 2px solid #008C45 !important;
+    }
+    
+    .dark-tab-content {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-slider > .wrap > div {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+    
+    .dark-slider > .wrap > div > div {
+        background-color: #008C45 !important;
     }
     
     /* Custom styling for chat interface */
@@ -231,9 +340,9 @@ with gr.Blocks(
         youtube_btn = gr.Button("📺 YouTube\nTranscript", elem_classes="tab-btn")
         whisper_btn = gr.Button("🎤 Whisper\nTranscript", elem_classes="tab-btn")
         ocr_btn = gr.Button("👁️ OCR\nExtraction", elem_classes="tab-btn")
+        structured_btn = gr.Button("📊 Structured\nData", elem_classes="tab-btn")
         rag_btn = gr.Button("🔍 RAG\nImplementation", elem_classes="tab-btn")
         interactive_btn = gr.Button("🎮 Interactive\nLearning", elem_classes="tab-btn")
-        structured_btn = gr.Button("📊 Structured\nData", elem_classes="tab-btn")
     
     # Main content area with tabs
     with gr.Row(elem_classes="main-content-area"):
@@ -250,14 +359,14 @@ with gr.Blocks(
             with gr.TabItem("OCR Extraction", id=3, elem_classes="tab-content"):
                 ocr_interface = create_ocr_interface(gr.Column())
             
-            with gr.TabItem("RAG Implementation", id=4, elem_classes="tab-content"):
+            with gr.TabItem("Structured Data", id=4, elem_classes="tab-content"):
+                structured_interface = create_structured_data_interface(gr.Column())
+            
+            with gr.TabItem("RAG Implementation", id=5, elem_classes="tab-content"):
                 rag_interface = create_rag_interface(gr.Column())
             
-            with gr.TabItem("Interactive Learning", id=5, elem_classes="tab-content"):
+            with gr.TabItem("Interactive Learning", id=6, elem_classes="tab-content"):
                 interactive_interface = create_interactive_learning_interface(gr.Column())
-            
-            with gr.TabItem("Structured Data", id=6, elem_classes="tab-content"):
-                structured_interface = create_structured_data_interface(gr.Column())
     
     # Footer
     with gr.Row(elem_classes="footer"):
@@ -269,7 +378,7 @@ with gr.Blocks(
         """)
     
     # Set up event handlers for navigation buttons
-    tab_buttons = [chat_btn, youtube_btn, whisper_btn, ocr_btn, rag_btn, interactive_btn, structured_btn]
+    tab_buttons = [chat_btn, youtube_btn, whisper_btn, ocr_btn, structured_btn, rag_btn, interactive_btn]
     
     # Function to update button styles based on active tab
     def update_button_styles(tab_index):
@@ -292,9 +401,9 @@ with gr.Blocks(
     youtube_btn.click(lambda: change_tab(1), None, [tabs] + tab_buttons)
     whisper_btn.click(lambda: change_tab(2), None, [tabs] + tab_buttons)
     ocr_btn.click(lambda: change_tab(3), None, [tabs] + tab_buttons)
-    rag_btn.click(lambda: change_tab(4), None, [tabs] + tab_buttons)
-    interactive_btn.click(lambda: change_tab(5), None, [tabs] + tab_buttons)
-    structured_btn.click(lambda: change_tab(6), None, [tabs] + tab_buttons)
+    structured_btn.click(lambda: change_tab(4), None, [tabs] + tab_buttons)
+    rag_btn.click(lambda: change_tab(5), None, [tabs] + tab_buttons)
+    interactive_btn.click(lambda: change_tab(6), None, [tabs] + tab_buttons)
 
 # Launch the app
 if __name__ == "__main__":

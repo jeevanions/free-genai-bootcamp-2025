@@ -85,52 +85,60 @@ def create_ocr_interface(parent):
     Creates the OCR extraction interface using the Tesseract Docker service
     """
     with parent:
-        gr.Markdown("### OCR Extraction using Tesseract Docker Service")
-        gr.Markdown("Enter a YouTube URL to extract text from video frames using OCR.")
+        # Header for the OCR extraction section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## OCR Extraction using Tesseract Docker Service", elem_classes="dark-header")
+            gr.Markdown("Enter a YouTube URL to extract text from video frames using OCR.", elem_classes="chat-description dark-description")
         
-        with gr.Row():
-            url_input = gr.Textbox(
-                label="YouTube URL",
-                placeholder="https://www.youtube.com/watch?v=...",
-            )
-        
-        with gr.Row():
-            frame_interval = gr.Slider(
-                minimum=0.5,
-                maximum=10,
-                value=1,
-                step=0.5,
-                label="Frame Interval (seconds)",
-                info="Interval between frames to extract"
-            )
+        with gr.Group():
+            with gr.Row():
+                url_input = gr.Textbox(
+                    label="YouTube URL",
+                    placeholder="https://www.youtube.com/watch?v=...",
+                    elem_classes="dark-textbox"
+                )
             
-            language_input = gr.Dropdown(
-                label="OCR Language",
-                choices=["ita", "eng", "fra", "spa", "deu"],
-                value="ita",
-                info="Language for OCR processing"
-            )
+            with gr.Row():
+                frame_interval = gr.Slider(
+                    minimum=0.5,
+                    maximum=10,
+                    value=1,
+                    step=0.5,
+                    label="Frame Interval (seconds)",
+                    info="Interval between frames to extract",
+                    elem_classes="dark-slider"
+                )
+                
+                language_input = gr.Dropdown(
+                    label="OCR Language",
+                    choices=["ita", "eng", "fra", "spa", "deu"],
+                    value="ita",
+                    info="Language for OCR processing",
+                    elem_classes="dark-dropdown"
+                )
+                
+                process_btn = gr.Button("Process Video", variant="primary", elem_classes="send-btn")
             
-            process_btn = gr.Button("Process Video")
-        
-        with gr.Row():
-            status_output = gr.Textbox(label="Status")
-        
-        with gr.Row():
-            ocr_output = gr.TextArea(
-                label="OCR Text",
-                placeholder="Extracted text will appear here...",
-                lines=15,
-                max_lines=30,
-            )
-        
-        # Debug output
-        with gr.Accordion("Debug Information", open=False):
-            debug_info = gr.Textbox(
-                label="Processing Log",
-                value="Debug information will appear here during processing",
-                lines=10
-            )
+            with gr.Row():
+                status_output = gr.Textbox(label="Status", elem_classes="status-box dark-textbox")
+            
+            with gr.Row():
+                ocr_output = gr.TextArea(
+                    label="OCR Text",
+                    placeholder="Extracted text will appear here...",
+                    lines=15,
+                    max_lines=30,
+                    elem_classes="dark-textarea"
+                )
+            
+            # Debug output
+            with gr.Accordion("Debug Information", open=False):
+                debug_info = gr.Textbox(
+                    label="Processing Log",
+                    value="Debug information will appear here during processing",
+                    lines=10,
+                    elem_classes="dark-textbox"
+                )
         
         # Set up event handlers
         def process_with_debug(url, interval, language):

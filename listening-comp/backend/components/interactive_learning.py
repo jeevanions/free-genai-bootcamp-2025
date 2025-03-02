@@ -183,53 +183,57 @@ def create_interactive_learning_interface(parent):
     Creates the interactive learning interface
     """
     with parent:
-        gr.Markdown("### Interactive Italian Learning")
-        gr.Markdown("Generate and practice with interactive Italian language exercises.")
+        # Header for the Interactive Learning section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## Interactive Italian Learning")
+            gr.Markdown("Generate and practice with interactive Italian language exercises.", elem_classes="chat-description")
         
         with gr.Tabs():
             with gr.Tab("Generate Exercise"):
-                with gr.Row():
-                    difficulty_dropdown = gr.Dropdown(
-                        label="Difficulty Level",
-                        choices=["beginner", "intermediate", "advanced"],
-                        value="beginner",
-                        info="Select the difficulty level of the exercise"
-                    )
+                with gr.Group():
+                    with gr.Row():
+                        difficulty_dropdown = gr.Dropdown(
+                            label="Difficulty Level",
+                            choices=["beginner", "intermediate", "advanced"],
+                            value="beginner",
+                            info="Select the difficulty level of the exercise"
+                        )
+                        
+                        exercise_type_dropdown = gr.Dropdown(
+                            label="Exercise Type",
+                            choices=[
+                                "listening_comprehension",
+                                "vocabulary",
+                                "grammar",
+                                "conversation"
+                            ],
+                            value="listening_comprehension",
+                            info="Select the type of exercise"
+                        )
                     
-                    exercise_type_dropdown = gr.Dropdown(
-                        label="Exercise Type",
-                        choices=[
-                            "listening_comprehension",
-                            "vocabulary",
-                            "grammar",
-                            "conversation"
-                        ],
-                        value="listening_comprehension",
-                        info="Select the type of exercise"
-                    )
-                
-                with gr.Row():
-                    generate_btn = gr.Button("Generate Exercise")
-                
-                with gr.Row():
-                    exercise_output = gr.Textbox(
-                        label="Exercise",
-                        lines=15,
-                    )
+                    with gr.Row():
+                        generate_btn = gr.Button("Generate Exercise", variant="primary", elem_classes="send-btn")
+                    
+                    with gr.Row():
+                        exercise_output = gr.Textbox(
+                            label="Exercise",
+                            lines=15,
+                        )
             
             with gr.Tab("Text to Speech"):
-                with gr.Row():
-                    tts_input = gr.Textbox(
-                        label="Italian Text",
-                        placeholder="Enter Italian text to convert to speech...",
-                        lines=5,
-                    )
-                
-                with gr.Row():
-                    tts_btn = gr.Button("Generate Speech")
-                
-                with gr.Row():
-                    audio_output = gr.Audio(label="Audio Output")
+                with gr.Group():
+                    with gr.Row():
+                        tts_input = gr.Textbox(
+                            label="Italian Text",
+                            placeholder="Enter Italian text to convert to speech...",
+                            lines=5,
+                        )
+                    
+                    with gr.Row():
+                        tts_btn = gr.Button("Generate Speech", variant="primary", elem_classes="send-btn")
+                    
+                    with gr.Row():
+                        audio_output = gr.Audio(label="Audio Output")
         
         # Set up event handlers
         generate_btn.click(

@@ -102,14 +102,17 @@ def create_youtube_transcript_interface(parent):
     Creates the YouTube transcript interface
     """
     with parent:
-        with gr.Group(elem_classes="content-section"):
-            gr.Markdown("### YouTube Transcript Downloader")
-            gr.Markdown("Enter a YouTube URL to download its transcript. Preferably Italian language videos.")
-            
+        # Header for the YouTube transcript section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## YouTube Transcript Downloader", elem_classes="dark-header")
+            gr.Markdown("Enter a YouTube URL to download its transcript. Preferably Italian language videos.", elem_classes="chat-description dark-description")
+        
+        with gr.Group():
             with gr.Row():
                 url_input = gr.Textbox(
                     label="YouTube URL",
                     placeholder="https://www.youtube.com/watch?v=...",
+                    elem_classes="dark-textbox"
                 )
             
             with gr.Row():
@@ -117,12 +120,13 @@ def create_youtube_transcript_interface(parent):
                     label="Language",
                     choices=["it", "en", "fr", "es", "de"],
                     value="it",
-                    info="Select the language of the transcript"
+                    info="Select the language of the transcript",
+                    elem_classes="dark-dropdown"
                 )
-                download_btn = gr.Button("Download Transcript", elem_classes="sidebar-btn")
+                download_btn = gr.Button("Download Transcript", variant="primary", elem_classes="send-btn")
             
             with gr.Row():
-                output_message = gr.Textbox(label="Status", elem_classes="status-msg")
+                output_message = gr.Textbox(label="Status", elem_classes="status-box dark-textbox")
             
             with gr.Row():
                 transcript_output = gr.TextArea(
@@ -130,6 +134,7 @@ def create_youtube_transcript_interface(parent):
                     placeholder="Transcript will appear here...",
                     lines=15,
                     max_lines=30,
+                    elem_classes="dark-textarea"
                 )
         
         # Set up event handlers

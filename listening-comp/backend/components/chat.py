@@ -89,28 +89,31 @@ def create_chat_interface(parent):
     Creates the chat interface with GPT-4 model
     """
     with parent:
-        with gr.Group(elem_classes="content-section"):
-            gr.Markdown("## Chat with our Italian Language Assistant", elem_classes="section-header")
-            gr.Markdown("Ask questions about Italian language, request translations, or get help with grammar.", elem_classes="section-description")
-            
-            chatbot = gr.Chatbot(
-                height=450,
-                bubble_full_width=False,
-                show_label=False,
-                type="messages",
-                elem_classes="italian-chatbot"
+        # Header for the chat section
+        with gr.Group(elem_classes="chat-with-assistant"):
+            gr.Markdown("## Chat with our Italian Language Assistant")
+            gr.Markdown("Ask questions about Italian language, request translations, or get help with grammar.", elem_classes="chat-description")
+        
+        # Chatbot component
+        chatbot = gr.Chatbot(
+            height=400,
+            bubble_full_width=False,
+            show_label=False,
+            type="messages",
+            elem_classes="chatbot"
+        )
+        
+        # Input area
+        with gr.Row(elem_classes="chat-input-container"):
+            msg = gr.Textbox(
+                placeholder="Type your Italian language question here...",
+                scale=9,
+                container=False,
+                elem_classes="chat-input"
             )
-            
-            with gr.Row():
-                msg = gr.Textbox(
-                    placeholder="Type your Italian language question here...",
-                    scale=9,
-                    container=False,
-                    elem_classes="italian-chat-input"
-                )
-                submit_btn = gr.Button("Send", scale=1, variant="primary", elem_classes="italian-send-btn")
-            
-            clear_btn = gr.Button("Clear Chat", size="sm", variant="secondary", elem_classes="italian-clear-btn")
+            submit_btn = gr.Button("Send", scale=1, variant="primary", elem_classes="send-btn")
+        
+        clear_btn = gr.Button("Clear Chat", size="sm", variant="secondary", elem_classes="clear-btn")
         
         def respond(message, chat_history):
             try:

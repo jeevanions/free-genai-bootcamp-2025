@@ -212,61 +212,66 @@ Transcript:
 def create_structured_data_interface(parent):
     """Create the structured data interface"""
     with parent:
-        gr.Markdown("## Generate Structured Data from Transcripts")
+        gr.Markdown("## Generate Structured Data from Transcripts", elem_classes="dark-header")
         gr.Markdown("""
         Convert transcripts from YouTube, Whisper, or OCR into structured JSON data for language learning.
         This tool uses Azure OpenAI to analyze the content and organize it into a structured format.
-        """)
+        """, elem_classes="dark-description")
         
         # Get available transcripts
         transcripts = get_available_transcripts()
         transcript_options = format_transcript_options(transcripts)
         
         with gr.Row():
-            with gr.Column(scale=1, elem_classes="content-section"):
-                gr.Markdown("### Select Transcript", elem_classes="nav-header")
+            with gr.Column(scale=1, elem_classes="content-section dark-section"):
+                gr.Markdown("### Select Transcript", elem_classes="nav-header dark-header")
                 transcript_dropdown = gr.Dropdown(
                     choices=transcript_options,
                     label="Available Transcripts",
-                    info="Select a transcript to convert to structured data"
+                    info="Select a transcript to convert to structured data",
+                    elem_classes="dark-dropdown"
                 )
                 
                 preview_btn = gr.Button("Preview Transcript", elem_classes="sidebar-btn")
                 generate_btn = gr.Button("Generate Structured Data", elem_classes="sidebar-btn")
-                status_box = gr.Textbox(label="Status", interactive=False)
+                status_box = gr.Textbox(label="Status", interactive=False, elem_classes="dark-textbox")
                 
-            with gr.Column(scale=2, elem_classes="content-section"):
-                with gr.Tabs(elem_classes="content-tabs"):
-                    with gr.TabItem("Transcript Preview", elem_classes="tab-content"):
+            with gr.Column(scale=2, elem_classes="content-section dark-section"):
+                with gr.Tabs(elem_classes="content-tabs dark-tabs"):
+                    with gr.TabItem("Transcript Preview", elem_classes="tab-content dark-tab-content"):
                         transcript_preview = gr.TextArea(
                             label="Transcript Content",
                             interactive=False,
-                            lines=15
+                            lines=15,
+                            elem_classes="dark-textarea"
                         )
                     
-                    with gr.TabItem("Structured Data (JSON)", elem_classes="tab-content"):
-                        json_output = gr.JSON(label="Structured Data")
+                    with gr.TabItem("Structured Data (JSON)", elem_classes="tab-content dark-tab-content"):
+                        json_output = gr.JSON(label="Structured Data", elem_classes="dark-json")
                     
-                    with gr.TabItem("Dialogue", elem_classes="tab-content"):
+                    with gr.TabItem("Dialogue", elem_classes="tab-content dark-tab-content"):
                         dialogue_output = gr.Dataframe(
                             headers=["Speaker", "Italian Text", "English Translation", "Timestamp"],
-                            label="Dialogue"
+                            label="Dialogue",
+                            elem_classes="dark-dataframe"
                         )
                     
-                    with gr.TabItem("Vocabulary", elem_classes="tab-content"):
+                    with gr.TabItem("Vocabulary", elem_classes="tab-content dark-tab-content"):
                         vocabulary_output = gr.Dataframe(
                             headers=["Term", "Part of Speech", "Translation", "Example"],
-                            label="Vocabulary"
+                            label="Vocabulary",
+                            elem_classes="dark-dataframe"
                         )
                     
-                    with gr.TabItem("Grammar & Exercises", elem_classes="tab-content"):
+                    with gr.TabItem("Grammar & Exercises", elem_classes="tab-content dark-tab-content"):
                         grammar_output = gr.Dataframe(
                             headers=["Concept", "Explanation", "Examples"],
-                            label="Grammar Concepts"
+                            label="Grammar Concepts",
+                            elem_classes="dark-dataframe"
                         )
                         
-                        gr.Markdown("### Practice Exercises", elem_classes="nav-header")
-                        exercises_output = gr.HTML(label="Exercises")
+                        gr.Markdown("### Practice Exercises", elem_classes="nav-header dark-header")
+                        exercises_output = gr.HTML(label="Exercises", elem_classes="dark-html")
         
         # Set up event handlers
         preview_btn.click(
@@ -333,16 +338,16 @@ def create_structured_data_interface(parent):
                 exercises_html = "<div class='form-group'>"
                 if "exercises" in json_data:
                     for i, exercise in enumerate(json_data["exercises"]):
-                        exercises_html += f"<div style='margin-bottom: 1.5rem; padding: 1rem; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #eaeaea;'>"
-                        exercises_html += f"<p style='color: #008C45; font-weight: 600;'><strong>Question {i+1}:</strong> {exercise.get('question', '')}</p>"
+                        exercises_html += f"<div style='margin-bottom: 1.5rem; padding: 1rem; background-color: #2d3748; border-radius: 6px; border: 1px solid #4a5568;'>"
+                        exercises_html += f"<p style='color: #4ade80; font-weight: 600;'><strong>Question {i+1}:</strong> {exercise.get('question', '')}</p>"
                         exercises_html += "<ul style='list-style-type: none; padding-left: 1rem;'>"
                         for option in exercise.get("options", []):
                             if option == exercise.get("correct_answer", ""):
-                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; background-color: rgba(0, 140, 69, 0.1); border-left: 4px solid #008C45; border-radius: 4px;'>✓ {option}</li>"
+                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; background-color: rgba(74, 222, 128, 0.2); border-left: 4px solid #4ade80; border-radius: 4px; color: white;'>✓ {option}</li>"
                             else:
-                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid #eaeaea; border-radius: 4px;'>{option}</li>"
+                                exercises_html += f"<li style='margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid #4a5568; border-radius: 4px; color: white;'>{option}</li>"
                         exercises_html += "</ul>"
-                        exercises_html += f"<p style='font-size: 0.8rem; color: #666; margin-top: 0.5rem;'><small>Timestamp: {exercise.get('audio_timestamp', '')}</small></p>"
+                        exercises_html += f"<p style='font-size: 0.8rem; color: #9ca3af; margin-top: 0.5rem;'><small>Timestamp: {exercise.get('audio_timestamp', '')}</small></p>"
                         exercises_html += "</div>"
                 exercises_html += "</div>"
                 

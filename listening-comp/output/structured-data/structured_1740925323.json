@@ -1,0 +1,159 @@
+{
+  "metadata": {
+    "video_title": "Rome Metro System - Italian A1 Listening Practice",
+    "language_level": "A1",
+    "topic": "Public Transportation in Rome",
+    "video_timestamp": "00:00-02:30",
+    "context": "Description of the Rome metro system, its lines, key stops, and its importance for locals and tourists."
+  },
+  "dialogue": [
+    {
+      "speaker": "Narrator",
+      "italian_text": "La metropolitana di Roma \u00e8 uno dei modi pi\u00f9 veloci per spostarsi.",
+      "english_translation": "The Rome metro is one of the fastest ways to get around.",
+      "audio_timestamp": "00:04",
+      "key_phrases": [
+        "La metropolitana di Roma",
+        "modi pi\u00f9 veloci"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "La metro attraversa gran parte di Roma e collega tutte le zone con il centro storico.",
+      "english_translation": "The metro crosses most of Rome and connects all areas with the historic center.",
+      "audio_timestamp": "00:13",
+      "key_phrases": [
+        "attraversa gran parte",
+        "collega tutte le zone"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Ogni giorno migliaia di persone prendono la metropolitana per andare a lavoro, visitare monumenti o semplicemente muoversi da una parte all'altra della citt\u00e0.",
+      "english_translation": "Every day, thousands of people take the metro to go to work, visit monuments, or simply move from one part of the city to another.",
+      "audio_timestamp": "00:30",
+      "key_phrases": [
+        "migliaia di persone",
+        "prendono la metropolitana"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Viaggiare in metro \u00e8 anche un'ottima soluzione per i turisti che possono facilmente raggiungere le attrazioni pi\u00f9 famose come il Vaticano o la piazza di Spagna.",
+      "english_translation": "Traveling by metro is also an excellent solution for tourists who can easily reach famous attractions like the Vatican or Piazza di Spagna.",
+      "audio_timestamp": "01:17",
+      "key_phrases": [
+        "un'ottima soluzione",
+        "raggiungere le attrazioni"
+      ]
+    }
+  ],
+  "vocabulary": [
+    {
+      "italian_term": "metropolitana",
+      "part_of_speech": "noun",
+      "english_translation": "metro/subway",
+      "example_sentence": "Prendo la metropolitana per andare al lavoro.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "spostarsi",
+      "part_of_speech": "verb",
+      "english_translation": "to get around",
+      "example_sentence": "\u00c8 facile spostarsi in citt\u00e0 con la metro.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "storico",
+      "part_of_speech": "adjective",
+      "english_translation": "historic",
+      "example_sentence": "Il centro storico di Roma \u00e8 famoso in tutto il mondo.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "collega",
+      "part_of_speech": "verb",
+      "english_translation": "connects",
+      "example_sentence": "La metro collega tutte le zone con il centro.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "attrazioni",
+      "part_of_speech": "noun",
+      "english_translation": "attractions",
+      "example_sentence": "Le attrazioni turistiche sono facilmente raggiungibili.",
+      "ocr_reference": null
+    }
+  ],
+  "grammar_concepts": [
+    {
+      "concept": "Definite Article Usage",
+      "explanation": "In Italian, definite articles (e.g., 'la', 'il') are used frequently to introduce nouns, even when they are not required in English.",
+      "examples": [
+        "La metropolitana di Roma",
+        "Il centro storico"
+      ]
+    },
+    {
+      "concept": "Prepositions with Verbs",
+      "explanation": "Certain verbs require specific prepositions, such as 'andare a lavoro' (to go to work) or 'muoversi da una parte all'altra' (to move from one part to another).",
+      "examples": [
+        "andare a lavoro",
+        "muoversi da una parte all'altra"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "question": "Qual \u00e8 uno dei modi pi\u00f9 veloci per spostarsi a Roma?",
+      "options": [
+        "La bicicletta",
+        "La metropolitana",
+        "L'automobile"
+      ],
+      "correct_answer": "La metropolitana",
+      "audio_timestamp": "00:04"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Quali attrazioni famose sono facilmente raggiungibili con la metro?",
+      "options": [
+        "Il Colosseo e il Vaticano",
+        "Piazza di Spagna e il Vaticano",
+        "Il Vaticano e il Foro Romano"
+      ],
+      "correct_answer": "Piazza di Spagna e il Vaticano",
+      "audio_timestamp": "01:17"
+    }
+  ],
+  "cultural_notes": [
+    {
+      "topic": "Rome Metro System",
+      "description": "The Rome metro is a vital transportation method for both locals and tourists. It includes three lines (A, B, C) and connects major attractions in the city.",
+      "connection_to_dialogue": "The narrator mentions the metro's ability to connect all areas of Rome with the historic center and famous attractions."
+    },
+    {
+      "topic": "Italian Transportation",
+      "description": "Public transportation, such as the metro, is a common way to navigate Italian cities due to traffic congestion.",
+      "connection_to_dialogue": "Reference to avoiding traffic by using the metro."
+    }
+  ],
+  "ocr_extracted_content": [
+    {
+      "text": "Linea A: Battistini \u2194 Anagnina",
+      "type": "metro map",
+      "timestamp": "00:25"
+    },
+    {
+      "text": "Linea B: Laurentina \u2194 Rebibbia",
+      "type": "metro map",
+      "timestamp": "00:25"
+    },
+    {
+      "text": "Linea C: San Giovanni \u2194 Monte Compatri",
+      "type": "metro map",
+      "timestamp": "00:25"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "video_title": "Italian for Beginners - Everyday Life: Marco's Story",
+    "language_level": "A1",
+    "topic": "Daily Life",
+    "video_timestamp": "00:00-05:30",
+    "context": "A narrative about Marco's life in Milan, including his work as a barista, hobbies, and family."
+  },
+  "dialogue": [
+    {
+      "speaker": "Narrator",
+      "italian_text": "Lui si chiama Marco e ha venticinque anni.",
+      "english_translation": "His name is Marco, and he is 25 years old.",
+      "audio_timestamp": "00:05",
+      "key_phrases": [
+        "venticinque anni",
+        "si chiama Marco"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Vive a Milano, una citt\u00e0 grande e bellissima, conosciuta per la moda e l'architettura.",
+      "english_translation": "He lives in Milan, a large and beautiful city known for fashion and architecture.",
+      "audio_timestamp": "00:10",
+      "key_phrases": [
+        "Vive a Milano",
+        "citt\u00e0 grande e bellissima"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Marco lavora come barista in un piccolo caff\u00e8 vicino casa.",
+      "english_translation": "Marco works as a barista in a small caf\u00e9 near his house.",
+      "audio_timestamp": "00:20",
+      "key_phrases": [
+        "lavora come barista",
+        "piccolo caff\u00e8"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Ogni mattina si alza presto per preparare il caff\u00e8 e i dolci per i clienti.",
+      "english_translation": "Every morning, he wakes up early to prepare coffee and pastries for the customers.",
+      "audio_timestamp": "00:25",
+      "key_phrases": [
+        "ogni mattina",
+        "si alza presto",
+        "preparare il caff\u00e8"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Nel tempo libero, Marco ama andare al cinema.",
+      "english_translation": "In his free time, Marco loves going to the cinema.",
+      "audio_timestamp": "00:40",
+      "key_phrases": [
+        "tempo libero",
+        "ama andare al cinema"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "A casa, Marco ha anche un gatto. Si chiama Micio ed \u00e8 molto affettuoso.",
+      "english_translation": "At home, Marco also has a cat. Its name is Micio, and it is very affectionate.",
+      "audio_timestamp": "01:00",
+      "key_phrases": [
+        "un gatto",
+        "molto affettuoso"
+      ]
+    }
+  ],
+  "vocabulary": [
+    {
+      "italian_term": "venticinque",
+      "part_of_speech": "number",
+      "english_translation": "twenty-five",
+      "example_sentence": "Marco ha venticinque anni.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "caff\u00e8",
+      "part_of_speech": "noun",
+      "english_translation": "coffee",
+      "example_sentence": "Marco lavora in un caff\u00e8.",
+      "ocr_reference": null
+    },
+    {
+      "italian_term": "affettuoso",
+      "part_of_speech": "adjective",
+      "english_translation": "affectionate",
+      "example_sentence": "Micio \u00e8 molto affettuoso.",
+      "ocr_reference": null
+    }
+  ],
+  "grammar_concepts": [
+    {
+      "concept": "Reflexive verbs",
+      "explanation": "In Italian, reflexive verbs are used when the subject and object of the verb are the same. Example: 'si alza' means 'he/she wakes up.'",
+      "examples": [
+        "Ogni mattina si alza presto."
+      ]
+    },
+    {
+      "concept": "Expressions of time",
+      "explanation": "Phrases like 'ogni mattina' (every morning) are used to indicate frequency.",
+      "examples": [
+        "Ogni mattina si alza presto."
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "question": "Dove vive Marco?",
+      "options": [
+        "Roma",
+        "Milano",
+        "Torino"
+      ],
+      "correct_answer": "Milano",
+      "audio_timestamp": "00:10"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Cosa fa Marco la mattina?",
+      "options": [
+        "Va al cinema",
+        "Prepara il caff\u00e8",
+        "Gioca a calcetto"
+      ],
+      "correct_answer": "Prepara il caff\u00e8",
+      "audio_timestamp": "00:25"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Come si chiama il gatto di Marco?",
+      "options": [
+        "Micio",
+        "Luca",
+        "Anna"
+      ],
+      "correct_answer": "Micio",
+      "audio_timestamp": "01:00"
+    }
+  ],
+  "cultural_notes": [
+    {
+      "topic": "Italian caf\u00e9 culture",
+      "description": "In Italy, it is common to have a quick coffee (espresso) at the bar counter in small caf\u00e9s.",
+      "connection_to_dialogue": "Marco works as a barista and prepares coffee for customers."
+    },
+    {
+      "topic": "Family bonds in Italy",
+      "description": "Family ties are very strong in Italian culture, and siblings often have close relationships.",
+      "connection_to_dialogue": "Marco and his sister Anna are described as 'molto legati' (very close)."
+    }
+  ],
+  "ocr_extracted_content": [
+    {
+      "text": "Cosa studi? Architettura, Ingegneria, Medicina",
+      "type": "questionnaire",
+      "timestamp": "01:30"
+    },
+    {
+      "text": "Pesce",
+      "type": "menu",
+      "timestamp": "02:10"
+    }
+  ]
+}

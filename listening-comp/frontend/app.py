@@ -12,6 +12,7 @@ from backend.components.whisper_transcript import create_whisper_transcript_inte
 from backend.components.ocr_extraction import create_ocr_interface
 from backend.components.rag_implementation import create_rag_interface
 from backend.components.interactive_learning import create_interactive_learning_interface
+from backend.components.structured_data import create_structured_data_interface
 
 # Load environment variables
 load_dotenv()
@@ -20,6 +21,7 @@ load_dotenv()
 os.makedirs("output/transcript-yt", exist_ok=True)
 os.makedirs("output/transcript-vid", exist_ok=True)
 os.makedirs("output/transcript-ocr", exist_ok=True)
+os.makedirs("output/structured-data", exist_ok=True)
 
 # Define Italian flag colors
 GREEN = "#008C45"
@@ -32,40 +34,18 @@ def change_tab(n):
 
 # Create the Gradio app with Italian-themed styling
 with gr.Blocks(
+    theme=gr.themes.Soft(),
     css="""
-    #app-header {
-        background: linear-gradient(90deg, #008C45 33%, #F4F5F0 33%, #F4F5F0 66%, #CD212A 66%);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 8px;
-        text-align: center;
-    }
-    #app-header h1 {
-        color: #1A1A1A;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    .footer {
-        text-align: center;
-        margin-top: 2rem;
-        padding: 1rem;
-        border-top: 1px solid #ddd;
-        font-size: 0.8rem;
-    }
-    .sidebar-btn {
-        background-color: #F4F5F0;
-        border: 1px solid #ddd;
-        margin: 0.2rem 0;
-        transition: all 0.3s;
-    }
-    .sidebar-btn:hover {
-        background-color: #008C45;
-        color: white;
-    }
+    /* Import external CSS file */
+    @import url('file=static/styles.css');
     """
 ) as app:
     # Header
     with gr.Row(elem_id="app-header"):
-        gr.HTML("<h1>🇮🇹 Italian Language Learning Platform 🇮🇹</h1>")
+        gr.HTML("""
+        <h1>🇮🇹 Italian Language Learning Platform 🇮🇹 </h1>
+        <p style="margin-top: 0.5rem; font-size: 1rem; color: #555;">Enhance your Italian language skills with AI-powered tools</p>
+        """)
     
     # Add a hidden state variable to track active tab
     active_tab = gr.State(value=0)
@@ -73,20 +53,21 @@ with gr.Blocks(
     # Main layout with sidebar and content area
     with gr.Row():
         # Sidebar for navigation
-        with gr.Column(scale=1):
-            gr.Markdown("### Navigation")
+        with gr.Column(scale=1, elem_classes="navigation-sidebar"):
+            gr.Markdown("### Navigation", elem_classes="nav-header")
             
-            with gr.Group():
-                chat_btn = gr.Button("Chat with GPT-4", elem_classes="sidebar-btn")
-                yt_transcript_btn = gr.Button("YouTube Transcript", elem_classes="sidebar-btn")
-                whisper_btn = gr.Button("Whisper Transcript", elem_classes="sidebar-btn")
-                ocr_btn = gr.Button("OCR Extraction", elem_classes="sidebar-btn")
-                rag_btn = gr.Button("RAG Implementation", elem_classes="sidebar-btn")
-                learning_btn = gr.Button("Interactive Learning", elem_classes="sidebar-btn")
+            with gr.Group(elem_classes="nav-button-group"):
+                chat_btn = gr.Button("💬 Chat with GPT-4", elem_classes="sidebar-btn")
+                yt_transcript_btn = gr.Button("🎬 YouTube Transcript", elem_classes="sidebar-btn")
+                whisper_btn = gr.Button("🎤 Whisper Transcript", elem_classes="sidebar-btn")
+                ocr_btn = gr.Button("👁️ OCR Extraction", elem_classes="sidebar-btn")
+                structured_data_btn = gr.Button("📊 Structured Data", elem_classes="sidebar-btn")
+                rag_btn = gr.Button("📚 RAG Implementation", elem_classes="sidebar-btn")
+                learning_btn = gr.Button("🎓 Interactive Learning", elem_classes="sidebar-btn")
         
         # Main content area with tabs
-        with gr.Column(scale=4):
-            tabs = gr.Tabs() 
+        with gr.Column(scale=4, elem_classes="main-content-area"):
+            tabs = gr.Tabs(elem_classes="content-tabs") 
             with tabs:
                 with gr.TabItem("Chat with GPT-4", id=0):
                     create_chat_interface(gr.Group())
@@ -100,15 +81,23 @@ with gr.Blocks(
                 with gr.TabItem("OCR Extraction", id=3):
                     create_ocr_interface(gr.Group())
                     
-                with gr.TabItem("RAG Implementation", id=4):
+                with gr.TabItem("Structured Data", id=4):
+                    create_structured_data_interface(gr.Group())
+                    
+                with gr.TabItem("RAG Implementation", id=5):
                     create_rag_interface(gr.Group())
                     
-                with gr.TabItem("Interactive Learning", id=5):
+                with gr.TabItem("Interactive Learning", id=6):
                     create_interactive_learning_interface(gr.Group())
     
     # Footer
     with gr.Row(elem_classes="footer"):
-        gr.Markdown("© 2025 Italian Language Learning Platform. All rights reserved.")
+        gr.HTML("""
+        <div>
+            <p><strong>© 2025 Italian Language Learning Platform</strong></p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Powered by Azure OpenAI and Whisper | All rights reserved</p>
+        </div>
+        """)
     
     # Connect buttons to tab selection function using the example approach
     chat_btn.click(lambda: 0, outputs=active_tab).then(
@@ -127,11 +116,15 @@ with gr.Blocks(
         change_tab, inputs=[active_tab], outputs=tabs
     )
     
-    rag_btn.click(lambda: 4, outputs=active_tab).then(
+    structured_data_btn.click(lambda: 4, outputs=active_tab).then(
         change_tab, inputs=[active_tab], outputs=tabs
     )
     
-    learning_btn.click(lambda: 5, outputs=active_tab).then(
+    rag_btn.click(lambda: 5, outputs=active_tab).then(
+        change_tab, inputs=[active_tab], outputs=tabs
+    )
+    
+    learning_btn.click(lambda: 6, outputs=active_tab).then(
         change_tab, inputs=[active_tab], outputs=tabs
     )
 

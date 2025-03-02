@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "video_title": "Italian for Beginners - Roma Metro Overview",
+    "language_level": "A1",
+    "topic": "Using Public Transport in Italy",
+    "video_timestamp": "00:00-05:30",
+    "context": "The video provides an overview of Rome's metro system, including its main lines, key stops, and its importance for daily commuting and tourism."
+  },
+  "dialogue": [
+    {
+      "speaker": "Narrator",
+      "italian_text": "La metropolitana di Roma \u00e8 uno dei modi pi\u00f9 veloci per spostarsi.",
+      "english_translation": "Rome's metro is one of the fastest ways to get around.",
+      "audio_timestamp": "00:05",
+      "key_phrases": [
+        "metropolitana",
+        "modi pi\u00f9 veloci"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Ogni giorno, migliaia di persone prendono la metropolitana per andare a lavoro, visitare monumenti o semplicemente muoversi da una parte all'altra della citt\u00e0.",
+      "english_translation": "Every day, thousands of people take the metro to go to work, visit monuments, or simply move around the city.",
+      "audio_timestamp": "00:30",
+      "key_phrases": [
+        "prendono la metropolitana",
+        "muoversi"
+      ]
+    },
+    {
+      "speaker": "Narrator",
+      "italian_text": "Alcune delle fermate pi\u00f9 importanti sono Termini e Colosseo.",
+      "english_translation": "Some of the most important stops are Termini and Colosseo.",
+      "audio_timestamp": "01:15",
+      "key_phrases": [
+        "fermate importanti",
+        "Termini",
+        "Colosseo"
+      ]
+    }
+  ],
+  "vocabulary": [
+    {
+      "italian_term": "metropolitana",
+      "part_of_speech": "noun",
+      "english_translation": "metro, subway",
+      "example_sentence": "Prendo la metropolitana ogni giorno per andare al lavoro.",
+      "ocr_reference": "Appears in text frames (e.g., Frame 159)"
+    },
+    {
+      "italian_term": "fermata",
+      "part_of_speech": "noun",
+      "english_translation": "stop, station",
+      "example_sentence": "La fermata di Termini \u00e8 molto trafficata.",
+      "ocr_reference": "Referenced in text frames (e.g., Frame 159)"
+    },
+    {
+      "italian_term": "spostarsi",
+      "part_of_speech": "verb",
+      "english_translation": "to move/get around",
+      "example_sentence": "\u00c8 facile spostarsi a Roma con la metro.",
+      "ocr_reference": "Mentioned in Frame 159"
+    }
+  ],
+  "grammar_concepts": [
+    {
+      "concept": "Using definite articles with place names",
+      "explanation": "In Italian, the definite article (e.g., la, il) is used before nouns like 'metropolitana' to specify it.",
+      "examples": [
+        "La metropolitana di Roma \u00e8 veloce.",
+        "Il Colosseo \u00e8 una fermata importante."
+      ]
+    },
+    {
+      "concept": "Expressing frequency with 'ogni giorno'",
+      "explanation": "'Ogni' is used with singular nouns to indicate 'every'.",
+      "examples": [
+        "Ogni giorno, prendo la metropolitana.",
+        "Ogni settimana, visito un monumento."
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "question": "Qual \u00e8 uno dei modi pi\u00f9 veloci per spostarsi a Roma?",
+      "options": [
+        "La metropolitana",
+        "La bicicletta",
+        "Il tram"
+      ],
+      "correct_answer": "La metropolitana",
+      "audio_timestamp": "00:05"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Quali sono alcune fermate importanti della metropolitana di Roma?",
+      "options": [
+        "Termini e Colosseo",
+        "Piazza Navona e Trastevere",
+        "Vaticano e Foro Romano"
+      ],
+      "correct_answer": "Termini e Colosseo",
+      "audio_timestamp": "01:15"
+    }
+  ],
+  "cultural_notes": [
+    {
+      "topic": "Rome's Metro System",
+      "description": "Rome's metro is one of the oldest in Italy and consists of three main lines: A, B, and C. It's an essential part of daily life for both locals and tourists.",
+      "connection_to_dialogue": "The dialogue mentions important stops like Termini and Colosseo."
+    },
+    {
+      "topic": "Public transportation in Italy",
+      "description": "Public transportation is widely used in Italy, with metro systems available in major cities like Rome, Milan, and Naples.",
+      "connection_to_dialogue": "The video's focus on the metro highlights its importance in Italian urban life."
+    }
+  ],
+  "ocr_extracted_content": [
+    {
+      "text": "La metropolitana di Roma \u00e8 uno dei modi pi\u00f9 veloci per spostarsi. Composta da tre linee principali, la metro attraversa gran parte di Roma, e collega tutte le zone con il centro storico.",
+      "type": "narrative text",
+      "timestamp": "00:15"
+    },
+    {
+      "text": "Ogni giorno, migliaia di persone prendono la metropolitana per andare a lavoro, visitare monumenti o semplicemente muoversi da una parte all'altra della citt\u00e0.",
+      "type": "narrative text",
+      "timestamp": "00:30"
+    },
+    {
+      "text": "Alcune delle fermate pi\u00f9 importanti sono Termini, la principale stazione ferroviaria, e Colosseo, che porta direttamente all'antico anfiteatro romano.",
+      "type": "narrative text",
+      "timestamp": "01:15"
+    },
+    {
+      "text": "Viaggiare in metro \u00e8 anche un'ottima soluzione per i turisti, che possono facilmente raggiungere le attrazioni pi\u00f9 famose, come il Vaticano o la Piazza di Spagna.",
+      "type": "narrative text",
+      "timestamp": "02:00"
+    }
+  ]
+}

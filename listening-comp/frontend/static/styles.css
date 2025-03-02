@@ -1,0 +1,414 @@
+/* Main application styles for Italian Listening Comprehension App */
+
+/* Global styling */
+body {
+    background-color: #f5f5f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* Global text color overrides */
+* {
+    color-scheme: light !important;
+}
+.dark {
+    color-scheme: light !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* App container */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+/* Header styling */
+.app-header {
+    background-color: #008C45;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 4px solid #CD212A;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.app-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+.app-header p {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* Main content area */
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Sidebar styling */
+.sidebar {
+    width: 240px;
+    background-color: #f0f0f0;
+    border-right: 1px solid #ddd;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+.sidebar-header {
+    font-weight: 600;
+    color: #008C45;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Sidebar buttons */
+.sidebar-btn {
+    display: block;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: left;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.sidebar-btn:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.sidebar-btn.active {
+    background-color: #008C45;
+    color: white;
+    border-color: #006633;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Content area */
+.content-area {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+/* Tabs styling */
+.content-tabs {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.tab-content {
+    padding: 1.5rem;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    min-height: 400px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+/* Section headers within tabs */
+.tab-content h3 {
+    color: #008C45;
+    border-bottom: 2px solid #eaeaea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+/* Card-like containers for content sections */
+.content-section {
+    background-color: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 6px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.content-section h4 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+}
+
+/* Style the tab buttons */
+.tabs > .tab-nav {
+    background-color: #e0e0e0;
+    border-bottom: 3px solid #008C45;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+    color: #333;
+}
+.tabs > .tab-nav > button {
+    border-radius: 6px 6px 0 0 !important;
+    padding: 0.8rem 1.4rem !important;
+    margin-right: 0.4rem;
+    font-weight: 600;
+    background-color: #c0c0c0 !important;
+    color: #333 !important;
+    border: 1px solid #999 !important;
+    border-bottom: none !important;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+.tabs > .tab-nav > button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: transparent;
+    transition: background-color 0.3s;
+}
+.tabs > .tab-nav > button:hover:not(.selected) {
+    background-color: #b0b0b0 !important;
+    transform: translateY(-2px);
+    color: #000 !important;
+}
+.tabs > .tab-nav > button:hover::after {
+    background-color: rgba(0, 140, 69, 0.3);
+}
+.tabs > .tab-nav > button.selected {
+    background-color: #008C45 !important;
+    color: white !important;
+    border-color: #006633 !important;
+    position: relative;
+    z-index: 1;
+    transform: translateY(-3px);
+    box-shadow: 0 -3px 8px rgba(0,0,0,0.15);
+    font-weight: 700;
+}
+.tabs > .tab-nav > button.selected::after {
+    background-color: #CD212A;
+}
+
+/* Fix text colors in various components */
+.gradio-container {
+    color: #333 !important;
+}
+
+/* Fix chatbot message colors */
+.message.user {
+    background-color: #e6f7ff !important;
+    color: #333 !important;
+}
+.message.bot {
+    background-color: #f0f0f0 !important;
+    color: #333 !important;
+}
+.message-wrap {
+    color: #333 !important;
+}
+.prose {
+    color: #333 !important;
+}
+.gr-box {
+    color: #333 !important;
+}
+.gr-input {
+    color: #333 !important;
+}
+.gr-button-secondary {
+    color: #333 !important;
+}
+.gr-panel {
+    color: #333 !important;
+}
+.gr-form {
+    color: #333 !important;
+}
+.gr-button-primary {
+    color: white !important;
+}
+.gr-button-tool {
+    color: #333 !important;
+}
+.gr-button {
+    color: #333 !important;
+}
+.gr-checkbox {
+    color: #333 !important;
+}
+.gr-radio {
+    color: #333 !important;
+}
+.gr-dropdown {
+    color: #333 !important;
+}
+.gr-compact {
+    color: #333 !important;
+}
+
+/* Fix table colors */
+table {
+    color: #333 !important;
+}
+th {
+    color: #333 !important;
+    background-color: #f0f0f0 !important;
+}
+td {
+    color: #333 !important;
+}
+
+/* Fix JSON viewer colors */
+.json-viewer {
+    color: #333 !important;
+    background-color: #f9f9f9 !important;
+}
+
+/* Fix code block colors */
+code {
+    color: #333 !important;
+    background-color: #f5f5f5 !important;
+}
+pre {
+    color: #333 !important;
+    background-color: #f5f5f5 !important;
+}
+
+/* Fix markdown colors */
+.markdown {
+    color: #333 !important;
+}
+.markdown h1, .markdown h2, .markdown h3, .markdown h4 {
+    color: #333 !important;
+}
+.markdown p {
+    color: #333 !important;
+}
+.markdown ul, .markdown ol {
+    color: #333 !important;
+}
+.markdown a {
+    color: #008C45 !important;
+}
+
+/* Fix slider colors */
+.gr-slider {
+    color: #333 !important;
+}
+.gr-slider-value {
+    color: #333 !important;
+}
+
+/* Footer styling */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-primary {
+    background-color: #008C45;
+    color: white;
+    border: 1px solid #006633;
+}
+.btn-primary:hover {
+    background-color: #006633;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.btn-secondary:hover {
+    background-color: #d0d0d0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Status messages */
+.status-msg {
+    padding: 0.8rem !important;
+    border-radius: 4px !important;
+    margin: 1rem 0 !important;
+    color: #333 !important;
+}
+.status-success {
+    background-color: rgba(0, 140, 69, 0.1) !important;
+    border-left: 4px solid #008C45 !important;
+}
+.status-info {
+    background-color: rgba(0, 149, 255, 0.1) !important;
+    border-left: 4px solid #0095ff !important;
+}
+.status-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    border-left: 4px solid #ffc107 !important;
+}
+.status-error {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+}
